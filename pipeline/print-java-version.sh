@@ -3,4 +3,4 @@
 set -x
 set -e
 
-$JAVA_HOME/bin/java -version
+"$JAVA_HOME/bin/java" -version

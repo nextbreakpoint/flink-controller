@@ -2,6 +2,6 @@
 
 set -e
 
-eval $(minikube docker-env)
+eval "$(minikube docker-env)"
 
-echo -n $DOCKER_PASSWORD | docker login --username=$DOCKER_USERNAME --password-stdin
+echo "$DOCKER_PASSWORD" | docker login --username="$DOCKER_USERNAME" --password-stdin

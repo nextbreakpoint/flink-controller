@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit
 open class IntegrationSetup {
     companion object {
         val version = "1.5.0"
-        val flinkVersion = getVariable("FLINK_VERSION", "1.12.1")
+        val flinkVersion = getVariable("FLINK_VERSION", "1.20.0")
         val scalaVersion = getVariable("SCALA_VERSION", "2.12")
         val timestamp = System.currentTimeMillis()
         val namespace = "integration"

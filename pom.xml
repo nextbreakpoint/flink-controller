@@ -26,10 +26,10 @@
 		<url>git@github.com:nextbreakpoint/flinkctl.git</url>
 	</scm>
 	<properties>
-		<java.version>21</java.version>
-		<java.release>21</java.release>
-		<maven.compiler.source>21</maven.compiler.source>
-		<maven.compiler.target>21</maven.compiler.target>
+		<java.version>11</java.version>
+		<java.release>11</java.release>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
@@ -49,6 +49,7 @@
 		<flinkclient.version>1.1.0</flinkclient.version>
 		<flink-major.version>1.20</flink-major.version>
 		<flink.version>${flink-major.version}.0</flink.version>
+		<scala.version>2.12</scala.version>
 		<client-java.version>10.0.0</client-java.version>
 		<joda-time.version>2.13.0</joda-time.version>
 		<junit.version>5.11.3</junit.version>
@@ -195,6 +196,7 @@
 						</includes>
 						<systemPropertyVariables>
 							<flink.version>${flink.version}</flink.version>
+							<scala.version>${scala.version}</scala.version>
 							<project.version>${project.version}</project.version>
 							<base.directory>${maven.multiModuleProjectDirectory}</base.directory>
 						</systemPropertyVariables>

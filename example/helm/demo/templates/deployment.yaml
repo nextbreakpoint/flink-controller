@@ -45,7 +45,7 @@ spec:
         - 'FLINK_PROPERTIES="$(FLINK_PROPERTIES)$(SECRET_PROPERTIES)" /docker-entrypoint.sh jobmanager'
       environment:
         - name: ENABLE_BUILT_IN_PLUGINS
-          value: flink-s3-fs-hadoop-1.12.1.jar
+          value: flink-s3-fs-hadoop-1.20.0.jar
       environmentFrom:
         - configMapRef:
             name: {{ $root.Values.name }}-jobmanager-properties-v1
@@ -84,7 +84,7 @@ spec:
         - 'FLINK_PROPERTIES="$(FLINK_PROPERTIES)$(SECRET_PROPERTIES)" /docker-entrypoint.sh taskmanager'
       environment:
         - name: ENABLE_BUILT_IN_PLUGINS
-          value: flink-s3-fs-hadoop-1.12.1.jar
+          value: flink-s3-fs-hadoop-1.20.0.jar
       environmentFrom:
         - configMapRef:
             name: {{ $root.Values.name }}-taskmanager-properties-v1
