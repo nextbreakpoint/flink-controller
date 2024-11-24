@@ -12,7 +12,7 @@ metadata:
     release: {{ $root.Release.Name }}
     heritage: {{ $root.Release.Service }}
 data:
-  ENABLE_BUILT_IN_PLUGINS: "flink-s3-fs-hadoop-1.12.1.jar;flink-s3-fs-presto-1.12.1.jar"
+  ENABLE_BUILT_IN_PLUGINS: "flink-s3-fs-hadoop-1.20.0.jar;flink-s3-fs-presto-1.20.0.jar"
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -9,15 +9,18 @@ on:
       - published
 jobs:
   build:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     if: github.actor == github.event.repository.owner.login
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
-    - name: Setup JDK 11
-      uses: actions/setup-java@v1
+      uses: actions/checkout@v2
+    - name: Set up JDK
+      uses: actions/setup-java@v2
       with:
+        distribution: temurin
         java-version: 11
+        cache: maven
+        check-latest: true
     - name: Print dependencies
       run: pipeline/print-dependencies.sh
     - name: Start Minikube
@@ -30,27 +33,15 @@ jobs:
         DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
     - name: Build Docker images
       run: pipeline/docker-build-images.sh
-    - name: Update latest images - Flink 1.12
+    - name: Update latest images - Flink 1.20
       run: pipeline/docker-update-latest.sh
       env:
-        FLINK_VERSION: "1.12.1"
+        FLINK_VERSION: "1.20.0"
         SCALA_VERSION: "2.12"
-    - name: Run integration tests - Flink 1.12
+    - name: Run integration tests - Flink 1.20
       run: pipeline/run-integration-tests.sh
       env:
-        FLINK_VERSION: "1.12.1"
-        SCALA_VERSION: "2.12"
-    - name: Update latest images - Flink 1.11
-      if: github.event_name == 'release' && github.event.action == 'published'
-      run: pipeline/docker-update-latest.sh
-      env:
-        FLINK_VERSION: "1.11.3"
-        SCALA_VERSION: "2.12"
-    - name: Run integration tests - Flink 1.11
-      if: github.event_name == 'release' && github.event.action == 'published'
-      run: pipeline/run-integration-tests.sh
-      env:
-        FLINK_VERSION: "1.11.3"
+        FLINK_VERSION: "1.20.0"
         SCALA_VERSION: "2.12"
     - name: Publish to Registry
       if: github.event_name == 'release' && github.event.action == 'published'

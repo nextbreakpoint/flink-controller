@@ -4,11 +4,11 @@ Example of Flink jobs based on DataStream API.
 
 ## Compile and execute job
 
-Install Java 11 and Maven 3. We recommend installing Adopt OpenJDK 11.
+Install Java 11 and Maven 3. We recommend installing Eclipse Temurin 11.
 
 Configure the path of the Java JDK:
 
-    export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home
+    export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-11.jdk//Contents/Home
 
 Compile the code with Maven:
 
@@ -65,7 +65,7 @@ Start Minikube with at least 8Gb of memory and mount the config directory:
 
 Configure the path of the Java JDK:
 
-    export JAVA_HOME=/Library/Java/JavaVirtualMachines/adoptopenjdk-11.jdk/Contents/Home
+    export JAVA_HOME=/Library/Java/JavaVirtualMachines/temurin-11.jdk//Contents/Home
 
 Package the code without Flink runtime (since the job will run on the standalone server):
 

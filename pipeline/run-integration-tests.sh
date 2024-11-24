@@ -3,7 +3,9 @@
 set -x
 set -e
 
-export OPERATOR_HOST=$(minikube ip)
+OPERATOR_HOST="$(minikube ip)"
+
+export OPERATOR_HOST
 
 ./gradlew integrationTest --info
 

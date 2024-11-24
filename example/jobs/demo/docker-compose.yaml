@@ -1,10 +1,10 @@
 version: '3.7'
 services:
   jobmanager:
-    image: apache/flink:1.12.1-scala_2.12-java11
+    image: apache/flink:1.20.0-scala_2.12-java11
     command: '${JOB_MANAGER_COMMAND:-jobmanager}'
     environment:
-      ENABLE_BUILT_IN_PLUGINS: "flink-s3-fs-hadoop-1.12.1.jar;flink-s3-fs-presto-1.12.1.jar"
+      ENABLE_BUILT_IN_PLUGINS: "flink-s3-fs-hadoop-1.20.0.jar;flink-s3-fs-presto-1.20.0.jar"
       FLINK_PROPERTIES: |
         rest.address: jobmanager
         jobmanager.rpc.address: jobmanager
@@ -40,10 +40,10 @@ services:
     networks:
       - flink-network
   taskmanager1:
-    image: apache/flink:1.12.1-scala_2.12-java11
+    image: apache/flink:1.20.0-scala_2.12-java11
     command: 'taskmanager'
     environment:
-      ENABLE_BUILT_IN_PLUGINS: "flink-s3-fs-hadoop-1.12.1.jar;flink-s3-fs-presto-1.12.1.jar"
+      ENABLE_BUILT_IN_PLUGINS: "flink-s3-fs-hadoop-1.20.0.jar;flink-s3-fs-presto-1.20.0.jar"
       FLINK_PROPERTIES: |
         rest.address: jobmanager
         jobmanager.rpc.address: jobmanager
@@ -77,10 +77,10 @@ services:
         protocol: tcp
         mode: ingress
   taskmanager2:
-    image: apache/flink:1.12.1-scala_2.12-java11
+    image: apache/flink:1.20.0-scala_2.12-java11
     command: 'taskmanager'
     environment:
-      ENABLE_BUILT_IN_PLUGINS: "flink-s3-fs-hadoop-1.12.1.jar;flink-s3-fs-presto-1.12.1.jar"
+      ENABLE_BUILT_IN_PLUGINS: "flink-s3-fs-hadoop-1.20.0.jar;flink-s3-fs-presto-1.20.0.jar"
       FLINK_PROPERTIES: |
         rest.address: jobmanager
         jobmanager.rpc.address: jobmanager
