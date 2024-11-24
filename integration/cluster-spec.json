@@ -1,6 +1,6 @@
 {
   "supervisor": {
-    "image": "integration/flinkctl:1.4.4-beta",
+    "image": "integration/flinkctl:1.5.0",
     "serviceAccount": "flink-supervisor",
     "taskTimeout": 120,
     "rescaleDelay": 30,

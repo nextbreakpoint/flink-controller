@@ -1,0 +1,16 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="operator run" type="JetRunConfigurationType">
+    <option name="ALTERNATIVE_JRE_PATH" value="11" />
+    <envs>
+      <env name="LD_PATH" value="$USER_HOME$/Applications/graalvm-ce-java11-20.3.0/Contents/Home/lib" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.cli.Main" />
+    <module name="com.nextbreakpoint.flinkctl" />
+    <option name="PROGRAM_PARAMETERS" value="operator run --namespace=flink --port=4444 --dry-run --flink-hostname=192.168.64.12 --kube-config=$USER_HOME$/.kube/config --keystore-path=secrets/keystore-operator-api.jks --truststore-path=secrets/truststore-operator-api.jks --keystore-secret=keystore-password --truststore-secret=truststore-password" />
+    <shortenClasspath name="NONE" />
+    <option name="VM_PARAMETERS" value="-XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

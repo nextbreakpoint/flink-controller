@@ -4,7 +4,7 @@ import com.nextbreakpoint.flink.common.BootstrapOptions
 import com.nextbreakpoint.flink.common.RunJarOptions
 import com.nextbreakpoint.flink.k8s.common.FlinkJobStatus
 import com.nextbreakpoint.flink.k8s.controller.Controller
-import com.nextbreakpoint.flinkclient.model.JarUploadResponseBody
+import com.nextbreakpoint.flinkclient.model.UploadStatus
 import java.io.File
 import java.util.logging.Level
 import java.util.logging.Logger
@@ -78,7 +78,7 @@ class Bootstrap(
                 throw Exception("Failed to upload JAR file")
             }
 
-            if (uploadResult.output?.status != JarUploadResponseBody.StatusEnum.SUCCESS) {
+            if (uploadResult.output?.status != UploadStatus.SUCCESS) {
                 throw Exception("Failed to upload JAR file")
             }
 

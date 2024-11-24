@@ -36,7 +36,7 @@ object FlinkClusterAnnotations {
     }
 
     fun getRequestedAction(flinkCluster: V1FlinkCluster): Action {
-        return Action.valueOf(flinkCluster.metadata?.annotations?.get(REQUESTED_ACTION)?.toUpperCase() ?: "NONE")
+        return Action.valueOf(flinkCluster.metadata?.annotations?.get(REQUESTED_ACTION)?.uppercase() ?: "NONE")
     }
 
     fun setWithoutSavepoint(flinkCluster: V1FlinkCluster, withoutSavepoint: Boolean) {
@@ -47,7 +47,7 @@ object FlinkClusterAnnotations {
     }
 
     fun isWithoutSavepoint(flinkCluster: V1FlinkCluster): Boolean {
-        return flinkCluster.metadata?.annotations?.get(WITHOUT_SAVEPOINT)?.toUpperCase() == "TRUE"
+        return flinkCluster.metadata?.annotations?.get(WITHOUT_SAVEPOINT)?.uppercase() == "TRUE"
     }
 
     fun setDeleteResources(flinkCluster: V1FlinkCluster, deleteResources: Boolean) {
@@ -58,7 +58,7 @@ object FlinkClusterAnnotations {
     }
 
     fun isDeleteResources(flinkCluster: V1FlinkCluster): Boolean {
-        return flinkCluster.metadata?.annotations?.get(DELETE_RESOURCES)?.toUpperCase() == "TRUE"
+        return flinkCluster.metadata?.annotations?.get(DELETE_RESOURCES)?.uppercase() == "TRUE"
     }
 
     fun setShouldRestart(flinkCluster: V1FlinkCluster, shouldRestart: Boolean) {
@@ -69,6 +69,6 @@ object FlinkClusterAnnotations {
     }
 
     fun shouldRestart(flinkCluster: V1FlinkCluster): Boolean {
-        return flinkCluster.metadata?.annotations?.get(SHOULD_RESTART)?.toUpperCase() == "TRUE"
+        return flinkCluster.metadata?.annotations?.get(SHOULD_RESTART)?.uppercase() == "TRUE"
     }
 }

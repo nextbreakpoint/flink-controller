@@ -22,7 +22,7 @@ class JobGetStatus(flinkOptions: FlinkOptions, flinkClient: FlinkClient, kubeCli
 
             Result(
                 ResultStatus.OK,
-                jobDetails.state.value.toString().toUpperCase()
+                jobDetails.state.value.toString().uppercase()
             )
         } catch (e: Exception) {
             logger.log(Level.WARNING, "Can't get job's status ($params)")

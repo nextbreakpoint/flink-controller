@@ -1,0 +1,17 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="operator run agentlib" type="JetRunConfigurationType">
+    <option name="ALTERNATIVE_JRE_PATH" value="GraalVM 11" />
+    <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
+    <envs>
+      <env name="LD_PATH" value="$USER_HOME$/Applications/graalvm-ce-java11-20.3.0/Contents/Home/lib" />
+    </envs>
+    <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.cli.Main" />
+    <module name="com.nextbreakpoint.flinkctl" />
+    <option name="PROGRAM_PARAMETERS" value="operator run --namespace=flink --port=4444 --dry-run --flink-hostname=192.168.64.10 --kube-config=$USER_HOME$/.kube/config --keystore-path=secrets/keystore-operator-api.jks --truststore-path=secrets/truststore-operator-api.jks --keystore-secret=keystore-password --truststore-secret=truststore-password" />
+    <shortenClasspath name="NONE" />
+    <option name="VM_PARAMETERS" value="-agentlib:native-image-agent=config-output-dir=graalvm-config" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

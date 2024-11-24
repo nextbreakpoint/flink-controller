@@ -14,13 +14,14 @@ import com.nextbreakpoint.flink.k8s.crd.V1FlinkClusterStatus
 import com.nextbreakpoint.flink.k8s.crd.V1FlinkJobSpec
 import com.nextbreakpoint.flink.k8s.crd.V1FlinkJobStatus
 import com.nextbreakpoint.flinkclient.model.TaskManagerInfo
-import com.squareup.okhttp.MediaType
-import com.squareup.okhttp.OkHttpClient
-import com.squareup.okhttp.Request
-import com.squareup.okhttp.RequestBody
 import io.kubernetes.client.openapi.JSON
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
+import okhttp3.OkHttpClient
+import okhttp3.Request
 import org.apache.commons.io.IOUtils
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.fail
 import org.awaitility.Awaitility
 import java.io.ByteArrayOutputStream
 import java.io.OutputStream
@@ -28,11 +29,10 @@ import java.lang.ProcessBuilder.Redirect
 import java.time.Duration
 import java.util.Date
 import java.util.concurrent.TimeUnit
-import kotlin.test.fail
 
 open class IntegrationSetup {
     companion object {
-        val version = "1.4.4-beta"
+        val version = "1.5.0"
         val flinkVersion = getVariable("FLINK_VERSION", "1.12.1")
         val scalaVersion = getVariable("SCALA_VERSION", "2.12")
         val timestamp = System.currentTimeMillis()
@@ -100,7 +100,7 @@ open class IntegrationSetup {
 
         fun createNamespace() {
             if (createNamespace(namespace = namespace) != 0) {
-                fail("Can't create namespace")
+                fail<Any>("Can't create namespace")
             }
         }
 
@@ -111,21 +111,21 @@ open class IntegrationSetup {
             cleanDockerImages()
             println("Building operator image...")
             if (buildDockerImage(path = ".", name = "integration/flinkctl:$version", args = emptyList()) != 0) {
-                fail("Can't build operator image")
+                fail<Any>("Can't build operator image")
             }
             println("Building flink image...")
             val flinkBuildArgs = listOf(
                 "--build-arg", "flink_version=$flinkVersion", "--build-arg", "scala_version=$scalaVersion"
             )
             if (buildDockerImage(path = "integration/flink", name = "integration/flink:latest", args = flinkBuildArgs) != 0) {
-                fail("Can't build flink image")
+                fail<Any>("Can't build flink image")
             }
             println("Building job image...")
             val jobBuildArgs = listOf(
                 "--build-arg", "image=integration/flinkctl:$version", "--build-arg", "flink_version=$flinkVersion", "--build-arg", "scala_version=$scalaVersion"
             )
             if (buildDockerImage(path = "integration/jobs", name = "integration/jobs:latest", args = jobBuildArgs) != 0) {
-                fail("Can't build job image")
+                fail<Any>("Can't build job image")
             }
             println("Images created")
             buildDockerImages = false
@@ -136,7 +136,7 @@ open class IntegrationSetup {
             val args = listOf("--set=s3AccessKey=$s3AccessKey,s3SecretKey=$s3SecretKey,s3Endpoint=$s3Endpoint,s3PathStyleAccess=$s3PathStyleAccess,flinkVersion=$flinkVersion,scalaVersion=$scalaVersion")
             if (installHelmChart(namespace = namespace, name = "jobs", path = "integration/helm/jobs", args = args, print = false) != 0) {
                 if (upgradeHelmChart(namespace = namespace, name = "jobs", path = "integration/helm/jobs", args = args, print = false) != 0) {
-                    fail("Can't install or upgrade Helm chart")
+                    fail<Any>("Can't install or upgrade Helm chart")
                 }
             }
             println("Jobs chart installed")
@@ -154,7 +154,7 @@ open class IntegrationSetup {
             println("Installing Minio...")
             if (installHelmChart(namespace = namespace, name = "minio", path = "integration/helm/minio", args = listOf()) != 0) {
                 if (upgradeHelmChart(namespace = namespace, name = "minio", path = "integration/helm/minio", args = listOf()) != 0) {
-                    fail("Can't install or upgrade Helm chart")
+                    fail<Any>("Can't install or upgrade Helm chart")
                 }
             }
             println("Minio installed")
@@ -181,7 +181,7 @@ open class IntegrationSetup {
         fun createBucket() {
             println("Creating bucket...")
             if (createBucket(namespace = namespace, bucketName = "nextbreakpoint-integration") != 0) {
-                fail("Can't create bucket")
+                fail<Any>("Can't create bucket")
             }
             println("Bucker created")
         }
@@ -190,7 +190,7 @@ open class IntegrationSetup {
             println("Installing CRDs...")
             if (installHelmChart(namespace = namespace, name = "flink-k8s-toolbox-crd", path = "helm/flink-k8s-toolbox-crd") != 0) {
                 if (upgradeHelmChart(namespace = namespace, name = "flink-k8s-toolbox-crd", path = "helm/flink-k8s-toolbox-crd") != 0) {
-                    fail("Can't install or upgrade Helm chart")
+                    fail<Any>("Can't install or upgrade Helm chart")
                 }
             }
         }
@@ -206,7 +206,7 @@ open class IntegrationSetup {
             println("Installing operator...")
             if (installHelmChart(namespace = namespace, name = "flink-k8s-toolbox-roles", path = "helm/flink-k8s-toolbox-roles") != 0) {
                 if (upgradeHelmChart(namespace = namespace, name = "flink-k8s-toolbox-roles", path = "helm/flink-k8s-toolbox-roles") != 0) {
-                    fail("Can't install or upgrade Helm chart")
+                    fail<Any>("Can't install or upgrade Helm chart")
                 }
             }
             val args = listOf(
@@ -219,13 +219,13 @@ open class IntegrationSetup {
             )
             if (installHelmChart(namespace = namespace, name = "flink-k8s-toolbox-operator", path = "helm/flink-k8s-toolbox-operator", args = args) != 0) {
                 if (upgradeHelmChart(namespace = namespace, name = "flink-k8s-toolbox-operator", path = "helm/flink-k8s-toolbox-operator", args = args) != 0) {
-                    fail("Can't install or upgrade Helm chart")
+                    fail<Any>("Can't install or upgrade Helm chart")
                 }
             }
             println("Operator installed")
             println("Starting operator...")
             if (scaleOperator(namespace = namespace, replicas = 2) != 0) {
-                fail("Can't scale the operator")
+                fail<Any>("Can't scale the operator")
             }
             awaitUntilAsserted(timeout = 60) {
                 assertThat(isOperatorRunning(namespace = namespace)).isTrue()
@@ -257,7 +257,7 @@ open class IntegrationSetup {
         fun exposeOperator() {
             println("Exposing operator...")
             if (exposeOperator(namespace = namespace) != 0) {
-                fail("Can't expose the operator")
+                fail<Any>("Can't expose the operator")
             }
             awaitUntilAsserted(timeout = 60) {
                 assertThat(listClusters()).isNotEmpty()
@@ -317,7 +317,7 @@ open class IntegrationSetup {
             println("Install resources...")
 //            if (createResources(namespace = namespace, path = "integration/sample-data.yaml") != 0) {
 //                if (replaceResources(namespace = namespace, path = "integration/sample-data.yaml") != 0) {
-//                    fail("Can't create data")
+//                    fail<Any>("Can't create data")
 //                }
 //            }
             println("Resources installed")
@@ -393,7 +393,7 @@ open class IntegrationSetup {
         private fun listClusters(): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't list clusters")
+                fail<Any>("Can't list clusters")
             }
             return response.second ?: mapOf()
         }
@@ -401,7 +401,7 @@ open class IntegrationSetup {
         private fun listJobs(clusterName: String): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't list jobs")
+                fail<Any>("Can't list jobs")
             }
             return response.second ?: mapOf()
         }
@@ -409,63 +409,63 @@ open class IntegrationSetup {
         fun stopCluster(clusterName: String, options: StopOptions) {
             val response = sendPutRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/stop", body = options, typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't stop cluster $clusterName")
+                fail<Any>("Can't stop cluster $clusterName")
             }
         }
 
         fun startCluster(clusterName: String, options: StartOptions) {
             val response = sendPutRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/start", body = options, typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't start cluster $clusterName")
+                fail<Any>("Can't start cluster $clusterName")
             }
         }
 
         fun scaleCluster(clusterName: String, options: ScaleClusterOptions) {
             val response = sendPutRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/scale", body = options, typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't scale cluster $clusterName")
+                fail<Any>("Can't scale cluster $clusterName")
             }
         }
 
         fun createCluster(clusterName: String, spec: V1FlinkClusterSpec) {
             val response = sendPostRequest(url = "http://$host:$port/api/v1/clusters/$clusterName", body = spec, typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't create cluster $clusterName")
+                fail<Any>("Can't create cluster $clusterName")
             }
         }
 
         fun deleteCluster(clusterName: String) {
             val response = sendDeleteRequest(url = "http://$host:$port/api/v1/clusters/$clusterName", typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't delete cluster $clusterName")
+                fail<Any>("Can't delete cluster $clusterName")
             }
         }
 
         fun createJob(clusterName: String, jobName: String, spec: V1FlinkJobSpec) {
             val response = sendPostRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName", body = spec, typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't create job $clusterName-$jobName")
+                fail<Any>("Can't create job $clusterName-$jobName")
             }
         }
 
         fun deleteJob(clusterName: String, jobName: String) {
             val response = sendDeleteRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName", typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't delete job $clusterName-$jobName")
+                fail<Any>("Can't delete job $clusterName-$jobName")
             }
         }
 
         fun scaleJob(clusterName: String, jobName: String, options: ScaleJobOptions) {
             val response = sendPutRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName/scale", body = options, typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't scale job $clusterName")
+                fail<Any>("Can't scale job $clusterName")
             }
         }
 
         fun getClusterStatus(clusterName: String): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/status", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't get status of cluster $clusterName")
+                fail<Any>("Can't get status of cluster $clusterName")
             }
             return response.second ?: mapOf()
         }
@@ -473,7 +473,7 @@ open class IntegrationSetup {
         fun getJobStatus(clusterName: String, jobName: String): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName/status", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't get status of job $clusterName-$jobName")
+                fail<Any>("Can't get status of job $clusterName-$jobName")
             }
             return response.second ?: mapOf()
         }
@@ -481,21 +481,21 @@ open class IntegrationSetup {
         fun stopJob(clusterName: String, jobName: String, options: StopOptions) {
             val response = sendPutRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName/stop", body = options, typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't stop job $clusterName-$jobName")
+                fail<Any>("Can't stop job $clusterName-$jobName")
             }
         }
 
         fun startJob(clusterName: String, jobName: String, options: StartOptions) {
             val response = sendPutRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName/start", body = options, typeToken = mapTypeToken)
             if (response.first != 200 || response.second?.get("status") != "OK") {
-                fail("Can't start job $clusterName-$jobName")
+                fail<Any>("Can't start job $clusterName-$jobName")
             }
         }
 
         fun getJobDetails(clusterName: String, jobName: String): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName/details", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't get job details of cluster $clusterName-$jobName")
+                fail<Any>("Can't get job details of cluster $clusterName-$jobName")
             }
             return response.second ?: mapOf()
         }
@@ -503,7 +503,7 @@ open class IntegrationSetup {
         fun getJobMetrics(clusterName: String, jobName: String): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName/metrics", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't get job metrics of cluster $clusterName-$jobName")
+                fail<Any>("Can't get job metrics of cluster $clusterName-$jobName")
             }
             return response.second ?: mapOf()
         }
@@ -511,7 +511,7 @@ open class IntegrationSetup {
         fun getJobManagerMetrics(clusterName: String): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobmanager/metrics", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't get JobManager metrics of cluster $clusterName")
+                fail<Any>("Can't get JobManager metrics of cluster $clusterName")
             }
             return response.second ?: mapOf()
         }
@@ -519,7 +519,7 @@ open class IntegrationSetup {
         fun getTaskManagers(clusterName: String): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/taskmanagers", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't get TaskManagers list of cluster $clusterName")
+                fail<Any>("Can't get TaskManagers list of cluster $clusterName")
             }
             return response.second ?: mapOf()
         }
@@ -527,7 +527,7 @@ open class IntegrationSetup {
         fun getTaskManagerDetails(clusterName: String, taskmanagerId: TaskManagerId): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/taskmanagers/${taskmanagerId.taskmanagerId}/details", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't get TaskManager details of cluster $clusterName")
+                fail<Any>("Can't get TaskManager details of cluster $clusterName")
             }
             return response.second ?: mapOf()
         }
@@ -535,7 +535,7 @@ open class IntegrationSetup {
         fun getTaskManagerMetrics(clusterName: String, taskmanagerId: TaskManagerId): Map<String, Any> {
             val response = sendGetRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/taskmanagers/${taskmanagerId.taskmanagerId}/metrics", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't get TaskManager metrics of cluster $clusterName")
+                fail<Any>("Can't get TaskManager metrics of cluster $clusterName")
             }
             return response.second ?: mapOf()
         }
@@ -543,7 +543,7 @@ open class IntegrationSetup {
         fun triggerSavepoint(clusterName: String, jobName: String): Map<String, Any> {
             val response = sendPutRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName/savepoint", typeToken = mapTypeToken, body = "")
             if (response.first != 200) {
-                fail("Can't trigger savepoint in job $clusterName-$jobName")
+                fail<Any>("Can't trigger savepoint in job $clusterName-$jobName")
             }
             return response.second ?: mapOf()
         }
@@ -551,7 +551,7 @@ open class IntegrationSetup {
         fun forgetSavepoint(clusterName: String, jobName: String): Map<String, Any> {
             val response = sendDeleteRequest(url = "http://$host:$port/api/v1/clusters/$clusterName/jobs/$jobName/savepoint", typeToken = mapTypeToken)
             if (response.first != 200) {
-                fail("Can't forget savepoint in job $clusterName-$jobName")
+                fail<Any>("Can't forget savepoint in job $clusterName-$jobName")
             }
             return response.second ?: mapOf()
         }
@@ -562,11 +562,11 @@ open class IntegrationSetup {
         }
 
         private fun <T> sendPostRequest(timeout: Long = 60, url: String, body: Any? = null, typeToken: TypeToken<T>): Pair<Int, T?> {
-            val mediaType = MediaType.parse("application/json")
+            val mediaType = "application/json".toMediaType()
             val builder = Request.Builder().url(url)
             if (body != null) {
                 val jsonBody = JSON().serialize(body)
-                val payload = RequestBody.create(mediaType, jsonBody)
+                val payload = jsonBody.toRequestBody(mediaType)
                 builder.post(payload)
             }
             val request = builder.build()
@@ -574,11 +574,11 @@ open class IntegrationSetup {
         }
 
         private fun <T> sendPutRequest(timeout: Long = 60, url: String, body: Any? = null, typeToken: TypeToken<T>): Pair<Int, T?> {
-            val mediaType = MediaType.parse("application/json")
+            val mediaType = "application/json".toMediaType()
             val builder = Request.Builder().url(url)
             if (body != null) {
                 val jsonBody = JSON().serialize(body)
-                val payload = RequestBody.create(mediaType, jsonBody)
+                val payload = jsonBody.toRequestBody(mediaType)
                 builder.put(payload)
             }
             val request = builder.build()
@@ -1084,20 +1084,22 @@ open class IntegrationSetup {
         }
 
         private fun createApiClient(timeout: Long): OkHttpClient {
-            val client = OkHttpClient()
-            client.setReadTimeout(timeout, TimeUnit.SECONDS)
-            client.setWriteTimeout(timeout, TimeUnit.SECONDS)
-            return client
+            return OkHttpClient().newBuilder()
+                .readTimeout(timeout, TimeUnit.SECONDS)
+                .writeTimeout(timeout, TimeUnit.SECONDS)
+                .build()
         }
 
         private fun <T> executeCall(request: Request, timeout: Long, typeToken: TypeToken<T>): Pair<Int, T?> {
             try {
                 val response = createApiClient(timeout).newCall(request).execute()
-                response.body().use {
+                response.body?.use {
                     val line = it.source().readUtf8Line()
-                    println("Response code: ${response.code()}, body: $line")
-                    return response.code() to JSON().deserialize(line, typeToken.type)
+                    println("Response code: ${response.code}, body: $line")
+                    return response.code to JSON().deserialize(line, typeToken.type)
                 }
+                println("ERROR: Empty response")
+                return 500 to null
             } catch (e: Exception) {
                 println("ERROR: ${e.message}")
                 return 500 to null
@@ -1108,7 +1110,7 @@ open class IntegrationSetup {
             if (print) println(command.joinToString(prefix = "# ", separator = " "))
             val processBuilder = ProcessBuilder(command)
             val environment = processBuilder.environment()
-            environment["KUBECONFIG"] = System.getenv("KUBECONFIG") ?: System.getProperty("user.home") + "/.kube/config"
+            environment["KUBECONFIG"] = System.getenv("KUBECONFIG") ?: (System.getProperty("user.home") + "/.kube/config")
             processBuilder.redirectErrorStream(true)
             processBuilder.redirectOutput(Redirect.INHERIT)
             val process = processBuilder.start()
@@ -1119,7 +1121,7 @@ open class IntegrationSetup {
             if (print) println(command.joinToString(prefix = "# ", separator = " "))
             val processBuilder = ProcessBuilder(command)
             val environment = processBuilder.environment()
-            environment["KUBECONFIG"] = System.getenv("KUBECONFIG") ?: System.getProperty("user.home") + "/.kube/config"
+            environment["KUBECONFIG"] = System.getenv("KUBECONFIG") ?: (System.getProperty("user.home") + "/.kube/config")
             processBuilder.redirectErrorStream(true)
             processBuilder.redirectOutput(Redirect.PIPE)
             val process = processBuilder.start()

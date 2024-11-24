@@ -154,7 +154,7 @@ object KubeClient {
                 null
             ).execute()
 
-            response.body()?.use { body ->
+            response.body?.use { body ->
                 body.source().use { source ->
                     val line = source.readUtf8Line() ?: ""
 
@@ -185,20 +185,20 @@ object KubeClient {
                 null
             ).execute()
 
-            response.body()?.use { body ->
+            response.body?.use { body ->
                 body.source().use { source ->
                     val line = source.readUtf8Line() ?: ""
 
                     if (!response.isSuccessful) {
                         logger.log(Level.SEVERE, line)
-                        throw NotFoundException("Can't fetch custom object ${name}")
+                        throw NotFoundException("Can't fetch custom object $name")
                     }
 
                     return Resource.parseV1FlinkCluster(line)
                 }
             }
 
-            throw NotFoundException("Flink cluster not found: ${name}")
+            throw NotFoundException("Flink cluster not found: $name")
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't fetch custom object: ${e.responseBody}")
             throw e
@@ -216,20 +216,20 @@ object KubeClient {
                 null
             ).execute()
 
-            response.body()?.use { body ->
+            response.body?.use { body ->
                 body.source().use { source ->
                     val line = source.readUtf8Line() ?: ""
 
                     if (!response.isSuccessful) {
                         logger.log(Level.SEVERE, line)
-                        throw NotFoundException("Can't fetch custom object ${name}")
+                        throw NotFoundException("Can't fetch custom object $name")
                     }
 
                     return Resource.parseV1FlinkJob(line)
                 }
             }
 
-            throw NotFoundException("Flink job not found: ${name}")
+            throw NotFoundException("Flink job not found: $name")
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't fetch custom object: ${e.responseBody}")
             throw e

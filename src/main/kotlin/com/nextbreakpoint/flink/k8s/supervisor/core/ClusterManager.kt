@@ -330,6 +330,10 @@ class ClusterManager(
             }
             Action.NONE -> {
             }
+            Action.TRIGGER_SAVEPOINT -> {
+            }
+            Action.FORGET_SAVEPOINT -> {
+            }
         }
 
         if (manualAction != Action.NONE) {
