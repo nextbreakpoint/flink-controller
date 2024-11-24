@@ -36,7 +36,7 @@ object FlinkJobAnnotations {
     }
 
     fun getRequestedAction(flinkJob: V1FlinkJob): Action {
-        return Action.valueOf(flinkJob.metadata?.annotations?.get(REQUESTED_ACTION)?.toUpperCase() ?: "NONE")
+        return Action.valueOf(flinkJob.metadata?.annotations?.get(REQUESTED_ACTION)?.uppercase() ?: "NONE")
     }
 
     fun setWithoutSavepoint(flinkJob: V1FlinkJob, withoutSavepoint: Boolean) {
@@ -47,7 +47,7 @@ object FlinkJobAnnotations {
     }
 
     fun isWithoutSavepoint(flinkJob: V1FlinkJob): Boolean {
-        return flinkJob.metadata?.annotations?.get(WITHOUT_SAVEPOINT)?.toUpperCase() == "TRUE"
+        return flinkJob.metadata?.annotations?.get(WITHOUT_SAVEPOINT)?.uppercase() == "TRUE"
     }
 
     fun setDeleteResources(flinkJob: V1FlinkJob, deleteResources: Boolean) {
@@ -58,7 +58,7 @@ object FlinkJobAnnotations {
     }
 
     fun isDeleteResources(flinkJob: V1FlinkJob): Boolean {
-        return flinkJob.metadata?.annotations?.get(DELETE_RESOURCES)?.toUpperCase() == "TRUE"
+        return flinkJob.metadata?.annotations?.get(DELETE_RESOURCES)?.uppercase() == "TRUE"
     }
 
     fun setShouldRestart(flinkJob: V1FlinkJob, shouldRestart: Boolean) {
@@ -69,6 +69,6 @@ object FlinkJobAnnotations {
     }
 
     fun shouldRestart(flinkJob: V1FlinkJob): Boolean {
-        return flinkJob.metadata?.annotations?.get(SHOULD_RESTART)?.toUpperCase() == "TRUE"
+        return flinkJob.metadata?.annotations?.get(SHOULD_RESTART)?.uppercase() == "TRUE"
     }
 }

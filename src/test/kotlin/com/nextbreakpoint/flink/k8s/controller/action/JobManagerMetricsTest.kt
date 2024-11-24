@@ -2,13 +2,13 @@ package com.nextbreakpoint.flink.k8s.controller.action
 
 import com.nextbreakpoint.flink.common.FlinkAddress
 import com.nextbreakpoint.flink.common.FlinkOptions
-import com.nextbreakpoint.flink.common.Metric
 import com.nextbreakpoint.flink.k8s.common.FlinkClient
 import com.nextbreakpoint.flink.k8s.common.KubeClient
 import com.nextbreakpoint.flink.k8s.controller.core.ResultStatus
 import com.nextbreakpoint.flink.testing.KotlinMockito.any
 import com.nextbreakpoint.flink.testing.KotlinMockito.eq
 import com.nextbreakpoint.flink.testing.KotlinMockito.given
+import com.nextbreakpoint.flinkclient.model.Metric
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,7 +27,7 @@ class JobManagerMetricsTest {
     @BeforeEach
     fun configure() {
         given(kubeClient.findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))).thenReturn(flinkAddress)
-        given(flinkClient.getJobManagerMetrics(eq(flinkAddress), any())).thenReturn(listOf(Metric("Status.JVM.CPU.Time", "10"), Metric("Status.JVM.CPU.Load", "1")))
+        given(flinkClient.getJobManagerMetrics(eq(flinkAddress), any())).thenReturn(listOf(Metric().id("Status.JVM.CPU.Time").value("10"), Metric().id("Status.JVM.CPU.Load").value("1")))
     }
 
     @Test

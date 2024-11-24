@@ -75,8 +75,8 @@ class SupervisorVerticle(
             serverOptions
                 .setSsl(true)
                 .setSni(false)
-                .setKeyStoreOptions(JksOptions().setPath(jksKeyStorePath).setPassword(jksKeyStoreSecret))
-                .setTrustStoreOptions(JksOptions().setPath(jksTrustStorePath).setPassword(jksTrustStoreSecret))
+                .setKeyCertOptions(JksOptions().setPath(jksKeyStorePath).setPassword(jksKeyStoreSecret))
+                .setTrustOptions(JksOptions().setPath(jksTrustStorePath).setPassword(jksTrustStoreSecret))
                 .setClientAuth(ClientAuth.REQUIRED)
         } else {
             logger.log(Level.WARNING, "HTTPS not enabled!")

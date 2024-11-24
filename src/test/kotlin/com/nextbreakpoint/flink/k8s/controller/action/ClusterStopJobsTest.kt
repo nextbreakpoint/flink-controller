@@ -8,7 +8,7 @@ import com.nextbreakpoint.flink.k8s.controller.core.ResultStatus
 import com.nextbreakpoint.flink.testing.KotlinMockito.any
 import com.nextbreakpoint.flink.testing.KotlinMockito.eq
 import com.nextbreakpoint.flink.testing.KotlinMockito.given
-import com.nextbreakpoint.flinkclient.model.JobIdWithStatus
+import com.nextbreakpoint.flinkclient.model.JobStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -56,7 +56,7 @@ class ClusterStopJobsTest {
 
     @Test
     fun `should return expected result when there is one job running`() {
-        given(flinkClient.listJobs(eq(flinkAddress), any())).thenReturn(mapOf("1" to JobIdWithStatus.StatusEnum.RUNNING))
+        given(flinkClient.listJobs(eq(flinkAddress), any())).thenReturn(mapOf("1" to JobStatus.RUNNING))
         val result = command.execute("flink", "test", setOf())
         verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
         verify(flinkClient, times(1)).listJobs(eq(flinkAddress), any())
@@ -70,7 +70,7 @@ class ClusterStopJobsTest {
 
     @Test
     fun `should return expected result when there is one job cancelled`() {
-        given(flinkClient.listJobs(eq(flinkAddress), any())).thenReturn(mapOf("1" to JobIdWithStatus.StatusEnum.CANCELED))
+        given(flinkClient.listJobs(eq(flinkAddress), any())).thenReturn(mapOf("1" to JobStatus.CANCELED))
         val result = command.execute("flink", "test", setOf())
         verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
         verify(flinkClient, times(1)).listJobs(eq(flinkAddress), any())
@@ -83,7 +83,7 @@ class ClusterStopJobsTest {
 
     @Test
     fun `should return expected result when there is one job restarting`() {
-        given(flinkClient.listJobs(eq(flinkAddress), any())).thenReturn(mapOf("1" to JobIdWithStatus.StatusEnum.RESTARTING))
+        given(flinkClient.listJobs(eq(flinkAddress), any())).thenReturn(mapOf("1" to JobStatus.RESTARTING))
         val result = command.execute("flink", "test", setOf())
         verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
         verify(flinkClient, times(1)).listJobs(eq(flinkAddress), any())
@@ -97,7 +97,7 @@ class ClusterStopJobsTest {
 
     @Test
     fun `should return expected result when there are two jobs running`() {
-        given(flinkClient.listJobs(eq(flinkAddress), any())).thenReturn(mapOf("1" to JobIdWithStatus.StatusEnum.RUNNING, "2" to JobIdWithStatus.StatusEnum.RUNNING))
+        given(flinkClient.listJobs(eq(flinkAddress), any())).thenReturn(mapOf("1" to JobStatus.RUNNING, "2" to JobStatus.RUNNING))
         val result = command.execute("flink", "test", setOf())
         verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
         verify(flinkClient, times(1)).listJobs(eq(flinkAddress), any())

@@ -4,7 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLMapper
 import com.google.gson.GsonBuilder
 import java.io.File
-import java.net.URL
+import java.net.URI
 import java.nio.file.Files
 
 class ExtractSchemas {
@@ -15,9 +15,9 @@ class ExtractSchemas {
 
         @JvmStatic
         fun main(args: Array<String>) {
-            val specification = ObjectMapper().readValue(URL(URL).openStream(), Map::class.java) as Map<String, Any>
+            val specification = ObjectMapper().readValue(URI.create(URL).toURL().openStream(), Map::class.java) as Map<String, Any>
 
-            val definitions = specification.get("definitions") as Map<String, Map<String, Any>>
+            val definitions = specification["definitions"] as Map<String, Map<String, Any>>
 
             processDefinitions(definitions)
 
@@ -49,7 +49,7 @@ class ExtractSchemas {
             println(json)
             val jsonNodeTree = ObjectMapper().readTree(json)
             val jsonAsYaml = YAMLMapper().writeValueAsString(jsonNodeTree)
-            Files.write(File("definitions", type + ".yaml").toPath(), jsonAsYaml.toByteArray())
+            Files.write(File("definitions", "$type.yaml").toPath(), jsonAsYaml.toByteArray())
         }
 
         private fun expandDefinitions(definitions: Map<String, Map<String, Any>>): Map<String, Map<String, Any>> {
@@ -141,18 +141,18 @@ class ExtractSchemas {
 
         private fun printDefinition(key: String, definition: Map<String, Any>) {
             println("Type definition $key:")
-            println("\ttype = ${definition.get("type")}")
-            println("\tformat = ${definition.get("format")}")
+            println("\ttype = ${definition["type"]}")
+            println("\tformat = ${definition["format"]}")
             if (definition.get("type") == "object") {
                 println("\tproperties = [")
-                val properties = definition.get("properties") as Map<String, Map<String, Any>>?
+                val properties = definition["properties"] as Map<String, Map<String, Any>>?
                 properties?.forEach {
                     if (it.value.get("\$ref") != null) {
-                        val ref = it.value.get("\$ref") as String
+                        val ref = it.value["\$ref"] as String
                         val type = ref.substring(ref.lastIndexOf('/') + 1)
                         println("\t\t${it.key} = $type")
                     } else {
-                        val type = it.value.get("type")
+                        val type = it.value["type"]
                         println("\t\t${it.key} = $type")
                     }
                 }

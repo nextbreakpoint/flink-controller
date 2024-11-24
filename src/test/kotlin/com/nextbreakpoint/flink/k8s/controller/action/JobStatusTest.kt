@@ -8,6 +8,7 @@ import com.nextbreakpoint.flink.k8s.controller.core.ResultStatus
 import com.nextbreakpoint.flink.testing.KotlinMockito.eq
 import com.nextbreakpoint.flink.testing.KotlinMockito.given
 import com.nextbreakpoint.flinkclient.model.JobDetailsInfo
+import com.nextbreakpoint.flinkclient.model.JobStatus
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -27,9 +28,9 @@ class JobStatusTest {
     fun configure() {
         given(kubeClient.findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))).thenReturn(flinkAddress)
         val jobDetailsInfo1 = JobDetailsInfo()
-        jobDetailsInfo1.state = JobDetailsInfo.StateEnum.RUNNING
+        jobDetailsInfo1.state = JobStatus.RUNNING
         val jobDetailsInfo2 = JobDetailsInfo()
-        jobDetailsInfo2.state = JobDetailsInfo.StateEnum.CANCELED
+        jobDetailsInfo2.state = JobStatus.CANCELED
         given(flinkClient.getJobDetails(eq(flinkAddress), eq("123"))).thenReturn(jobDetailsInfo1).thenReturn(jobDetailsInfo2)
     }
 

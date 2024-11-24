@@ -18,7 +18,7 @@ spec:
     {{- end }}
     supervisor:
       pullPolicy: {{ $root.Values.supervisor.pullPolicy }}
-      image: nextbreakpoint/flinkctl:1.4.4-beta
+      image: nextbreakpoint/flinkctl:1.5.0
       serviceAccount: flink-supervisor
       taskTimeout: {{ $root.Values.supervisor.taskTimeout }}
       rescaleDelay: {{ $root.Values.supervisor.rescaleDelay }}

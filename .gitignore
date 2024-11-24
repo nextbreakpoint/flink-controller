@@ -19,3 +19,4 @@ lombok.config
 reports
 flinkctl
 graalvm
+src/main/java

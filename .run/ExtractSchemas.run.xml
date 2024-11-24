@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="ExtractSchemas" type="JetRunConfigurationType" nameIsGenerated="true">
+    <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.utility.ExtractSchemas" />
+    <module name="com.nextbreakpoint.flinkctl" />
+    <option name="PROGRAM_PARAMETERS" value="V1ResourceRequirements V1Container V1ContainerPort V1EnvFromSource V1EnvVar V1Volume V1VolumeMount V1SecurityContext V1Affinity V1Toleration V1TopologySpreadConstraint V1Pod" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

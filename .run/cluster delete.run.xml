@@ -1,0 +1,11 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="cluster delete" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.cli.Main" />
+    <module name="com.nextbreakpoint.flinkctl" />
+    <option name="PROGRAM_PARAMETERS" value="cluster delete --cluster-name=cluster-1 --keystore-path=secrets/keystore-operator-cli.jks --truststore-path=secrets/truststore-operator-cli.jks --keystore-secret=keystore-password --truststore-secret=truststore-password" />
+    <shortenClasspath name="NONE" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -2,7 +2,7 @@ package com.nextbreakpoint.flink.k8s.controller.action
 
 import com.nextbreakpoint.flink.common.FlinkAddress
 import com.nextbreakpoint.flink.common.FlinkOptions
-import com.nextbreakpoint.flink.common.SavepointInfo
+import com.nextbreakpoint.flink.common.SavepointStatus
 import com.nextbreakpoint.flink.common.SavepointRequest
 import com.nextbreakpoint.flink.k8s.common.FlinkClient
 import com.nextbreakpoint.flink.k8s.common.FlinkJobStatus
@@ -51,7 +51,7 @@ class SavepointQueryTest {
 
     @Test
     fun `should return expected result when there are pending requests`() {
-        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointInfo("IN_PROGRESS", "")))
+        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointStatus("IN_PROGRESS", "")))
         val result = command.execute("flink", "test", "test", savepointRequest)
         verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
         verify(flinkClient, times(1)).getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))
@@ -64,7 +64,7 @@ class SavepointQueryTest {
 
     @Test
     fun `should return expected result when there are failed requests`() {
-        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointInfo("FAILED", "")))
+        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointStatus("FAILED", "")))
         val result = command.execute("flink", "test", "test", savepointRequest)
         verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
         verify(flinkClient, times(1)).getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))
@@ -77,7 +77,7 @@ class SavepointQueryTest {
 
     @Test
     fun `should return expected result when there are completed requests`() {
-        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointInfo("COMPLETED", "file://tmp/000")))
+        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointStatus("COMPLETED", "file://tmp/000")))
         val result = command.execute("flink", "test", "test", savepointRequest)
         verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
         verify(flinkClient, times(1)).getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))
@@ -90,7 +90,7 @@ class SavepointQueryTest {
 
     @Test
     fun `should return expected result when location is missing`() {
-        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointInfo("COMPLETED", null)))
+        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointStatus("COMPLETED", null)))
         val result = command.execute("flink", "test", "test", savepointRequest)
         verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
         verify(flinkClient, times(1)).getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))
@@ -103,7 +103,7 @@ class SavepointQueryTest {
 
     @Test
     fun `should return expected result when status is unexpected`() {
-        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointInfo("UNKNOWN", null)))
+        given(flinkClient.getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))).thenReturn(mapOf("1" to SavepointStatus("UNKNOWN", null)))
         val result = command.execute("flink", "test", "test", savepointRequest)
         verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
         verify(flinkClient, times(1)).getSavepointRequestsStatus(eq(flinkAddress), eq(mapOf(savepointRequest.jobId to savepointRequest.triggerId)))

@@ -236,31 +236,31 @@ Configure Docker environment:
 
 Get status of the deployment:
 
-     docker run --rm -it nextbreakpoint/flinkctl:1.4.4-beta deployment status --host=$(minikube ip) --deployment-name=demo | jq -r '.output' | jq
+     docker run --rm -it nextbreakpoint/flinkctl:1.5.0 deployment status --host=$(minikube ip) --deployment-name=demo | jq -r '.output' | jq
 
 Get status of the cluster:
 
-     docker run --rm -it nextbreakpoint/flinkctl:1.4.4-beta cluster status --host=$(minikube ip) --cluster-name=demo | jq -r '.output' | jq
+     docker run --rm -it nextbreakpoint/flinkctl:1.5.0 cluster status --host=$(minikube ip) --cluster-name=demo | jq -r '.output' | jq
 
 Get status of a job:
 
-     docker run --rm -it nextbreakpoint/flinkctl:1.4.4-beta job status --host=$(minikube ip) --cluster-name=demo --job-name=computeaverage | jq -r '.output' | jq
+     docker run --rm -it nextbreakpoint/flinkctl:1.5.0 job status --host=$(minikube ip) --cluster-name=demo --job-name=computeaverage | jq -r '.output' | jq
 
 Stop the cluster:
 
-     docker run --rm -it nextbreakpoint/flinkctl:1.4.4-beta cluster stop --host=$(minikube ip) --cluster-name=demo
+     docker run --rm -it nextbreakpoint/flinkctl:1.5.0 cluster stop --host=$(minikube ip) --cluster-name=demo
 
 Start the cluster:
 
-     docker run --rm -it nextbreakpoint/flinkctl:1.4.4-beta cluster start --host=$(minikube ip) --cluster-name=demo
+     docker run --rm -it nextbreakpoint/flinkctl:1.5.0 cluster start --host=$(minikube ip) --cluster-name=demo
 
 Stop a job:
 
-     docker run --rm -it nextbreakpoint/flinkctl:1.4.4-beta job stop --host=$(minikube ip) --cluster-name=demo --job-name=computeaverage
+     docker run --rm -it nextbreakpoint/flinkctl:1.5.0 job stop --host=$(minikube ip) --cluster-name=demo --job-name=computeaverage
 
 Start a job:
 
-     docker run --rm -it nextbreakpoint/flinkctl:1.4.4-beta job start --host=$(minikube ip) --cluster-name=demo --job-name=computeaverage
+     docker run --rm -it nextbreakpoint/flinkctl:1.5.0 job start --host=$(minikube ip) --cluster-name=demo --job-name=computeaverage
 
 ## Remove all resources
 
