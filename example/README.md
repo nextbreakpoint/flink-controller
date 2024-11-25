@@ -4,11 +4,11 @@ Follow these tutorial to set up a Minikube environment and learn how to use the 
 
 ## Preparation   
 
-Install Minikube 1.11.0 or later with Kubernetes 1.18. Install kubectl, Helm 3, and AWS CLI.
+Install Minikube 1.34. Install kubectl, Helm 3, and AWS CLI.
 
-Start Minikube with at least 8Gb of memory:
+Start Minikube with at least 8Gb of memory and Kubernetes version 1.31:
 
-    minikube start --cpus=2 --memory=8gb --kubernetes-version v1.18.14
+    minikube start --cpus=4 --memory=8gb --kubernetes-version v1.31.0 --driver=hyperkit
 
 ## Install Flink Kubernetes Toolbox    
 

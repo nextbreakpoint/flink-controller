@@ -26,12 +26,12 @@
 		<url>git@github.com:nextbreakpoint/flinkctl.git</url>
 	</scm>
 	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<java.version>11</java.version>
 		<java.release>11</java.release>
 		<maven.compiler.source>11</maven.compiler.source>
 		<maven.compiler.target>11</maven.compiler.target>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<kotlin.compiler.languageVersion>2.0</kotlin.compiler.languageVersion>
 		<kotlin.compiler.apiVersion>2.0</kotlin.compiler.apiVersion>
 		<kotlin.code.style>official</kotlin.code.style>
@@ -49,7 +49,8 @@
 		<flinkclient.version>1.1.0</flinkclient.version>
 		<flink-major.version>1.20</flink-major.version>
 		<flink.version>${flink-major.version}.0</flink.version>
-		<scala.version>2.12</scala.version>
+		<scala-major.version>2.12</scala-major.version>
+		<scala.version>${scala-major.version}.20</scala.version>
 		<client-java.version>10.0.0</client-java.version>
 		<joda-time.version>2.13.0</joda-time.version>
 		<junit.version>5.11.3</junit.version>
@@ -57,11 +58,11 @@
 		<assertj.version>3.26.3</assertj.version>
 		<awaitility.version>4.2.2</awaitility.version>
 		<wiremock.version>3.9.2</wiremock.version>
+		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
+		<maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 		<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
 		<maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
 		<maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
-		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
-		<maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
 		<maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
 		<versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
 		<lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
@@ -180,8 +181,7 @@
 					</executions>
 					<configuration>
 						<useSystemClassLoader>false</useSystemClassLoader>
-						<argLine>@{argLine}</argLine>
-						<forkCount>0</forkCount>
+<!--						<argLine>@{argLine}</argLine>-->
 						<properties>
 							<configurationParameters>
 								junit.jupiter.execution.parallel.enabled = true
@@ -196,7 +196,7 @@
 						</includes>
 						<systemPropertyVariables>
 							<flink.version>${flink.version}</flink.version>
-							<scala.version>${scala.version}</scala.version>
+							<scala.version>${scala-major.version}</scala.version>
 							<project.version>${project.version}</project.version>
 							<base.directory>${maven.multiModuleProjectDirectory}</base.directory>
 						</systemPropertyVariables>
@@ -236,7 +236,7 @@
 					</executions>
 					<configuration>
 						<useSystemClassLoader>false</useSystemClassLoader>
-						<argLine>@{argLine}</argLine>
+<!--						<argLine>@{argLine}</argLine>-->
 						<properties>
 							<configurationParameters>
 								junit.jupiter.execution.parallel.enabled = false
