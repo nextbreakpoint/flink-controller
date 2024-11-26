@@ -6,7 +6,7 @@ import com.nextbreakpoint.flink.k8s.common.KubeClient
 import com.nextbreakpoint.flink.k8s.controller.core.ClusterAction
 import com.nextbreakpoint.flink.k8s.controller.core.Result
 import com.nextbreakpoint.flink.k8s.controller.core.ResultStatus
-import com.nextbreakpoint.flinkclient.model.JarUploadResponseBody
+import com.nextbreakpoint.flink.client.model.JarUploadResponseBody
 import java.io.File
 import java.util.logging.Level
 import java.util.logging.Logger

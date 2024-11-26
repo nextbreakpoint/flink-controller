@@ -4,7 +4,7 @@ import com.nextbreakpoint.flink.common.BootstrapOptions
 import com.nextbreakpoint.flink.common.RunJarOptions
 import com.nextbreakpoint.flink.k8s.common.FlinkJobStatus
 import com.nextbreakpoint.flink.k8s.controller.Controller
-import com.nextbreakpoint.flinkclient.model.UploadStatus
+import com.nextbreakpoint.flink.client.model.UploadStatus
 import java.io.File
 import java.util.logging.Level
 import java.util.logging.Logger

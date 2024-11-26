@@ -15,7 +15,7 @@ import com.nextbreakpoint.flink.k8s.controller.core.ResultStatus
 import com.nextbreakpoint.flink.k8s.crd.V1FlinkCluster
 import com.nextbreakpoint.flink.k8s.crd.V1FlinkJob
 import com.nextbreakpoint.flink.k8s.factory.ClusterResourcesDefaultFactory
-import com.nextbreakpoint.flinkclient.model.TaskManagerInfo
+import com.nextbreakpoint.flink.client.model.TaskManagerInfo
 import io.kubernetes.client.openapi.models.V1Pod
 import org.joda.time.DateTime
 import java.util.logging.Level

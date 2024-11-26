@@ -10,7 +10,7 @@ import com.nextbreakpoint.flink.k8s.controller.core.JobContext
 import com.nextbreakpoint.flink.k8s.controller.core.ResultStatus
 import com.nextbreakpoint.flink.testing.KotlinMockito.eq
 import com.nextbreakpoint.flink.testing.KotlinMockito.given
-import com.nextbreakpoint.flinkclient.model.TriggerResponse
+import com.nextbreakpoint.flink.client.model.TriggerResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
