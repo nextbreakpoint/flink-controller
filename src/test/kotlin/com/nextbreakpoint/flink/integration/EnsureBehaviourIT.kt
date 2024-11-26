@@ -13,7 +13,7 @@ import com.nextbreakpoint.flink.k8s.crd.V1FlinkClusterSpec
 import com.nextbreakpoint.flink.k8s.crd.V1FlinkClusterStatus
 import com.nextbreakpoint.flink.k8s.crd.V1FlinkJobSpec
 import com.nextbreakpoint.flink.k8s.crd.V1FlinkJobStatus
-import com.nextbreakpoint.flinkclient.model.TaskManagerInfo
+import com.nextbreakpoint.flink.client.model.TaskManagerInfo
 import io.kubernetes.client.openapi.JSON
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll

@@ -7,8 +7,8 @@ import com.nextbreakpoint.flink.k8s.common.KubeClient
 import com.nextbreakpoint.flink.k8s.controller.core.ResultStatus
 import com.nextbreakpoint.flink.testing.KotlinMockito.eq
 import com.nextbreakpoint.flink.testing.KotlinMockito.given
-import com.nextbreakpoint.flinkclient.model.TaskManagerInfo
-import com.nextbreakpoint.flinkclient.model.TaskManagersInfo
+import com.nextbreakpoint.flink.client.model.TaskManagerInfo
+import com.nextbreakpoint.flink.client.model.TaskManagersInfo
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

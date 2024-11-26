@@ -7,7 +7,7 @@ import com.nextbreakpoint.flink.k8s.common.KubeClient
 import com.nextbreakpoint.flink.k8s.controller.core.ClusterAction
 import com.nextbreakpoint.flink.k8s.controller.core.Result
 import com.nextbreakpoint.flink.k8s.controller.core.ResultStatus
-import com.nextbreakpoint.flinkclient.model.TaskManagerDetailsInfo
+import com.nextbreakpoint.flink.client.model.TaskManagerDetailsInfo
 import java.util.logging.Level
 import java.util.logging.Logger
 

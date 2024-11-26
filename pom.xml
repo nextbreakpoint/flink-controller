@@ -46,7 +46,8 @@
 		<activation.version>1.1.1</activation.version>
 		<micrometer.version>1.14.1</micrometer.version>
 		<jackson.version>2.18.1</jackson.version>
-		<flinkclient.version>1.1.0</flinkclient.version>
+		<flink-client.version>1.1.1</flink-client.version>
+		<flink-dummies.version>0.0.1</flink-dummies.version>
 		<flink-major.version>1.20</flink-major.version>
 		<flink.version>${flink-major.version}.0</flink.version>
 		<scala-major.version>2.12</scala-major.version>
@@ -469,8 +470,8 @@
 			</dependency>
 			<dependency>
 				<groupId>com.nextbreakpoint</groupId>
-				<artifactId>com.nextbreakpoint.flinkclient.core</artifactId>
-				<version>${flinkclient.version}</version>
+				<artifactId>com.nextbreakpoint.flink.client</artifactId>
+				<version>${flink-client.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>joda-time</groupId>
@@ -595,7 +596,7 @@
 		</dependency>
 		<dependency>
 			<groupId>com.nextbreakpoint</groupId>
-			<artifactId>com.nextbreakpoint.flinkclient.core</artifactId>
+			<artifactId>com.nextbreakpoint.flink.client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>joda-time</groupId>

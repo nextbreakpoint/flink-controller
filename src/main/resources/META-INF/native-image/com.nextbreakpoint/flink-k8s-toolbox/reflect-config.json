@@ -404,7 +404,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.GarbageCollectorInfo",
+    "name": "com.nextbreakpoint.flink.client.model.GarbageCollectorInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -414,7 +414,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.HardwareDescription",
+    "name": "com.nextbreakpoint.flink.client.model.HardwareDescription",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -424,7 +424,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.AsynchronousOperationResult",
+    "name": "com.nextbreakpoint.flink.client.model.AsynchronousOperationResult",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -434,7 +434,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.ClusterOverviewWithVersion",
+    "name": "com.nextbreakpoint.flink.client.model.ClusterOverviewWithVersion",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -444,7 +444,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.IOMetricsInfo",
+    "name": "com.nextbreakpoint.flink.client.model.IOMetricsInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -454,7 +454,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JobDetailsInfo",
+    "name": "com.nextbreakpoint.flink.client.model.JobDetailsInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -464,7 +464,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JobDetailsInfo$StateEnum$Adapter",
+    "name": "com.nextbreakpoint.flink.client.model.JobDetailsInfo$StateEnum$Adapter",
     "methods": [
       {
         "name": "<init>",
@@ -473,7 +473,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JobDetailsInfoJobPlan",
+    "name": "com.nextbreakpoint.flink.client.model.JobDetailsInfoJobPlan",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -483,7 +483,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JobDetailsInfoJobVertexDetailsInfo",
+    "name": "com.nextbreakpoint.flink.client.model.JobDetailsInfoJobVertexDetailsInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -493,7 +493,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JobDetailsInfoJobVertexDetailsInfo$StatusEnum$Adapter",
+    "name": "com.nextbreakpoint.flink.client.model.JobDetailsInfoJobVertexDetailsInfo$StatusEnum$Adapter",
     "methods": [
       {
         "name": "<init>",
@@ -502,7 +502,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JobDetailsInfoNode",
+    "name": "com.nextbreakpoint.flink.client.model.JobDetailsInfoNode",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -512,7 +512,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JobIdWithStatus",
+    "name": "com.nextbreakpoint.flink.client.model.JobIdWithStatus",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -522,7 +522,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JobIdWithStatus$StatusEnum$Adapter",
+    "name": "com.nextbreakpoint.flink.client.model.JobIdWithStatus$StatusEnum$Adapter",
     "methods": [
       {
         "name": "<init>",
@@ -531,7 +531,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JobIdsWithStatusOverview",
+    "name": "com.nextbreakpoint.flink.client.model.JobIdsWithStatusOverview",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -541,7 +541,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.QueueStatus",
+    "name": "com.nextbreakpoint.flink.client.model.QueueStatus",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -551,7 +551,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.QueueStatus$IdEnum$Adapter",
+    "name": "com.nextbreakpoint.flink.client.model.QueueStatus$IdEnum$Adapter",
     "methods": [
       {
         "name": "<init>",
@@ -560,7 +560,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.SavepointTriggerRequestBody",
+    "name": "com.nextbreakpoint.flink.client.model.SavepointTriggerRequestBody",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -570,7 +570,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.TriggerResponse",
+    "name": "com.nextbreakpoint.flink.client.model.TriggerResponse",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -580,7 +580,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.TaskManagerDetailsInfo",
+    "name": "com.nextbreakpoint.flink.client.model.TaskManagerDetailsInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -590,7 +590,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.TaskManagerInfo",
+    "name": "com.nextbreakpoint.flink.client.model.TaskManagerInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -600,7 +600,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.TaskManagerMetricsInfo",
+    "name": "com.nextbreakpoint.flink.client.model.TaskManagerMetricsInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -610,7 +610,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.TaskManagersInfo",
+    "name": "com.nextbreakpoint.flink.client.model.TaskManagersInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -620,7 +620,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JarEntryInfo",
+    "name": "com.nextbreakpoint.flink.client.model.JarEntryInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -630,7 +630,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JarFileInfo",
+    "name": "com.nextbreakpoint.flink.client.model.JarFileInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -640,7 +640,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JarListInfo",
+    "name": "com.nextbreakpoint.flink.client.model.JarListInfo",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -650,7 +650,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JarRunResponseBody",
+    "name": "com.nextbreakpoint.flink.client.model.JarRunResponseBody",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -660,7 +660,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JarUploadResponseBody",
+    "name": "com.nextbreakpoint.flink.client.model.JarUploadResponseBody",
     "allDeclaredFields": true,
     "methods": [
       {
@@ -670,7 +670,7 @@
     ]
   },
   {
-    "name": "com.nextbreakpoint.flinkclient.model.JarUploadResponseBody$StatusEnum$Adapter",
+    "name": "com.nextbreakpoint.flink.client.model.JarUploadResponseBody$StatusEnum$Adapter",
     "methods": [
       {
         "name": "<init>",

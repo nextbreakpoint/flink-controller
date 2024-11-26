@@ -15,8 +15,8 @@ import com.nextbreakpoint.flink.testing.KotlinMockito.any
 import com.nextbreakpoint.flink.testing.KotlinMockito.eq
 import com.nextbreakpoint.flink.testing.KotlinMockito.given
 import com.nextbreakpoint.flink.testing.TestFactory
-import com.nextbreakpoint.flinkclient.model.TaskManagerInfo
-import com.nextbreakpoint.flinkclient.model.TaskManagersInfo
+import com.nextbreakpoint.flink.client.model.TaskManagerInfo
+import com.nextbreakpoint.flink.client.model.TaskManagersInfo
 import io.kubernetes.client.openapi.models.V1PodIP
 import io.kubernetes.client.openapi.models.V1PodStatus
 import org.assertj.core.api.Assertions.assertThat
