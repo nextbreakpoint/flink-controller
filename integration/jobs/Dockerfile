@@ -1,11 +1,3 @@
 ARG image
-
-FROM maven:3.9-eclipse-temurin-11 AS build
-ARG flink_version
-ARG scala_version
-COPY demo /demo
-WORKDIR /demo
-RUN mvn clean package -t toolchains-linux.xml -DincludeFlinkRuntime=false -Dflink.version=${flink_version}
-
 FROM ${image}
-COPY --from=build /demo/target/demo-1.0.0-shaded.jar /flink-jobs.jar
+RUN curl https://github.com/nextbreakpoint/flink-dummies/releases/download/v0.0.4/com.nextbreakpoint.flink.dummies-0.0.4.jar -O /com.nextbreakpoint.flink.dummies.jar

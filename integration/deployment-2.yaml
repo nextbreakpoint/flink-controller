@@ -19,13 +19,11 @@ spec:
           serviceAccount: flink-bootstrap
           pullPolicy: Never
           image: integration/jobs:latest
-          jarPath: /flink-jobs.jar
-          className: com.nextbreakpoint.flink.jobs.ComputeAverage
+          jarPath: /com.nextbreakpoint.flink.dummies.jar
+          className: com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain
           arguments:
-            - --JOB_PARAMETERS
-            - file:///var/config/computeaverage.conf
-            - --OUTPUT_LOCATION
-            - s3a://nextbreakpoint-integration/1
+            - --CONFIG_PATH
+            - file:///var/config/measurement.conf
           resources:
             limits:
               cpu: '0.5'
@@ -48,13 +46,11 @@ spec:
           serviceAccount: flink-bootstrap
           pullPolicy: Never
           image: integration/jobs:latest
-          jarPath: /flink-jobs.jar
-          className: com.nextbreakpoint.flink.jobs.ComputeMaximum
+          jarPath: /com.nextbreakpoint.flink.dummies.jar
+          className: com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain
           arguments:
-            - --JOB_PARAMETERS
-            - file:///var/config/computemaximum.conf
-            - --OUTPUT_LOCATION
-            - s3a://nextbreakpoint-integration/1
+            - --CONFIG_PATH
+            - file:///var/config/measurement.conf
           resources:
             limits:
               cpu: '0.5'
@@ -98,11 +94,8 @@ spec:
             name: integration-cluster-2-secret-v1
       volumeMounts:
         - name: config-vol
-          mountPath: /var/config/computeaverage.conf
-          subPath: computeaverage.conf
-        - name: config-vol
-          mountPath: /var/config/computemaximum.conf
-          subPath: computemaximum.conf
+          mountPath: /var/config/measurement.conf
+          subPath: measurement.conf
       volumes:
         - name: config-vol
           configMap:

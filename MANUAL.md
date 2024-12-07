@@ -1114,25 +1114,13 @@ The state machine associate to a job is documented in this graph:
 
 Instruction for building and running the flinkctl command.
 
-### Build with Gradle
+### Build with Maven
 
-Install GraalVM 20.3.0 (graalvm-ce-java11-20.3.0).
+Install Java 11 and Maven 3.9.
 
-Compile and package the code with Gradle command:
+Compile and package the code with command:
 
-    ./gradlew build copyRuntimeDeps
-
-All the JARs required to run the application will be produced into the directory build/libs.
-
-Please note that Gradle alone will only build the JARs, not the binary file.
-
-If you are on MacOS or Linux, you can build the flinkctl binary file with the command:
-
-    $GRAALVM_HOME/bin/native-image --verbose -cp $(CLASSPATH)
-
-where CLASSPATH must include all the dependencies required to run the application:
-
-    export CLASSPATH=$(find build/libs -name "*.jar" -print | sed "s/.jar/.jar:/g" | tr -d '\n' | sed "s/:$//g")
+    mvn clean package
 
 ### Build with Docker
 
@@ -1177,17 +1165,17 @@ where CLASSPATH must include all the dependencies required to run the applicatio
 
 Run unit tests with command:
 
-    ./gradlew clean test
+    mvn test
 
 Run integration tests against Docker for Desktop or Minikube with command:
 
     export BUILD_IMAGES=true
-    ./gradlew clean integrationTest
+    mvn verify
 
 You can skip the Docker images build step if the images already exist:
 
     export BUILD_IMAGES=false
-    ./gradlew clean integrationTest
+    mvn verify
 
 ## Advanced configuration
 

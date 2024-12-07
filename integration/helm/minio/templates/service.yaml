@@ -18,6 +18,10 @@ spec:
       targetPort: http
       protocol: TCP
       name: minio
+    - port: 9001
+      targetPort: http
+      protocol: TCP
+      name: minio-console
   selector:
     app: {{ $name }}
     release: {{ $root.Release.Name }}
@@ -39,6 +43,10 @@ spec:
       targetPort: http
       protocol: TCP
       name: minio
+    - port: 9001
+      targetPort: http
+      protocol: TCP
+      name: minio-console
   selector:
     app: {{ $name }}
     release: {{ $root.Release.Name }}

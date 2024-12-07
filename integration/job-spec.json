@@ -14,13 +14,11 @@
     "serviceAccount": "flink-bootstrap",
     "pullPolicy": "Never",
     "image": "integration/jobs:latest",
-    "jarPath": "/flink-jobs.jar",
-    "className": "com.nextbreakpoint.flink.jobs.ComputeAverage",
+    "jarPath": "com.nextbreakpoint.flink.dummies.jar",
+    "className": "com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain",
     "arguments": [
-      "--JOB_PARAMETERS",
-      "file:///var/config/computeaverage.conf",
-      "--OUTPUT_LOCATION",
-      "s3a://nextbreakpoint-integration/0"
+      "--CONFIG_PATH",
+      "file:///var/config/measurement.conf"
     ],
     "resources": {
       "limits": {

@@ -46,8 +46,8 @@
 		<activation.version>1.1.1</activation.version>
 		<micrometer.version>1.14.1</micrometer.version>
 		<jackson.version>2.18.1</jackson.version>
-		<flink-client.version>1.1.1</flink-client.version>
-		<flink-dummies.version>0.0.1</flink-dummies.version>
+		<flink-client.version>1.1.2</flink-client.version>
+		<flink-dummies.version>0.0.4</flink-dummies.version>
 		<flink-major.version>1.20</flink-major.version>
 		<flink.version>${flink-major.version}.0</flink.version>
 		<scala-major.version>2.12</scala-major.version>
@@ -61,6 +61,7 @@
 		<wiremock.version>3.9.2</wiremock.version>
 		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
 		<maven-enforcer-plugin.version>3.5.0</maven-enforcer-plugin.version>
+		<maven-dependency-plugin.version>3.2.0</maven-dependency-plugin.version>
 		<maven-compiler-plugin.version>3.13.0</maven-compiler-plugin.version>
 		<maven-surefire-plugin.version>3.5.2</maven-surefire-plugin.version>
 		<maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
@@ -168,6 +169,11 @@
 					<configuration>
 						<rulesUri>file://${maven.multiModuleProjectDirectory}/maven-version-rules.xml</rulesUri>
 					</configuration>
+				</plugin>
+				<plugin>
+					<groupId>org.apache.maven.plugins</groupId>
+					<artifactId>maven-dependency-plugin</artifactId>
+					<version>${maven-dependency-plugin.version}</version>
 				</plugin>
 				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
@@ -351,6 +357,32 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-enforcer-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<artifactItems>
+						<artifactItem>
+							<groupId>com.nextbreakpoint</groupId>
+							<artifactId>com.nextbreakpoint.flink.dummies</artifactId>
+							<version>${flink-dummies.version}</version>
+							<classifier>shaded</classifier>
+							<type>jar</type>
+							<overWrite>true</overWrite>
+							<outputDirectory>${project.build.directory}/downloaded</outputDirectory>
+						</artifactItem>
+					</artifactItems>
+				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>

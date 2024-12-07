@@ -5,6 +5,37 @@ The toolbox provides a native command flinkctl which can be executed on Linux ma
 The command implements both client and server components which together represent a complete solution for operating Apache Flink on Kubernetes.
 The command is based on the Kubernetes Operator Pattern, it implements a custom controller, and it works with custom resources.         
 
+## License
+
+The toolbox is distributed under the terms of BSD 3-Clause License.
+
+    Copyright (c) 2019-2024, Andrea Medeghini
+    All rights reserved.
+
+    Redistribution and use in source and binary forms, with or without
+    modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notice, this
+      list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright notice,
+      this list of conditions and the following disclaimer in the documentation
+      and/or other materials provided with the distribution.
+
+    * Neither the name of the copyright holder nor the names of its
+      contributors may be used to endorse or promote products derived from
+      this software without specific prior written permission.
+
+    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 ## Features
 
@@ -40,7 +71,6 @@ This is the list of the main features implemented in the toolbox:
 - Configurable savepoints location
 - CLI and REST interface to support operations
 - Metrics compatible with Prometheus
-
 
 ## Overview
 
@@ -78,7 +108,6 @@ The dependencies between resources are represented in the following graph:
 
 ![Resource dependencies](/graphs/flink-operator.png "Resource dependencies")
 
-
 ## Get started
 
 Download the Docker image with flinkctl command from Docker Hub:
@@ -99,7 +128,6 @@ https://github.com/nextbreakpoint/flink-k8s-toolbox/blob/master/MANUAL.md
 
 Look at the section "Create your first deployment".
 
-
 ## Contribute
 
 Visit the project on GitHub:
@@ -109,36 +137,3 @@ https://github.com/nextbreakpoint/flink-k8s-toolbox
 Report an issue or request a feature:
 
 https://github.com/nextbreakpoint/flink-k8s-toolbox/issues
-
-
-## License
-
-The toolbox is distributed under the terms of BSD 3-Clause License.
-
-    Copyright (c) 2019-2024, Andrea Medeghini
-    All rights reserved.
-
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are met:
-
-    * Redistributions of source code must retain the above copyright notice, this
-      list of conditions and the following disclaimer.
-
-    * Redistributions in binary form must reproduce the above copyright notice,
-      this list of conditions and the following disclaimer in the documentation
-      and/or other materials provided with the distribution.
-
-    * Neither the name of the copyright holder nor the names of its
-      contributors may be used to endorse or promote products derived from
-      this software without specific prior written permission.
-
-    THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
-    AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
-    IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
-    FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
-    DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
-    CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
-    OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-    OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

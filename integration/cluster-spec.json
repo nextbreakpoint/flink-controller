@@ -52,13 +52,13 @@
     "volumeMounts": [
       {
         "name": "config-vol",
-        "mountPath": "/var/config/computeaverage.conf",
-        "subPath": "computeaverage.conf"
+        "mountPath": "/var/config/measurement.conf",
+        "subPath": "measurement.conf"
       },
       {
         "name": "config-vol",
-        "mountPath": "/var/config/computemaximum.conf",
-        "subPath": "computemaximum.conf"
+        "mountPath": "/var/config/measurement-with-limit.conf",
+        "subPath": "measurement-with-limit.conf"
       }
     ],
     "volumes": [

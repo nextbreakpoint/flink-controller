@@ -33,10 +33,10 @@ data:
     jobmanager.memory.process.size: 500mb
     jobmanager.memory.flink.size: 200mb
     metrics.reporters: prometheus
-    metrics.reporter.prometheus.class: org.apache.flink.metrics.prometheus.PrometheusReporter
+    metrics.reporter.prometheus.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
     metrics.reporter.prometheus.port: 9250
     metrics.latency.granularity: operator
-    state.backend: filesystem
+    state.backend.type: hashmap
     s3.endpoint: {{ $root.Values.s3Endpoint }}
     s3.path.style.access: {{ $root.Values.s3PathStyleAccess }}
     s3.connection.maximum: 200
@@ -63,10 +63,10 @@ data:
     taskmanager.memory.network.fraction: 0.1
     taskmanager.memory.managed.fraction: 0.1
     metrics.reporters: prometheus
-    metrics.reporter.prometheus.class: org.apache.flink.metrics.prometheus.PrometheusReporter
+    metrics.reporter.prometheus.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
     metrics.reporter.prometheus.port: 9250
     metrics.latency.granularity: operator
-    state.backend: filesystem
+    state.backend.type: hashmap
     s3.endpoint: {{ $root.Values.s3Endpoint }}
     s3.path.style.access: {{ $root.Values.s3PathStyleAccess }}
     s3.connection.maximum: 200
@@ -85,8 +85,8 @@ stringData:
   SECRET_PROPERTIES: |
     s3.access-key: {{ $root.Values.s3AccessKey }}
     s3.secret-key: {{ $root.Values.s3SecretKey }}
-    state.savepoints.dir: s3p://{{ $root.Values.s3BucketName }}/0/savepoints
-    state.checkpoints.dir: s3p://{{ $root.Values.s3BucketName }}/0/checkpoints
+    execution.checkpointing.dir: s3p://{{ $root.Values.s3BucketName }}/0/checkpoints
+    execution.checkpointing.savepoint-dir: s3p://{{ $root.Values.s3BucketName }}/0/savepoints
 ---
 apiVersion: v1
 kind: Secret
@@ -102,8 +102,8 @@ stringData:
   SECRET_PROPERTIES: |
     s3.access-key: {{ $root.Values.s3AccessKey }}
     s3.secret-key: {{ $root.Values.s3SecretKey }}
-    state.savepoints.dir: s3p://{{ $root.Values.s3BucketName }}/1/savepoints
-    state.checkpoints.dir: s3p://{{ $root.Values.s3BucketName }}/1/checkpoints
+    execution.checkpointing.dir: s3p://{{ $root.Values.s3BucketName }}/1/checkpoints
+    execution.checkpointing.savepoint-dir: s3p://{{ $root.Values.s3BucketName }}/1/savepoints
 ---
 apiVersion: v1
 kind: Secret
@@ -119,8 +119,8 @@ stringData:
   SECRET_PROPERTIES: |
     s3.access-key: {{ $root.Values.s3AccessKey }}
     s3.secret-key: {{ $root.Values.s3SecretKey }}
-    state.savepoints.dir: s3p://{{ $root.Values.s3BucketName }}/2/savepoints
-    state.checkpoints.dir: s3p://{{ $root.Values.s3BucketName }}/2/checkpoints
+    execution.checkpointing.dir: s3p://{{ $root.Values.s3BucketName }}/2/checkpoints
+    execution.checkpointing.savepoint-dir: s3p://{{ $root.Values.s3BucketName }}/2/savepoints
 ---
 apiVersion: v1
 kind: Secret
@@ -136,5 +136,5 @@ stringData:
   SECRET_PROPERTIES: |
     s3.access-key: {{ $root.Values.s3AccessKey }}
     s3.secret-key: {{ $root.Values.s3SecretKey }}
-    state.savepoints.dir: s3p://{{ $root.Values.s3BucketName }}/3/savepoints
-    state.checkpoints.dir: s3p://{{ $root.Values.s3BucketName }}/3/checkpoints
+    execution.checkpointing.dir: s3p://{{ $root.Values.s3BucketName }}/3/checkpoints
+    execution.checkpointing.savepoint-dir: s3p://{{ $root.Values.s3BucketName }}/3/savepoints

@@ -1,7 +1,7 @@
 FROM maven:3.9-eclipse-temurin-21-alpine AS build
 ADD . /src
 WORKDIR /src
-RUN mvn package
+RUN mvn clean package
 RUN find build/libs -name "*.jar" -print | sed "s/.jar/.jar:/g" | tr -d '\n' | sed "s/:$//g" > /src/build/.classpath
 
 #FROM ghcr.io/graalvm/native-image-community:23 as native-image
