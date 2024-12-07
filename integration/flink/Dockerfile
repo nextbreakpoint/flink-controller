@@ -1,5 +1,2 @@
-ARG flink_version
-ARG scala_version
-
-FROM apache/flink:${flink_version}-scala_${scala_version}-java11
+FROM apache/flink:1.20.0-scala_2.12-java11
 

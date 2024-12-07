@@ -47,9 +47,14 @@ spec:
           args:
             - server
             - /var/data
+            - --console-address
+            - ":9001"
           ports:
-            - name: http
+            - name: minio
               containerPort: 9000
+              protocol: TCP
+            - name: minio-console
+              containerPort: 9001
               protocol: TCP
           env:
             - name: POD_NAME
