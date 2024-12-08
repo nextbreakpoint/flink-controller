@@ -23,7 +23,7 @@ spec:
           className: com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain
           arguments:
             - --CONFIG_PATH
-            - file:///var/config/measurement.conf
+            - file:///var/config/measurement.properties
           resources:
             limits:
               cpu: '0.5'
@@ -50,7 +50,7 @@ spec:
           className: com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain
           arguments:
             - --CONFIG_PATH
-            - file:///var/config/measurement.conf
+            - file:///var/config/measurement.properties
           resources:
             limits:
               cpu: '0.5'
@@ -94,8 +94,8 @@ spec:
             name: integration-cluster-2-secret-v1
       volumeMounts:
         - name: config-vol
-          mountPath: /var/config/measurement.conf
-          subPath: measurement.conf
+          mountPath: /var/config/measurement.properties
+          subPath: measurement.properties
       volumes:
         - name: config-vol
           configMap:
