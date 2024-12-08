@@ -4,6 +4,11 @@ This document describes how to install and use the Flink Kubernetes Toolbox.
 
 Currently, Flink Kubernetes Toolbox requires Kubernetes 1.18.14 or later, and it supports Apache Flink 1.11 or later.
 
+
+minikube start --cpus=4 --memory=8gb --kubernetes-version v1.31.0 --driver=hyperkit
+
+
+
 ## Generate SSL certificates
 
 The toolbox provides client and server components. The client component communicates to the server component over HTTP.
@@ -194,25 +199,24 @@ If you don't have the JAR of a Flink application yet, you can try using the demo
 
 Pull the Flink's Docker image with command:
 
-    docker pull apache/flink:1.12.1-scala_2.12-java11
+    docker pull apache/flink:1.20.0-scala_2.12-java11
 
 Please note that you can use other images of Flink. The image must have an entrypoint for running JobManager and TaskManager.
 
 Install Minio to simulate a distributed filesystem base on AWS S3 API.
 
-    helm repo add minio https://helm.min.io/
-    helm repo update
-    helm install minio minio/minio --namespace minio --set accessKey=minioaccesskey,secretKey=miniosecretkey,persistence.size=20Gi,service.port=9000
+    helm install minio --namespace minio --create-namespace oci://registry-1.docker.io/bitnamicharts/minio --set auth.rootUser=minioaccesskey --set auth.rootPassword=miniosecretkey 
 
 Expose Minio port to host:
 
     kubectl -n minio expose service minio --name=minio-external --type=LoadBalancer --external-ip=$(minikube ip) --port=9000 --target-port=9000
+    kubectl -n minio expose service minio --name=minio-console-external --type=LoadBalancer --external-ip=$(minikube ip) --port=9001 --target-port=9001
 
 Create the bucket with AWS CLI:
 
     export AWS_ACCESS_KEY_ID=minioaccesskey  
     export AWS_SECRET_ACCESS_KEY=miniosecretkey
-    aws s3 mb s3://nextbreakpoint-demo --endpoint-url http://$(minikube ip):9000
+    aws s3 mb s3://nextbreakpoint-integration --endpoint-url http://$(minikube ip):9000
 
 Create a file flinkproperties.yaml for the JobManager and TaskManager configuration:
 
