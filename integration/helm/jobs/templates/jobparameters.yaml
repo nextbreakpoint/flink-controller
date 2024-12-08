@@ -12,14 +12,14 @@ metadata:
     release: {{ $root.Release.Name }}
     heritage: {{ $root.Release.Service }}
 data:
-  measurement.conf: |
+  measurement.properties: |
     job.name: temperature-measurement
     log.verbosity: 2
     watermark.strategy.max-out-of-orderness: 5000
     watermark.strategy.idle-timeout: 30000
     source.max-delay: 5000
     source.max-count: 0
-    bucket.output-path: s3a://temperature-measurement/${JOB_ID}/output
+    bucket.output-path: s3a://temperature-measurement
     bucket.check-interval: 30000
     bucket.rollover-interval: 300000
     bucket.inactivity-interval: 300000
@@ -37,14 +37,14 @@ data:
     #flink.restart-strategy.type: fixed-delay
     #flink.restart-strategy.fixed-delay.attempts: 3
     #flink.restart-strategy.fixed-delay.delay: 60000
-  measurement-with-limit.conf: |
+  measurement-with-limit.properties: |
     job.name: temperature-measurement
     log.verbosity: 2
     watermark.strategy.max-out-of-orderness: 5000
     watermark.strategy.idle-timeout: 30000
     source.max-delay: 5000
     source.max-count: 100
-    bucket.output-path: s3a://temperature-measurement/${JOB_ID}/output
+    bucket.output-path: s3a://temperature-measurement
     bucket.check-interval: 30000
     bucket.rollover-interval: 300000
     bucket.inactivity-interval: 300000

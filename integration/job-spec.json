@@ -18,7 +18,7 @@
     "className": "com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain",
     "arguments": [
       "--CONFIG_PATH",
-      "file:///var/config/measurement.conf"
+      "file:///var/config/measurement.properties"
     ],
     "resources": {
       "limits": {

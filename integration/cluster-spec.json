@@ -52,13 +52,13 @@
     "volumeMounts": [
       {
         "name": "config-vol",
-        "mountPath": "/var/config/measurement.conf",
-        "subPath": "measurement.conf"
+        "mountPath": "/var/config/measurement.properties",
+        "subPath": "measurement.properties"
       },
       {
         "name": "config-vol",
-        "mountPath": "/var/config/measurement-with-limit.conf",
-        "subPath": "measurement-with-limit.conf"
+        "mountPath": "/var/config/measurement.properties",
+        "subPath": "measurement-with-limit.properties"
       }
     ],
     "volumes": [
