@@ -3,7 +3,7 @@
     <option name="ALTERNATIVE_JRE_PATH" value="1.8" />
     <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.cli.Main" />
     <module name="com.nextbreakpoint.flinkctl" />
-    <option name="PROGRAM_PARAMETERS" value="operator run --namespace=flink --port=4444 --kube-config=$PROJECT_DIR$/../kubernetes-playground/admin.conf --keystore-path=secrets/keystore-operator-api.jks --truststore-path=secrets/truststore-operator-api.jks --keystore-secret=keystore-password --truststore-secret=truststore-password" />
+    <option name="PROGRAM_PARAMETERS" value="operator run --namespace=flink-jobs --port=4444 --kube-config=$PROJECT_DIR$/../kubernetes-playground/admin.conf --keystore-path=secrets/keystore-operator-api.jks --truststore-path=secrets/truststore-operator-api.jks --keystore-secret=keystore-password --truststore-secret=truststore-password" />
     <shortenClasspath name="NONE" />
     <option name="VM_PARAMETERS" value="-XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Dnetworkaddress.cache.ttl=1 -Dnetworkaddress.cache.negative.ttl=1" />
     <method v="2">
