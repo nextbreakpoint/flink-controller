@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="bootstrap run job-1" type="JetRunConfigurationType">
-    <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.cli.Main" />
-    <module name="com.nextbreakpoint.flinkctl" />
+    <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.control.cli.Main" />
+    <module name="com.nextbreakpoint.flink.control" />
     <option name="PROGRAM_PARAMETERS" value="bootstrap run --namespace=flink --flink-hostname=192.168.64.12 --kube-config=$USER_HOME$/.kube/config --cluster-name=cluster-1 --job-name=job-1 --jar-path=flink-jobs.jar --class-name=com.nextbreakpoint.flink.jobs.stream.TestJob --parallelism=4 --argument=--DEVELOP_MODE --argument=disabled" />
     <shortenClasspath name="NONE" />
     <method v="2">
