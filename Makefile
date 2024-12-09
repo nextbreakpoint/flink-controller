@@ -24,7 +24,7 @@ install:
 
 .PHONY: minikube-start
 minikube-start:
-	minikube start --cpus=4 --memory=8gb --kubernetes-version v1.31.0 --driver=docker
+	minikube start --cpus=4 --memory=8gb --kubernetes-version v1.31.0 --driver=hyperkit
 
 .PHONY: minikube-stop
 minikube-stop:
