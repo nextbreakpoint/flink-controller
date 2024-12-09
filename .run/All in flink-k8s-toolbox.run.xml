@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="All in flink-k8s-toolbox" type="JUnit" factoryName="JUnit">
-    <module name="com.nextbreakpoint.flinkctl" />
+    <module name="com.nextbreakpoint.flink.control" />
     <useClassPathOnly />
     <option name="PACKAGE_NAME" value="" />
     <option name="MAIN_CLASS_NAME" value="" />

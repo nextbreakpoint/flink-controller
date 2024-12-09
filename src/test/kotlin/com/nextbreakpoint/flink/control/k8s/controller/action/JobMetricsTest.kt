@@ -1,0 +1,72 @@
+package com.nextbreakpoint.flink.control.k8s.controller.action
+
+import com.nextbreakpoint.flink.control.common.FlinkAddress
+import com.nextbreakpoint.flink.control.common.FlinkOptions
+import com.nextbreakpoint.flink.control.k8s.common.FlinkClient
+import com.nextbreakpoint.flink.control.k8s.common.KubeClient
+import com.nextbreakpoint.flink.control.k8s.controller.core.ResultStatus
+import com.nextbreakpoint.flink.control.testing.KotlinMockito.any
+import com.nextbreakpoint.flink.control.testing.KotlinMockito.eq
+import com.nextbreakpoint.flink.control.testing.KotlinMockito.given
+import com.nextbreakpoint.flink.client.model.Metric
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+import org.mockito.Mockito.mock
+import org.mockito.Mockito.times
+import org.mockito.Mockito.verify
+import org.mockito.Mockito.verifyNoMoreInteractions
+
+class JobMetricsTest {
+    private val flinkOptions = FlinkOptions(hostname = "localhost", portForward = null, useNodePort = false)
+    private val flinkClient = mock(FlinkClient::class.java)
+    private val kubeClient = mock(KubeClient::class.java)
+    private val flinkAddress = FlinkAddress(host = "localhost", port = 8080)
+    private val command = JobMetrics(flinkOptions, flinkClient, kubeClient)
+
+    @BeforeEach
+    fun configure() {
+        given(kubeClient.findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))).thenReturn(flinkAddress)
+        given(flinkClient.getJobMetrics(eq(flinkAddress), eq("1"), any())).thenReturn(listOf(Metric().id("totalNumberOfCheckpoints").value("10"), Metric().id("lastCheckpointSize").value("100")))
+    }
+
+    @Test
+    fun `should fail when kubeClient throws exception`() {
+        given(kubeClient.findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))).thenThrow(RuntimeException::class.java)
+        val result = command.execute("flink", "test", "test", "1")
+        verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
+        verifyNoMoreInteractions(kubeClient)
+        verifyNoMoreInteractions(flinkClient)
+        assertThat(result).isNotNull()
+        assertThat(result.status).isEqualTo(ResultStatus.ERROR)
+        assertThat(result.output).isNull()
+    }
+
+    @Test
+    fun `should return expected result when it can't fetch job's metrics`() {
+        given(flinkClient.getJobMetrics(eq(flinkAddress), eq("1"), any())).thenThrow(RuntimeException())
+        val result = command.execute("flink", "test", "test", "1")
+        verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
+        verify(flinkClient, times(1)).getJobMetrics(eq(flinkAddress), eq("1"), any())
+        verifyNoMoreInteractions(kubeClient)
+        verifyNoMoreInteractions(flinkClient)
+        assertThat(result).isNotNull()
+        assertThat(result.status).isEqualTo(ResultStatus.ERROR)
+        assertThat(result.output).isNull()
+    }
+
+    @Test
+    fun `should return expected result when it can fetch job's metrics`() {
+        val result = command.execute("flink", "test", "test", "1")
+        verify(kubeClient, times(1)).findFlinkAddress(eq(flinkOptions), eq("flink"), eq("test"))
+        verify(flinkClient, times(1)).getJobMetrics(eq(flinkAddress), eq("1"), any())
+        verifyNoMoreInteractions(kubeClient)
+        verifyNoMoreInteractions(flinkClient)
+        assertThat(result).isNotNull()
+        assertThat(result.status).isEqualTo(ResultStatus.OK)
+        assertThat(result.output).isNotNull()
+        val metrics = result.output
+        assertThat(metrics?.totalNumberOfCheckpoints).isEqualTo(10)
+        assertThat(metrics?.lastCheckpointSize).isEqualTo(100)
+    }
+}

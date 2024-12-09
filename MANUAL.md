@@ -1159,7 +1159,7 @@ Run the operator with a given namespace and Kubernetes config using Docker:
 
 Run the operator with a given namespace and Kubernetes config with java command:
 
-    java -cp $CLASSPATH com.nextbreakpoint.flink.cli.Main operator run --namespace=test --kube-config=~/.kube/config
+    java -cp $CLASSPATH com.nextbreakpoint.flink.control.cli.Main operator run --namespace=test --kube-config=~/.kube/config
 
 where CLASSPATH must include all the dependencies required to run the application:
 

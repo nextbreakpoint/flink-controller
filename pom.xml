@@ -74,7 +74,7 @@
 		<lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
 		<kotlin-maven-plugin.version>2.0.21</kotlin-maven-plugin.version>
 		<maven-surefire-junit5-tree-reporter.version>1.3.0</maven-surefire-junit5-tree-reporter.version>
-		<main-class>com.nextbreakpoint.flink.cli.Main</main-class>
+		<main-class>com.nextbreakpoint.flink.control.cli.Main</main-class>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -701,6 +701,38 @@
 				<artifactId>versions-maven-plugin</artifactId>
 			</plugin>
 			<plugin>
+				<groupId>org.moditect</groupId>
+				<artifactId>moditect-maven-plugin</artifactId>
+				<version>${moditect-maven-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>add-module-info</id>
+						<phase>package</phase>
+						<goals>
+							<goal>add-module-info</goal>
+						</goals>
+						<configuration>
+							<failOnWarning>false</failOnWarning>
+							<overwriteExistingFiles>true</overwriteExistingFiles>
+							<outputDirectory>${project.build.directory}</outputDirectory>
+							<modules>
+								<module>
+									<artifact>
+										<groupId>com.nextbreakpoint</groupId>
+										<artifactId>com.nextbreakpoint.flink.control</artifactId>
+										<version>${project.version}</version>
+									</artifact>
+									<moduleInfoSource>
+										module com.nextbreakpoint.flink.control {
+										}
+									</moduleInfoSource>
+								</module>
+							</modules>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-shade-plugin</artifactId>
 				<executions>
@@ -754,12 +786,12 @@
 								<exclude>**/*</exclude>
 							</excludes>
 						</filter>
-						<filter>
-							<artifact>com.fasterxml.jackson:*</artifact>
-							<excludes>
-								<exclude>**/*</exclude>
-							</excludes>
-						</filter>
+<!--						<filter>-->
+<!--							<artifact>com.fasterxml.jackson.core:*</artifact>-->
+<!--							<excludes>-->
+<!--								<exclude>**/*</exclude>-->
+<!--							</excludes>-->
+<!--						</filter>-->
 						<filter>
 							<artifact>com.squareup.okio:*</artifact>
 							<excludes>
@@ -774,38 +806,6 @@
 						</filter>
 					</filters>
 				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.moditect</groupId>
-				<artifactId>moditect-maven-plugin</artifactId>
-				<version>${moditect-maven-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>add-module-info</id>
-						<phase>package</phase>
-						<goals>
-							<goal>add-module-info</goal>
-						</goals>
-						<configuration>
-							<failOnWarning>false</failOnWarning>
-							<overwriteExistingFiles>true</overwriteExistingFiles>
-							<outputDirectory>${project.build.directory}</outputDirectory>
-							<modules>
-								<module>
-									<artifact>
-										<groupId>com.nextbreakpoint</groupId>
-										<artifactId>com.nextbreakpoint.flink.control</artifactId>
-										<version>${project.version}</version>
-									</artifact>
-									<moduleInfoSource>
-										module com.nextbreakpoint.flink.control {
-										}
-									</moduleInfoSource>
-								</module>
-							</modules>
-						</configuration>
-					</execution>
-				</executions>
 			</plugin>
 		</plugins>
 	</build>

@@ -1,0 +1,13 @@
+package com.nextbreakpoint.flink.control.common
+
+data class JobSelector(
+    val namespace: String,
+    val clusterName: String,
+    val jobName: String
+) {
+    override fun toString(): String {
+        return "$namespace:$clusterName:$jobName"
+    }
+
+    fun resourceName() = "$clusterName-$jobName"
+}
