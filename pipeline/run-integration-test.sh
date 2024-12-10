@@ -7,5 +7,5 @@ OPERATOR_HOST="$(minikube ip)"
 
 export OPERATOR_HOST
 
-./gradlew integrationTest --info --tests="com.nextbreakpoint.flink.integration.${1}Test"
+mvn verify -Dtest=com.nextbreakpoint.flink.control.integration.EnsureBehaviourIT
 

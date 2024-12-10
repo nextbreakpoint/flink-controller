@@ -3,5 +3,5 @@
 set -x
 set -e
 
-./gradlew test --info
+mvn test
 

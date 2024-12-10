@@ -7,5 +7,5 @@ OPERATOR_HOST="$(minikube ip)"
 
 export OPERATOR_HOST
 
-./gradlew integrationTest --info
+mvn verify
 

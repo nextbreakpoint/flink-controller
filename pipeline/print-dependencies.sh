@@ -3,5 +3,4 @@
 set -x
 set -e
 
-./gradlew dependencies
-
+mvn dependency:tree
