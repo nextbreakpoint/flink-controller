@@ -4,7 +4,7 @@
     <module name="com.nextbreakpoint.flink.control" />
     <option name="PROGRAM_PARAMETERS" value="supervisor run --port=4445 --namespace=flink-jobs --flink-hostname=192.168.69.2 --cluster-name=cluster-1 --kube-config=$USER_HOME$/.kube/config --task-timeout=60 --polling-interval=5 --dry-run" />
     <shortenClasspath name="NONE" />
-    <option name="VM_PARAMETERS" value="-Dmonitoring.port=8083" />
+    <option name="VM_PARAMETERS" value="-Dmonitoring.port=8083 -Djavax.net.debug=ssl:handshake:verbose" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>
