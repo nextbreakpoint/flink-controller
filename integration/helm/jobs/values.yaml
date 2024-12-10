@@ -11,4 +11,3 @@ s3AccessKey: minioaccesskey
 s3SecretKey: miniosecretkey
 
 flinkVersion: "1.20.0"
-scalaVersion: "2.12"
