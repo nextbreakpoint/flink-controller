@@ -57,7 +57,7 @@
       },
       {
         "name": "config-vol",
-        "mountPath": "/var/config/measurement.properties",
+        "mountPath": "/var/config/measurement-with-limit.properties",
         "subPath": "measurement-with-limit.properties"
       }
     ],
