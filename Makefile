@@ -12,7 +12,11 @@ test:
 
 .PHONY: verify
 verify:
-	mvn verify
+	BUILD_IMAGES=true mvn verify -Dtest=com.nextbreakpoint.flink.control.integration.EnsureBehaviourIT
+
+.PHONY: verify-skip-image
+verify-skip-image:
+	BUILD_IMAGES=false mvn verify -Dtest=com.nextbreakpoint.flink.control.integration.EnsureBehaviourIT
 
 .PHONY: package
 package:
@@ -22,9 +26,13 @@ package:
 install:
 	mvn install -DskipTests=true
 
+.PHONY: package-distribution
+package-distribution:
+	mvn package -DskipTests=true -Pdistribution
+
 .PHONY: minikube-start
 minikube-start:
-	minikube start --cpus=4 --memory=8gb --kubernetes-version v1.31.0 --driver=hyperkit
+	minikube start --cpus=4 --memory=8gb --kubernetes-version v1.31.0 --disk-size 20GB --driver=hyperkit
 
 .PHONY: minikube-stop
 minikube-stop:
