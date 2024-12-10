@@ -4,11 +4,6 @@ This document describes how to install and use the Flink Kubernetes Toolbox.
 
 Currently, Flink Kubernetes Toolbox requires Kubernetes 1.18.14 or later, and it supports Apache Flink 1.11 or later.
 
-
-minikube start --cpus=4 --memory=8gb --kubernetes-version v1.31.0 --driver=hyperkit
-
-
-
 ## Generate SSL certificates
 
 The toolbox provides client and server components. The client component communicates to the server component over HTTP.
@@ -1057,7 +1052,7 @@ Please note that you must provide the SSL certificates when the operator API is 
 
 When using minikube, the secrets can be mounted from host:
 
-    minikube start --cpus=2 --memory=8gb --kubernetes-version v1.18.14 --mount-string="$(pwd)/secrets:/var/secrets" --mount
+    minikube start --cpus=4 --memory=8gb -disk-size 20GB --kubernetes-version v1.18.14 --mount-string="$(pwd)/secrets:/var/secrets" --mount
 
 ## Server components
 
@@ -1159,11 +1154,11 @@ Run the operator with a given namespace and Kubernetes config using Docker:
 
 Run the operator with a given namespace and Kubernetes config with java command:
 
-    java -cp $CLASSPATH com.nextbreakpoint.flink.control.cli.Main operator run --namespace=test --kube-config=~/.kube/config
+    java --module-path target/com.nextbreakpoint.flink.control-1.5.0-shaded.jar --module com.nextbreakpoint.flink.control/com.nextbreakpoint.flink.control.cli.Main operator run --namespace=test --kube-config=~/.kube/config
 
-where CLASSPATH must include all the dependencies required to run the application:
+Run the operator with a given namespace and Kubernetes config and with debug agent enabled:
 
-    export CLASSPATH=$(find build/libs -name "*.jar" -print | sed "s/.jar/.jar:/g" | tr -d '\n' | sed "s/:$//g")
+    java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5555 --module-path target/com.nextbreakpoint.flink.control-1.5.0-shaded.jar --module com.nextbreakpoint.flink.control/com.nextbreakpoint.flink.control.cli.Main operator run --namespace=test --kube-config=~/.kube/config
 
 ### Run automated tests
 
