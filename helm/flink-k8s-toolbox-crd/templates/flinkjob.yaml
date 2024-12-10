@@ -91,87 +91,115 @@ spec:
                     resources:
                       description: "ResourceRequirements describes the compute resource requirements."
                       properties:
+                        claims:
+                          description: "Claims lists the names of resources, defined in spec.resourceClaims,\
+                            \ that are used by this container.\n\nThis is an alpha field and requires enabling\
+                            \ the DynamicResourceAllocation feature gate.\n\nThis field is immutable. It\
+                            \ can only be set for containers."
+                          items:
+                            description: "ResourceClaim references one entry in PodSpec.ResourceClaims."
+                            properties:
+                              name:
+                                description: "Name must match the name of one entry in pod.spec.resourceClaims\
+                                  \ of the Pod where this field is used. It makes that resource available\
+                                  \ inside a container."
+                                type: "string"
+                              request:
+                                description: "Request is the name chosen for a request in the referenced\
+                                  \ claim. If empty, everything from the claim is made available, otherwise\
+                                  \ only the result of this request."
+                                type: "string"
+                            required:
+                              - "name"
+                            type: "object"
+                          type: "array"
+                          x-kubernetes-list-map-keys:
+                            - "name"
+                          x-kubernetes-list-type: "map"
                         limits:
                           additionalProperties:
                             description: "Quantity is a fixed-point representation of a number. It provides\
                               \ convenient marshaling/unmarshaling in JSON and YAML, in addition to String()\
-                              \ and AsInt64() accessors.\n\nThe serialization format is:\n\n<quantity> \
-                              \       ::= <signedNumber><suffix>\n  (Note that <suffix> may be empty, from\
-                              \ the \"\" case in <decimalSI>.)\n<digit>           ::= 0 | 1 | ... | 9 <digits>\
-                              \          ::= <digit> | <digit><digits> <number>          ::= <digits> |\
-                              \ <digits>.<digits> | <digits>. | .<digits> <sign>            ::= \"+\" |\
-                              \ \"-\" <signedNumber>    ::= <number> | <sign><number> <suffix>         \
-                              \ ::= <binarySI> | <decimalExponent> | <decimalSI> <binarySI>        ::= Ki\
-                              \ | Mi | Gi | Ti | Pi | Ei\n  (International System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\
-                              <decimalSI>       ::= m | \"\" | k | M | G | T | P | E\n  (Note that 1024\
-                              \ = 1Ki but 1000 = 1k; I didn't choose the capitalization.)\n<decimalExponent>\
-                              \ ::= \"e\" <signedNumber> | \"E\" <signedNumber>\n\nNo matter which of the\
-                              \ three exponent forms is used, no quantity may represent a number greater\
-                              \ than 2^63-1 in magnitude, nor may it have more than 3 decimal places. Numbers\
+                              \ and AsInt64() accessors.\n\nThe serialization format is:\n\n``` <quantity>\
+                              \        ::= <signedNumber><suffix>\n\n\t(Note that <suffix> may be empty,\
+                              \ from the \"\" case in <decimalSI>.)\n\n<digit>           ::= 0 | 1 | ...\
+                              \ | 9 <digits>          ::= <digit> | <digit><digits> <number>          ::=\
+                              \ <digits> | <digits>.<digits> | <digits>. | .<digits> <sign>            ::=\
+                              \ \"+\" | \"-\" <signedNumber>    ::= <number> | <sign><number> <suffix> \
+                              \         ::= <binarySI> | <decimalExponent> | <decimalSI> <binarySI>    \
+                              \    ::= Ki | Mi | Gi | Ti | Pi | Ei\n\n\t(International System of units;\
+                              \ See: http://physics.nist.gov/cuu/Units/binary.html)\n\n<decimalSI>     \
+                              \  ::= m | \"\" | k | M | G | T | P | E\n\n\t(Note that 1024 = 1Ki but 1000\
+                              \ = 1k; I didn't choose the capitalization.)\n\n<decimalExponent> ::= \"e\"\
+                              \ <signedNumber> | \"E\" <signedNumber> ```\n\nNo matter which of the three\
+                              \ exponent forms is used, no quantity may represent a number greater than\
+                              \ 2^63-1 in magnitude, nor may it have more than 3 decimal places. Numbers\
                               \ larger or more precise will be capped or rounded up. (E.g.: 0.1m will rounded\
                               \ up to 1m.) This may be extended in the future if we require larger or smaller\
                               \ quantities.\n\nWhen a Quantity is parsed from a string, it will remember\
                               \ the type of suffix it had, and will use the same type again when it is serialized.\n\
                               \nBefore serializing, Quantity will be put in \"canonical form\". This means\
                               \ that Exponent/suffix will be adjusted up or down (with a corresponding increase\
-                              \ or decrease in Mantissa) such that:\n  a. No precision is lost\n  b. No\
-                              \ fractional digits will be emitted\n  c. The exponent (or suffix) is as large\
-                              \ as possible.\nThe sign will be omitted unless the number is negative.\n\n\
-                              Examples:\n  1.5 will be serialized as \"1500m\"\n  1.5Gi will be serialized\
-                              \ as \"1536Mi\"\n\nNote that the quantity will NEVER be internally represented\
-                              \ by a floating point number. That is the whole point of this exercise.\n\n\
-                              Non-canonical values will still parse as long as they are well formed, but\
-                              \ will be re-emitted in their canonical form. (So always use canonical form,\
-                              \ or don't diff.)\n\nThis format is intended to make it difficult to use these\
-                              \ numbers without writing some sort of special handling code in the hopes\
-                              \ that that will cause implementors to also use a fixed point implementation."
+                              \ or decrease in Mantissa) such that:\n\n- No precision is lost - No fractional\
+                              \ digits will be emitted - The exponent (or suffix) is as large as possible.\n\
+                              \nThe sign will be omitted unless the number is negative.\n\nExamples:\n\n\
+                              - 1.5 will be serialized as \"1500m\" - 1.5Gi will be serialized as \"1536Mi\"\
+                              \n\nNote that the quantity will NEVER be internally represented by a floating\
+                              \ point number. That is the whole point of this exercise.\n\nNon-canonical\
+                              \ values will still parse as long as they are well formed, but will be re-emitted\
+                              \ in their canonical form. (So always use canonical form, or don't diff.)\n\
+                              \nThis format is intended to make it difficult to use these numbers without\
+                              \ writing some sort of special handling code in the hopes that that will cause\
+                              \ implementors to also use a fixed point implementation."
                             type: "string"
-                            properties: {}
+                            properties: { }
                           description: "Limits describes the maximum amount of compute resources allowed.\
-                            \ More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
+                            \ More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                           type: "object"
-                          properties: {}
+                          properties: { }
                         requests:
                           additionalProperties:
                             description: "Quantity is a fixed-point representation of a number. It provides\
                               \ convenient marshaling/unmarshaling in JSON and YAML, in addition to String()\
-                              \ and AsInt64() accessors.\n\nThe serialization format is:\n\n<quantity> \
-                              \       ::= <signedNumber><suffix>\n  (Note that <suffix> may be empty, from\
-                              \ the \"\" case in <decimalSI>.)\n<digit>           ::= 0 | 1 | ... | 9 <digits>\
-                              \          ::= <digit> | <digit><digits> <number>          ::= <digits> |\
-                              \ <digits>.<digits> | <digits>. | .<digits> <sign>            ::= \"+\" |\
-                              \ \"-\" <signedNumber>    ::= <number> | <sign><number> <suffix>         \
-                              \ ::= <binarySI> | <decimalExponent> | <decimalSI> <binarySI>        ::= Ki\
-                              \ | Mi | Gi | Ti | Pi | Ei\n  (International System of units; See: http://physics.nist.gov/cuu/Units/binary.html)\n\
-                              <decimalSI>       ::= m | \"\" | k | M | G | T | P | E\n  (Note that 1024\
-                              \ = 1Ki but 1000 = 1k; I didn't choose the capitalization.)\n<decimalExponent>\
-                              \ ::= \"e\" <signedNumber> | \"E\" <signedNumber>\n\nNo matter which of the\
-                              \ three exponent forms is used, no quantity may represent a number greater\
-                              \ than 2^63-1 in magnitude, nor may it have more than 3 decimal places. Numbers\
+                              \ and AsInt64() accessors.\n\nThe serialization format is:\n\n``` <quantity>\
+                              \        ::= <signedNumber><suffix>\n\n\t(Note that <suffix> may be empty,\
+                              \ from the \"\" case in <decimalSI>.)\n\n<digit>           ::= 0 | 1 | ...\
+                              \ | 9 <digits>          ::= <digit> | <digit><digits> <number>          ::=\
+                              \ <digits> | <digits>.<digits> | <digits>. | .<digits> <sign>            ::=\
+                              \ \"+\" | \"-\" <signedNumber>    ::= <number> | <sign><number> <suffix> \
+                              \         ::= <binarySI> | <decimalExponent> | <decimalSI> <binarySI>    \
+                              \    ::= Ki | Mi | Gi | Ti | Pi | Ei\n\n\t(International System of units;\
+                              \ See: http://physics.nist.gov/cuu/Units/binary.html)\n\n<decimalSI>     \
+                              \  ::= m | \"\" | k | M | G | T | P | E\n\n\t(Note that 1024 = 1Ki but 1000\
+                              \ = 1k; I didn't choose the capitalization.)\n\n<decimalExponent> ::= \"e\"\
+                              \ <signedNumber> | \"E\" <signedNumber> ```\n\nNo matter which of the three\
+                              \ exponent forms is used, no quantity may represent a number greater than\
+                              \ 2^63-1 in magnitude, nor may it have more than 3 decimal places. Numbers\
                               \ larger or more precise will be capped or rounded up. (E.g.: 0.1m will rounded\
                               \ up to 1m.) This may be extended in the future if we require larger or smaller\
                               \ quantities.\n\nWhen a Quantity is parsed from a string, it will remember\
                               \ the type of suffix it had, and will use the same type again when it is serialized.\n\
                               \nBefore serializing, Quantity will be put in \"canonical form\". This means\
                               \ that Exponent/suffix will be adjusted up or down (with a corresponding increase\
-                              \ or decrease in Mantissa) such that:\n  a. No precision is lost\n  b. No\
-                              \ fractional digits will be emitted\n  c. The exponent (or suffix) is as large\
-                              \ as possible.\nThe sign will be omitted unless the number is negative.\n\n\
-                              Examples:\n  1.5 will be serialized as \"1500m\"\n  1.5Gi will be serialized\
-                              \ as \"1536Mi\"\n\nNote that the quantity will NEVER be internally represented\
-                              \ by a floating point number. That is the whole point of this exercise.\n\n\
-                              Non-canonical values will still parse as long as they are well formed, but\
-                              \ will be re-emitted in their canonical form. (So always use canonical form,\
-                              \ or don't diff.)\n\nThis format is intended to make it difficult to use these\
-                              \ numbers without writing some sort of special handling code in the hopes\
-                              \ that that will cause implementors to also use a fixed point implementation."
+                              \ or decrease in Mantissa) such that:\n\n- No precision is lost - No fractional\
+                              \ digits will be emitted - The exponent (or suffix) is as large as possible.\n\
+                              \nThe sign will be omitted unless the number is negative.\n\nExamples:\n\n\
+                              - 1.5 will be serialized as \"1500m\" - 1.5Gi will be serialized as \"1536Mi\"\
+                              \n\nNote that the quantity will NEVER be internally represented by a floating\
+                              \ point number. That is the whole point of this exercise.\n\nNon-canonical\
+                              \ values will still parse as long as they are well formed, but will be re-emitted\
+                              \ in their canonical form. (So always use canonical form, or don't diff.)\n\
+                              \nThis format is intended to make it difficult to use these numbers without\
+                              \ writing some sort of special handling code in the hopes that that will cause\
+                              \ implementors to also use a fixed point implementation."
                             type: "string"
-                            properties: {}
+                            properties: { }
                           description: "Requests describes the minimum amount of compute resources required.\
                             \ If Requests is omitted for a container, it defaults to Limits if that is explicitly\
-                            \ specified, otherwise to an implementation-defined value. More info: https://kubernetes.io/docs/concepts/configuration/manage-compute-resources-container/"
+                            \ specified, otherwise to an implementation-defined value. Requests cannot exceed\
+                            \ Limits. More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/"
                           type: "object"
-                          properties: {}
+                          properties: { }
                       type: "object"
                     securityContext:
                       description: "SecurityContext holds security configuration that will be applied to\
@@ -182,8 +210,31 @@ spec:
                           description: "AllowPrivilegeEscalation controls whether a process can gain more\
                             \ privileges than its parent process. This bool directly controls if the no_new_privs\
                             \ flag will be set on the container process. AllowPrivilegeEscalation is true\
-                            \ always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN"
+                            \ always when the container is: 1) run as Privileged 2) has CAP_SYS_ADMIN Note\
+                            \ that this field cannot be set when spec.os.name is windows."
                           type: "boolean"
+                        appArmorProfile:
+                          description: "AppArmorProfile defines a pod or container's AppArmor settings."
+                          properties:
+                            localhostProfile:
+                              description: "localhostProfile indicates a profile loaded on the node that\
+                                \ should be used. The profile must be preconfigured on the node to work.\
+                                \ Must match the loaded name of the profile. Must be set if and only if\
+                                \ type is \"Localhost\"."
+                              type: "string"
+                            type:
+                              description: "type indicates which kind of AppArmor profile will be applied.\
+                                \ Valid options are:\n  Localhost - a profile pre-loaded on the node.\n\
+                                \  RuntimeDefault - the container runtime's default profile.\n  Unconfined\
+                                \ - no AppArmor enforcement."
+                              type: "string"
+                          required:
+                            - "type"
+                          type: "object"
+                          x-kubernetes-unions:
+                            - discriminator: "type"
+                              fields-to-discriminateBy:
+                                localhostProfile: "LocalhostProfile"
                         capabilities:
                           description: "Adds and removes POSIX capabilities from running containers."
                           properties:
@@ -192,30 +243,34 @@ spec:
                               items:
                                 type: "string"
                               type: "array"
+                              x-kubernetes-list-type: "atomic"
                             drop:
                               description: "Removed capabilities"
                               items:
                                 type: "string"
                               type: "array"
+                              x-kubernetes-list-type: "atomic"
                           type: "object"
                         privileged:
                           description: "Run container in privileged mode. Processes in privileged containers\
-                            \ are essentially equivalent to root on the host. Defaults to false."
+                            \ are essentially equivalent to root on the host. Defaults to false. Note that\
+                            \ this field cannot be set when spec.os.name is windows."
                           type: "boolean"
                         procMount:
                           description: "procMount denotes the type of proc mount to use for the containers.\
-                            \ The default is DefaultProcMount which uses the container runtime defaults\
-                            \ for readonly paths and masked paths. This requires the ProcMountType feature\
-                            \ flag to be enabled."
+                            \ The default value is Default which uses the container runtime defaults for\
+                            \ readonly paths and masked paths. This requires the ProcMountType feature flag\
+                            \ to be enabled. Note that this field cannot be set when spec.os.name is windows."
                           type: "string"
                         readOnlyRootFilesystem:
                           description: "Whether this container has a read-only root filesystem. Default\
-                            \ is false."
+                            \ is false. Note that this field cannot be set when spec.os.name is windows."
                           type: "boolean"
                         runAsGroup:
                           description: "The GID to run the entrypoint of the container process. Uses runtime\
                             \ default if unset. May also be set in PodSecurityContext.  If set in both SecurityContext\
-                            \ and PodSecurityContext, the value specified in SecurityContext takes precedence."
+                            \ and PodSecurityContext, the value specified in SecurityContext takes precedence.\
+                            \ Note that this field cannot be set when spec.os.name is windows."
                           format: "int64"
                           type: "integer"
                         runAsNonRoot:
@@ -230,7 +285,8 @@ spec:
                           description: "The UID to run the entrypoint of the container process. Defaults\
                             \ to user specified in image metadata if unspecified. May also be set in PodSecurityContext.\
                             \  If set in both SecurityContext and PodSecurityContext, the value specified\
-                            \ in SecurityContext takes precedence."
+                            \ in SecurityContext takes precedence. Note that this field cannot be set when\
+                            \ spec.os.name is windows."
                           format: "int64"
                           type: "integer"
                         seLinuxOptions:
@@ -249,6 +305,30 @@ spec:
                               description: "User is a SELinux user label that applies to the container."
                               type: "string"
                           type: "object"
+                        seccompProfile:
+                          description: "SeccompProfile defines a pod/container's seccomp profile settings.\
+                            \ Only one profile source may be set."
+                          properties:
+                            localhostProfile:
+                              description: "localhostProfile indicates a profile defined in a file on the\
+                                \ node should be used. The profile must be preconfigured on the node to\
+                                \ work. Must be a descending path, relative to the kubelet's configured\
+                                \ seccomp profile location. Must be set if type is \"Localhost\". Must NOT\
+                                \ be set for any other type."
+                              type: "string"
+                            type:
+                              description: "type indicates which kind of seccomp profile will be applied.\
+                                \ Valid options are:\n\nLocalhost - a profile defined in a file on the node\
+                                \ should be used. RuntimeDefault - the container runtime default profile\
+                                \ should be used. Unconfined - no profile should be applied."
+                              type: "string"
+                          required:
+                            - "type"
+                          type: "object"
+                          x-kubernetes-unions:
+                            - discriminator: "type"
+                              fields-to-discriminateBy:
+                                localhostProfile: "LocalhostProfile"
                         windowsOptions:
                           description: "WindowsSecurityContextOptions contain Windows-specific options and\
                             \ credentials."
@@ -262,6 +342,13 @@ spec:
                               description: "GMSACredentialSpecName is the name of the GMSA credential spec\
                                 \ to use."
                               type: "string"
+                            hostProcess:
+                              description: "HostProcess determines if a container should be run as a 'Host\
+                                \ Process' container. All of a Pod's containers must have the same effective\
+                                \ HostProcess value (it is not allowed to have a mix of HostProcess containers\
+                                \ and non-HostProcess containers). In addition, if HostProcess is true then\
+                                \ HostNetwork must also be set to true."
+                              type: "boolean"
                             runAsUserName:
                               description: "The UserName in Windows to run the entrypoint of the container\
                                 \ process. Defaults to the user specified in image metadata if unspecified.\
