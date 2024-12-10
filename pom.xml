@@ -46,6 +46,7 @@
 		<jaxb.version>2.4.0-b180830.0359</jaxb.version>
 		<!-- keep it compatible with vertx -->
 		<micrometer.version>1.12.12</micrometer.version>
+		<context-propagation.version>1.1.2</context-propagation.version>
 		<simpleclient.version>0.16.0</simpleclient.version>
 		<jackson.version>2.18.1</jackson.version>
 		<flink-client.version>1.1.3</flink-client.version>
@@ -56,6 +57,7 @@
 		<scala.version>${scala-major.version}.20</scala.version>
 		<client-java.version>10.0.0</client-java.version>
 		<joda-time.version>2.13.0</joda-time.version>
+		<blockhound.version>1.0.10.RELEASE</blockhound.version>
 		<junit.version>5.11.3</junit.version>
 		<mockito.version>5.14.2</mockito.version>
 		<assertj.version>3.26.3</assertj.version>
@@ -69,6 +71,7 @@
 		<maven-failsafe-plugin.version>3.5.2</maven-failsafe-plugin.version>
 		<maven-shade-plugin.version>3.6.0</maven-shade-plugin.version>
 		<maven-jar-plugin.version>3.4.2</maven-jar-plugin.version>
+		<jpackage-maven-plugin.version>0.1.5</jpackage-maven-plugin.version>
 		<moditect-maven-plugin.version>1.2.2.Final</moditect-maven-plugin.version>
 		<versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
 		<lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
@@ -151,6 +154,11 @@
 			</dependency>
 			<dependency>
 				<groupId>io.micrometer</groupId>
+				<artifactId>context-propagation</artifactId>
+				<version>${context-propagation.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.micrometer</groupId>
 				<artifactId>micrometer-registry-prometheus</artifactId>
 				<version>${micrometer.version}</version>
 			</dependency>
@@ -189,6 +197,11 @@
 				<groupId>joda-time</groupId>
 				<artifactId>joda-time</artifactId>
 				<version>${joda-time.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>io.projectreactor.tools</groupId>
+				<artifactId>blockhound</artifactId>
+				<version>${blockhound.version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
@@ -298,6 +311,10 @@
 		</dependency>
 		<dependency>
 			<groupId>io.micrometer</groupId>
+			<artifactId>context-propagation</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
 		</dependency>
 		<dependency>
@@ -323,6 +340,10 @@
 		<dependency>
 			<groupId>joda-time</groupId>
 			<artifactId>joda-time</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor.tools</groupId>
+			<artifactId>blockhound</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -639,6 +660,11 @@
 					<artifactId>moditect-maven-plugin</artifactId>
 					<version>${moditect-maven-plugin.version}</version>
 				</plugin>
+				<plugin>
+					<groupId>com.github.akman</groupId>
+					<artifactId>jpackage-maven-plugin</artifactId>
+					<version>${jpackage-maven-plugin.version}</version>
+				</plugin>
 			</plugins>
 		</pluginManagement>
 		<plugins>
@@ -667,26 +693,77 @@
 				<artifactId>maven-dependency-plugin</artifactId>
 				<executions>
 					<execution>
-						<id>copy</id>
+						<id>copy-dummies</id>
 						<phase>pre-integration-test</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>com.nextbreakpoint</groupId>
+									<artifactId>com.nextbreakpoint.flink.dummies</artifactId>
+									<version>${flink-dummies.version}</version>
+									<classifier>shaded</classifier>
+									<type>jar</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.build.directory}/downloaded</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
 					</execution>
+<!--					<execution>-->
+<!--						<id>copy-dependencies</id>-->
+<!--						<phase>package</phase>-->
+<!--						<goals>-->
+<!--							<goal>copy</goal>-->
+<!--						</goals>-->
+<!--						<configuration>-->
+<!--							<artifactItems>-->
+<!--								<artifactItem>-->
+<!--									<groupId>com.fasterxml.jackson.core</groupId>-->
+<!--									<artifactId>jackson-core</artifactId>-->
+<!--									<version>${jackson.version}</version>-->
+<!--									<type>jar</type>-->
+<!--									<overWrite>true</overWrite>-->
+<!--									<outputDirectory>${project.build.directory}/dependencies</outputDirectory>-->
+<!--								</artifactItem>-->
+<!--								<artifactItem>-->
+<!--									<groupId>com.fasterxml.jackson.core</groupId>-->
+<!--									<artifactId>jackson-databind</artifactId>-->
+<!--									<version>${jackson.version}</version>-->
+<!--									<type>jar</type>-->
+<!--									<overWrite>true</overWrite>-->
+<!--									<outputDirectory>${project.build.directory}/dependencies</outputDirectory>-->
+<!--								</artifactItem>-->
+<!--								<artifactItem>-->
+<!--									<groupId>com.fasterxml.jackson.core</groupId>-->
+<!--									<artifactId>jackson-annotations</artifactId>-->
+<!--									<version>${jackson.version}</version>-->
+<!--									<type>jar</type>-->
+<!--									<overWrite>true</overWrite>-->
+<!--									<outputDirectory>${project.build.directory}/dependencies</outputDirectory>-->
+<!--								</artifactItem>-->
+<!--								<artifactItem>-->
+<!--									<groupId>com.fasterxml.jackson.datatype</groupId>-->
+<!--									<artifactId>jackson-datatype-jsr310</artifactId>-->
+<!--									<version>${jackson.version}</version>-->
+<!--									<type>jar</type>-->
+<!--									<overWrite>true</overWrite>-->
+<!--									<outputDirectory>${project.build.directory}/dependencies</outputDirectory>-->
+<!--								</artifactItem>-->
+<!--								<artifactItem>-->
+<!--									<groupId>com.fasterxml.jackson.dataformat</groupId>-->
+<!--									<artifactId>jackson-dataformat-yaml</artifactId>-->
+<!--									<version>${jackson.version}</version>-->
+<!--									<type>jar</type>-->
+<!--									<overWrite>true</overWrite>-->
+<!--									<outputDirectory>${project.build.directory}/dependencies</outputDirectory>-->
+<!--								</artifactItem>-->
+<!--							</artifactItems>-->
+<!--						</configuration>-->
+<!--					</execution>-->
 				</executions>
-				<configuration>
-					<artifactItems>
-						<artifactItem>
-							<groupId>com.nextbreakpoint</groupId>
-							<artifactId>com.nextbreakpoint.flink.dummies</artifactId>
-							<version>${flink-dummies.version}</version>
-							<classifier>shaded</classifier>
-							<type>jar</type>
-							<overWrite>true</overWrite>
-							<outputDirectory>${project.build.directory}/downloaded</outputDirectory>
-						</artifactItem>
-					</artifactItems>
-				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -700,113 +777,235 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>versions-maven-plugin</artifactId>
 			</plugin>
-			<plugin>
-				<groupId>org.moditect</groupId>
-				<artifactId>moditect-maven-plugin</artifactId>
-				<version>${moditect-maven-plugin.version}</version>
-				<executions>
-					<execution>
-						<id>add-module-info</id>
-						<phase>package</phase>
-						<goals>
-							<goal>add-module-info</goal>
-						</goals>
-						<configuration>
-							<failOnWarning>false</failOnWarning>
-							<overwriteExistingFiles>true</overwriteExistingFiles>
-							<outputDirectory>${project.build.directory}</outputDirectory>
-							<modules>
-								<module>
-									<artifact>
-										<groupId>com.nextbreakpoint</groupId>
-										<artifactId>com.nextbreakpoint.flink.control</artifactId>
-										<version>${project.version}</version>
-									</artifact>
-									<moduleInfoSource>
-										module com.nextbreakpoint.flink.control {
-										}
-									</moduleInfoSource>
-								</module>
-							</modules>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<executions>
-					<execution>
-						<phase>package</phase>
-						<goals>
-							<goal>shade</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<shadedArtifactAttached>true</shadedArtifactAttached>
-					<artifactSet>
-						<includes>
-							<include>*:*</include>
-						</includes>
-					</artifactSet>
-					<transformers>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
-							<manifestEntries>
-								<Main-Class>${main-class}</Main-Class>
-								<X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
-								<X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
-							</manifestEntries>
-						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
-							<addHeader>false</addHeader>
-						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-							<resource>META-INF/DEPENDENCIES</resource>
-						</transformer>
-						<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
-							<resource>META-INF/io.netty.versions.properties</resource>
-						</transformer>
-					</transformers>
-					<filters>
-						<filter>
-							<artifact>*:*</artifact>
-							<excludes>
-								<exclude>META-INF/*.MF</exclude>
-								<exclude>META-INF/*.SF</exclude>
-								<exclude>META-INF/*.DSA</exclude>
-								<exclude>META-INF/versions/9/**</exclude>
-							</excludes>
-						</filter>
-						<filter>
-							<artifact>io.sundr:sundr-core</artifact>
-							<excludes>
-								<exclude>**/*</exclude>
-							</excludes>
-						</filter>
-<!--						<filter>-->
-<!--							<artifact>com.fasterxml.jackson.core:*</artifact>-->
-<!--							<excludes>-->
-<!--								<exclude>**/*</exclude>-->
-<!--							</excludes>-->
-<!--						</filter>-->
-						<filter>
-							<artifact>com.squareup.okio:*</artifact>
-							<excludes>
-								<exclude>META-INF/okio.kotlin_module</exclude>
-							</excludes>
-						</filter>
-						<filter>
-							<artifact>com.nextbreakpoint:com.nextbreakpoint.flink.client</artifact>
-							<excludes>
-								<exclude>log4j2.xml</exclude>
-							</excludes>
-						</filter>
-					</filters>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
+	<profiles>
+		<profile>
+			<id>distribution</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<shadedArtifactAttached>true</shadedArtifactAttached>
+							<useDependencyReducedPomInJar>true</useDependencyReducedPomInJar>
+							<promoteTransitiveDependencies>true</promoteTransitiveDependencies>
+							<transformers>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<manifestEntries>
+										<Main-Class>${main-class}</Main-Class>
+										<X-Compile-Source-JDK>${maven.compiler.source}</X-Compile-Source-JDK>
+										<X-Compile-Target-JDK>${maven.compiler.target}</X-Compile-Target-JDK>
+									</manifestEntries>
+								</transformer>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheLicenseResourceTransformer"/>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.ApacheNoticeResourceTransformer">
+									<addHeader>false</addHeader>
+								</transformer>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									<resource>META-INF/DEPENDENCIES</resource>
+								</transformer>
+								<transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+									<resource>META-INF/io.netty.versions.properties</resource>
+								</transformer>
+							</transformers>
+							<artifactSet>
+								<excludes>
+									<!--							<exclude>com.fasterxml.jackson.core:*</exclude>-->
+									<!--							<exclude>com.fasterxml.jackson.datatype:*</exclude>-->
+									<!--							<exclude>com.fasterxml.jackson.dataformat:*</exclude>-->
+									<!--							<exclude>org.yaml:*</exclude>-->
+									<exclude>io.sundr:*</exclude>
+								</excludes>
+							</artifactSet>
+							<filters>
+								<filter>
+									<artifact>*:*</artifact>
+									<excludes>
+										<exclude>META-INF/*.MF</exclude>
+										<exclude>META-INF/*.SF</exclude>
+										<exclude>META-INF/*.DSA</exclude>
+										<exclude>META-INF/versions/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>io.sundr:sundr-core</artifact>
+									<excludes>
+										<exclude>**/*</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.squareup.okio:*</artifact>
+									<excludes>
+										<exclude>META-INF/okio.kotlin_module</exclude>
+									</excludes>
+								</filter>
+								<filter>
+									<artifact>com.nextbreakpoint:com.nextbreakpoint.flink.client</artifact>
+									<excludes>
+										<exclude>log4j2.xml</exclude>
+									</excludes>
+								</filter>
+							</filters>
+						</configuration>
+					</plugin>
+					<plugin>
+						<groupId>org.moditect</groupId>
+						<artifactId>moditect-maven-plugin</artifactId>
+						<version>${moditect-maven-plugin.version}</version>
+						<executions>
+							<execution>
+								<id>add-module-info</id>
+								<phase>package</phase>
+								<goals>
+									<goal>add-module-info</goal>
+								</goals>
+								<configuration>
+									<failOnWarning>false</failOnWarning>
+									<overwriteExistingFiles>true</overwriteExistingFiles>
+									<outputDirectory>${project.build.directory}</outputDirectory>
+									<modules>
+										<!--								<module>-->
+										<!--									<artifact>-->
+										<!--										<groupId>org.yaml</groupId>-->
+										<!--										<artifactId>snakeyaml</artifactId>-->
+										<!--										<version>1.27</version>-->
+										<!--									</artifact>-->
+										<!--									<moduleInfoSource>-->
+										<!--										module org.yaml.snakeyaml {-->
+										<!--											exports org.yaml.snakeyaml;-->
+										<!--											exports org.yaml.snakeyaml.composer;-->
+										<!--											exports org.yaml.snakeyaml.constructor;-->
+										<!--											exports org.yaml.snakeyaml.emitter;-->
+										<!--											exports org.yaml.snakeyaml.env;-->
+										<!--											exports org.yaml.snakeyaml.error;-->
+										<!--											exports org.yaml.snakeyaml.events;-->
+										<!--											exports org.yaml.snakeyaml.extensions.compactnotation;-->
+										<!--											exports org.yaml.snakeyaml.introspector;-->
+										<!--											exports org.yaml.snakeyaml.nodes;-->
+										<!--											exports org.yaml.snakeyaml.parser;-->
+										<!--											exports org.yaml.snakeyaml.reader;-->
+										<!--											exports org.yaml.snakeyaml.representer;-->
+										<!--											exports org.yaml.snakeyaml.resolver;-->
+										<!--											exports org.yaml.snakeyaml.scanner;-->
+										<!--											exports org.yaml.snakeyaml.serializer;-->
+										<!--											exports org.yaml.snakeyaml.tokens;-->
+										<!--											exports org.yaml.snakeyaml.util;-->
+										<!--										}-->
+										<!--									</moduleInfoSource>-->
+										<!--								</module>-->
+										<module>
+											<artifact>
+												<groupId>com.nextbreakpoint</groupId>
+												<artifactId>com.nextbreakpoint.flink.control</artifactId>
+												<version>${project.version}</version>
+												<classifier>shaded</classifier>
+											</artifact>
+											<moduleInfoSource>
+												open module com.nextbreakpoint.flink.control {
+													requires java.compiler;
+													requires java.desktop;
+													requires java.logging;
+													requires java.naming;
+													requires java.sql;
+													requires jdk.unsupported;
+													requires jdk.crypto.cryptoki;
+													uses com.fasterxml.jackson.core.JsonFactory;
+													uses com.fasterxml.jackson.core.ObjectCodec;
+													uses io.micrometer.context.ThreadLocalAccessor;
+													uses io.vertx.codegen.GeneratorLoader;
+													uses io.vertx.core.spi.launcher.CommandFactory;
+													uses io.vertx.core.spi.VertxServiceProvider;
+													uses io.vertx.core.spi.VerticleFactory;
+													uses io.vertx.ext.auth.HashingAlgorithm;
+													uses java.security.Provider;
+													uses javax.annotation.processing.Processor;
+													uses kotlin.reflect.jvm.internal.impl.builtins.BuiltInsLoader;
+													uses kotlin.reflect.jvm.internal.impl.resolve.ExternalOverridabilityCondition;
+													uses org.apache.logging.log4j.core.util.ContextDataProvider;
+													uses org.apache.logging.log4j.message.ThreadDumpMessage$ThreadInfoFactory;
+													uses org.apache.logging.log4j.spi.Provider;
+													uses org.apache.logging.log4j.util.PropertySource;
+													uses org.apache.logging.log4j.core.util.WatchEventService;
+													uses org.slf4j.spi.SLF4JServiceProvider;
+													uses org.threeten.bp.zone.ZoneRulesProvider;
+													uses reactor.blockhound.integration.BlockHoundIntegration;
+													provides com.fasterxml.jackson.core.JsonFactory with com.fasterxml.jackson.core.JsonFactory;
+													provides com.fasterxml.jackson.core.ObjectCodec with com.fasterxml.jackson.databind.ObjectMapper;
+													provides io.micrometer.context.ThreadLocalAccessor with io.micrometer.observation.contextpropagation.ObservationThreadLocalAccessor;
+													provides io.vertx.codegen.GeneratorLoader with io.vertx.lang.rxjava.RxJavaGeneratorLoader;
+													provides io.vertx.core.spi.launcher.CommandFactory with io.vertx.core.impl.launcher.commands.RunCommandFactory, io.vertx.core.impl.launcher.commands.VersionCommandFactory, io.vertx.core.impl.launcher.commands.BareCommandFactory, io.vertx.core.impl.launcher.commands.ListCommandFactory, io.vertx.core.impl.launcher.commands.StartCommandFactory, io.vertx.core.impl.launcher.commands.StopCommandFactory;
+													provides io.vertx.core.spi.VertxServiceProvider with io.vertx.micrometer.MicrometerMetricsFactory;
+													provides io.vertx.ext.auth.HashingAlgorithm with io.vertx.ext.auth.impl.hash.SHA1, io.vertx.ext.auth.impl.hash.SHA256, io.vertx.ext.auth.impl.hash.SHA512, io.vertx.ext.auth.impl.hash.PBKDF2;
+													provides java.security.Provider with org.bouncycastle.jce.provider.BouncyCastleProvider, org.bouncycastle.pqc.jcajce.provider.BouncyCastlePQCProvider;
+													provides javax.annotation.processing.Processor with org.apache.logging.log4j.core.config.plugins.processor.PluginProcessor;
+													provides kotlin.reflect.jvm.internal.impl.builtins.BuiltInsLoader with kotlin.reflect.jvm.internal.impl.serialization.deserialization.builtins.BuiltInsLoaderImpl;
+													provides kotlin.reflect.jvm.internal.impl.resolve.ExternalOverridabilityCondition with kotlin.reflect.jvm.internal.impl.load.java.FieldOverridabilityCondition, kotlin.reflect.jvm.internal.impl.load.java.ErasedOverridabilityCondition, kotlin.reflect.jvm.internal.impl.load.java.JavaIncompatibilityRulesOverridabilityCondition;
+													provides org.apache.logging.log4j.core.util.ContextDataProvider with org.apache.logging.log4j.core.impl.ThreadContextDataProvider;
+													provides org.apache.logging.log4j.message.ThreadDumpMessage$ThreadInfoFactory with org.apache.logging.log4j.core.message.ExtendedThreadInfoFactory;
+													provides org.apache.logging.log4j.spi.Provider with org.apache.logging.log4j.core.impl.Log4jProvider;
+													provides org.apache.logging.log4j.util.PropertySource with org.apache.logging.log4j.util.EnvironmentPropertySource, org.apache.logging.log4j.util.SystemPropertiesPropertySource;
+													provides org.slf4j.spi.SLF4JServiceProvider with org.apache.logging.slf4j.SLF4JServiceProvider;
+													provides org.threeten.bp.zone.ZoneRulesProvider with org.threeten.bp.zone.TzdbZoneRulesProvider;
+													provides reactor.blockhound.integration.BlockHoundIntegration with io.netty.util.internal.Hidden$NettyBlockHoundIntegration;
+												<!--											requires org.yaml.snakeyaml;-->
+												<!--											requires com.fasterxml.jackson.core;-->
+												}
+											</moduleInfoSource>
+										</module>
+									</modules>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+					<plugin>
+						<groupId>com.github.akman</groupId>
+						<artifactId>jpackage-maven-plugin</artifactId>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>jpackage</goal>
+								</goals>
+								<configuration>
+									<modulepath>
+										<filesets>
+											<fileset>
+												<directory>${project.build.directory}</directory>
+												<includes>
+													<include>${project.artifactId}-${project.version}-shaded.jar</include>
+												</includes>
+												<followSymlinks>false</followSymlinks>
+											</fileset>
+										</filesets>
+									</modulepath>
+									<addmodules>
+										<addmodule>com.nextbreakpoint.flink.control</addmodule>
+									</addmodules>
+									<module>com.nextbreakpoint.flink.control/${main-class}</module>
+									<name>flinkctl</name>
+									<type>IMAGE</type>
+									<vendor>NextBreakpoint</vendor>
+									<verbose>true</verbose>
+									<copyright>(c) 2019-2024 Andrea Medeghini</copyright>
+									<description>Kubernetes Custom Controller for Apache Flink</description>
+									<javaoptions>-Djavax.net.debug=ssl:handshake:verbose</javaoptions>
+								</configuration>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>
