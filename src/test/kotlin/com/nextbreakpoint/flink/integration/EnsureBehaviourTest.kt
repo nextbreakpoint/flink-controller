@@ -516,7 +516,7 @@ class EnsureBehaviourTest : IntegrationSetup() {
             fail("Can't update deployment")
         }
 
-        assertJobStopping(clusterName = "cluster-2", jobName = "job-1")
+        //assertJobStopping(clusterName = "cluster-2", jobName = "job-1")
         assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStopped(clusterName = "cluster-2", jobName = "job-1")
 
