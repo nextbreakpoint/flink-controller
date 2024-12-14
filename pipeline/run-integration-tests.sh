@@ -7,5 +7,5 @@ OPERATOR_HOST="$(minikube ip)"
 
 export OPERATOR_HOST
 
-mvn verify
+mvn -t toolchains-pipeline.xml verify
 

@@ -7,5 +7,5 @@ OPERATOR_HOST="$(minikube ip)"
 
 export OPERATOR_HOST
 
-mvn verify -Dtest=com.nextbreakpoint.flink.control.integration.EnsureBehaviourIT
+mvn -t toolchains-pipeline.xml verify -Dtest=com.nextbreakpoint.flink.control.integration.EnsureBehaviourIT
 

@@ -3,5 +3,5 @@
 set -x
 set -e
 
-mvn test
+mvn -t toolchains-pipeline.xml test
 
