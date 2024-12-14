@@ -65,6 +65,7 @@ spec:
       serviceAccount: flink-supervisor
       taskTimeout: 180
       rescaleDelay: 30
+      pollingInterval: 5
       replicas: 2
       resources:
         limits:
@@ -78,8 +79,8 @@ spec:
       image: integration/flink:latest
     jobManager:
       serviceMode: ClusterIP
-      annotations:
-        managed: true
+#      annotations:
+#        managed: true
       command:
         - 'bash'
       args:
@@ -92,6 +93,9 @@ spec:
             name: integration-jobmanager-properties-v1
         - secretRef:
             name: integration-cluster-2-secret-v1
+      environment:
+        - name: BUCKET_NAME
+          value: nextbreakpoint-integration
       volumeMounts:
         - name: config-vol
           mountPath: /var/config/measurement.properties
@@ -109,8 +113,8 @@ spec:
           memory: 500Mi
     taskManager:
       taskSlots: 2
-      annotations:
-        managed: true
+#      annotations:
+#        managed: true
       command:
         - 'bash'
       args:
@@ -123,6 +127,9 @@ spec:
             name: integration-taskmanager-properties-v1
         - secretRef:
             name: integration-cluster-2-secret-v1
+      environment:
+        - name: BUCKET_NAME
+          value: nextbreakpoint-integration
       resources:
         limits:
           cpu: '1'

@@ -2,9 +2,9 @@
   <configuration default="false" name="supervisor run" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.control.cli.Main" />
     <module name="com.nextbreakpoint.flink.control" />
-    <option name="PROGRAM_PARAMETERS" value="supervisor run --port=4445 --namespace=flink-jobs --flink-hostname=192.168.69.2 --cluster-name=cluster-1 --kube-config=$USER_HOME$/.kube/config --task-timeout=60 --polling-interval=5 --dry-run" />
+    <option name="PROGRAM_PARAMETERS" value="supervisor run --port=4445 --namespace=flink-jobs --flink-hostname=192.168.70.4 --cluster-name=cluster-1 --kube-config=$USER_HOME$/.kube/config --task-timeout=60 --polling-interval=5 " />
     <shortenClasspath name="NONE" />
-    <option name="VM_PARAMETERS" value="-Dmonitoring.port=8083 -Djavax.net.debug=ssl:handshake:verbose" />
+    <option name="VM_PARAMETERS" value="-Dmonitoring.port=8083" />
     <method v="2">
       <option name="Make" enabled="true" />
     </method>

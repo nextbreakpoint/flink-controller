@@ -189,15 +189,15 @@ open class IntegrationSetup {
 
         fun installCRDs() {
             println("Installing CRDs...")
-            if (installHelmChart(namespace = namespace, name = "flink-k8s-toolbox-crd", path = "helm/flink-k8s-toolbox-crd") != 0) {
-                if (upgradeHelmChart(namespace = namespace, name = "flink-k8s-toolbox-crd", path = "helm/flink-k8s-toolbox-crd") != 0) {
+            if (installHelmChart(name = "flink-k8s-toolbox-crd", path = "helm/flink-k8s-toolbox-crd") != 0) {
+                if (upgradeHelmChart(name = "flink-k8s-toolbox-crd", path = "helm/flink-k8s-toolbox-crd") != 0) {
                     fail<Any>("Can't install or upgrade Helm chart")
                 }
             }
         }
         fun uninstallCRDs() {
             println("Uninstalling CRDs...")
-            if (uninstallHelmChart(namespace = namespace, name = "flink-k8s-toolbox-crd") != 0) {
+            if (uninstallHelmChart(name = "flink-k8s-toolbox-crd") != 0) {
                 println("Can't uninstall Helm chart")
             }
             println("Operator uninstalled")
@@ -375,7 +375,7 @@ open class IntegrationSetup {
             }
         }
 
-        fun awaitUntilAsserted(timeout: Long = 120, delay: Long = 1, interval: Long = 5, assertion: () -> Unit) {
+        fun awaitUntilAsserted(timeout: Long = 120, delay: Long = 1, interval: Long = 2, assertion: () -> Unit) {
             Awaitility.await()
                 .atMost(Duration.ofSeconds(timeout))
                 .pollDelay(Duration.ofSeconds(delay))
@@ -383,7 +383,7 @@ open class IntegrationSetup {
                 .untilAsserted(assertion)
         }
 
-        fun awaitUntilCondition(timeout: Long = 120, delay: Long = 1, interval: Long = 5, condition: () -> Boolean) {
+        fun awaitUntilCondition(timeout: Long = 120, delay: Long = 1, interval: Long = 2, condition: () -> Boolean) {
             Awaitility.await()
                 .atMost(Duration.ofSeconds(timeout))
                 .pollDelay(Duration.ofSeconds(delay))
@@ -909,39 +909,68 @@ open class IntegrationSetup {
             return executeCommand(command)
         }
 
-        private fun installHelmChart(namespace: String, name: String, path: String, args: List<String>? = emptyList(), print: Boolean = false): Int {
-            val command = listOf(
-                "helm",
-                "install",
-                "--namespace",
-                namespace,
-                name,
-                path
-            ).plus(args?.asSequence().orEmpty())
-            return executeCommand(command, print)
+        private fun installHelmChart(namespace: String? = null, name: String, path: String, args: List<String>? = emptyList(), print: Boolean = false): Int {
+            if (namespace != null) {
+                val command = listOf(
+                    "helm",
+                    "install",
+                    "--namespace",
+                    namespace,
+                    name,
+                    path
+                ).plus(args?.asSequence().orEmpty())
+                return executeCommand(command, print)
+            } else {
+                val command = listOf(
+                    "helm",
+                    "install",
+                    name,
+                    path
+                ).plus(args?.asSequence().orEmpty())
+                return executeCommand(command, print)
+            }
         }
 
-        private fun upgradeHelmChart(namespace: String, name: String, path: String, args: List<String>? = emptyList(), print: Boolean = false): Int {
-            val command = listOf(
-                "helm",
-                "upgrade",
-                "--namespace",
-                namespace,
-                name,
-                path
-            ).plus(args?.asSequence().orEmpty())
-            return executeCommand(command, print)
+        private fun upgradeHelmChart(namespace: String? = null, name: String, path: String, args: List<String>? = emptyList(), print: Boolean = false): Int {
+            if (namespace != null) {
+                val command = listOf(
+                    "helm",
+                    "upgrade",
+                    "--namespace",
+                    namespace,
+                    name,
+                    path
+                ).plus(args?.asSequence().orEmpty())
+                return executeCommand(command, print)
+            } else {
+                val command = listOf(
+                    "helm",
+                    "upgrade",
+                    name,
+                    path
+                ).plus(args?.asSequence().orEmpty())
+                return executeCommand(command, print)
+            }
         }
 
-        private fun uninstallHelmChart(namespace: String, name: String): Int {
-            val command = listOf(
-                "helm",
-                "uninstall",
-                "--namespace",
-                namespace,
-                name
-            )
-            return executeCommand(command)
+        private fun uninstallHelmChart(namespace: String? = null, name: String): Int {
+            if (namespace != null) {
+                val command = listOf(
+                    "helm",
+                    "uninstall",
+                    "--namespace",
+                    namespace,
+                    name
+                )
+                return executeCommand(command)
+            } else {
+                val command = listOf(
+                    "helm",
+                    "uninstall",
+                    name
+                )
+                return executeCommand(command)
+            }
         }
 
         fun isMinioReady(namespace: String): Boolean {

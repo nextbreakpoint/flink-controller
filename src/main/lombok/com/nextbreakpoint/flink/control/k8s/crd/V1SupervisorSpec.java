@@ -22,7 +22,7 @@ public class V1SupervisorSpec {
     @SerializedName("serviceAccount")
     private String serviceAccount;
     @SerializedName("pollingInterval")
-    private String pollingInterval;
+    private Integer pollingInterval;
     @SerializedName("taskTimeout")
     private Integer taskTimeout;
     @SerializedName("maxTaskManagers")
