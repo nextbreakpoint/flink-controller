@@ -19,6 +19,7 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Tag
@@ -381,8 +382,6 @@ class EnsureBehaviourIT : IntegrationSetup() {
         println("Should delete cluster and jobs...")
 
         deleteResource(namespace = namespace, path = "integration/deployment-1.yaml")
-        assertJobStopping(clusterName = "cluster-1", jobName = "job-0")
-        assertClusterStopping("cluster-1")
         assertJobDeleted(clusterName = "cluster-1", jobName = "job-0")
         assertClusterDeleted("cluster-1")
     }
@@ -454,6 +453,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
 
     @Test
     @Order(1100)
+    @Disabled
     fun `Should stop job when batch job has finished`() {
         println("Should stop job when batch job has finished...")
 

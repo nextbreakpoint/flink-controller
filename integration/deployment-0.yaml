@@ -11,6 +11,7 @@ spec:
       serviceAccount: flink-supervisor
       taskTimeout: 120
       rescaleDelay: 30
+      pollingInterval: 5
       replicas: 1
       resources:
         limits:
@@ -24,8 +25,8 @@ spec:
       image: integration/flink:latest
     jobManager:
       serviceMode: NodePort
-      annotations:
-        managed: true
+#      annotations:
+#        managed: true
       command:
         - 'bash'
       args:
@@ -38,6 +39,9 @@ spec:
             name: integration-jobmanager-properties-v1
         - secretRef:
             name: integration-cluster-0-secret-v1
+      environment:
+        - name: BUCKET_NAME
+          value: nextbreakpoint-integration
       initContainers:
         - image: busybox
           command:
@@ -78,8 +82,8 @@ spec:
           memory: 500Mi
     taskManager:
       taskSlots: 2
-      annotations:
-        managed: true
+#      annotations:
+#        managed: true
       command:
         - 'bash'
       args:
@@ -92,6 +96,9 @@ spec:
             name: integration-taskmanager-properties-v1
         - secretRef:
             name: integration-cluster-0-secret-v1
+      environment:
+        - name: BUCKET_NAME
+          value: nextbreakpoint-integration
       initContainers:
         - image: busybox
           command:

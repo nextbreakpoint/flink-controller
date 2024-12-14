@@ -78,12 +78,12 @@ class JobOnStarting : Task<JobManager>() {
             return
         }
 
-        if (!manager.ensureBootstrapJobExists()) {
+        if (manager.isJobStarted()) {
+            manager.onJobStarted()
             return
         }
 
-        if (manager.isJobStarted()) {
-            manager.onJobStarted()
+        if (!manager.ensureBootstrapJobExists()) {
             return
         }
     }

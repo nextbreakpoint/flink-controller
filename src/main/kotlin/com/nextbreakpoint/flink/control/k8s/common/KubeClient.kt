@@ -57,7 +57,7 @@ object KubeClient {
     private var apiClient: ApiClient? = null
 
     fun configure(kubeConfig: String?) {
-        Configuration.setDefaultApiClient(createKubernetesApiClient(kubeConfig, 5000))
+        Configuration.setDefaultApiClient(createKubernetesApiClient(kubeConfig, 20000))
         apiClient = createKubernetesApiClient(kubeConfig, 0)
         objectApi.apiClient = Configuration.getDefaultApiClient()
         batchApi.apiClient = Configuration.getDefaultApiClient()

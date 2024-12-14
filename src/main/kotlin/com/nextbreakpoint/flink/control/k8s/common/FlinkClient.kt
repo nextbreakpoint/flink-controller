@@ -29,7 +29,7 @@ import java.util.logging.Logger
 object FlinkClient {
     private val logger = Logger.getLogger(FlinkClient::class.simpleName)
 
-    private const val TIMEOUT = 10000L
+    private const val TIMEOUT = 30000L
 
     fun getOverview(address: FlinkAddress): ClusterOverviewWithVersion {
         try {
@@ -387,7 +387,7 @@ object FlinkClient {
 
                 val response = flinkApi.triggerSavepointWithHttpInfo(jobId, requestBody)
 
-                if (response.statusCode != 200) {
+                if (response.statusCode != 202) {
                     throw FlinkClientException("[$address] Can't trigger savepoint for job $jobId")
                 }
 
@@ -484,7 +484,7 @@ object FlinkClient {
             return jobs.map {
                 val response = flinkApi.rescaleJobWithHttpInfo(it, parallelism)
 
-                if (response.statusCode != 200) {
+                if (response.statusCode != 202) {
                     throw FlinkClientException("[$address] Can't trigger rescale for job $it")
                 }
 

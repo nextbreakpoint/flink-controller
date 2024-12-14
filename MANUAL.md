@@ -1052,7 +1052,7 @@ Please note that you must provide the SSL certificates when the operator API is 
 
 When using minikube, the secrets can be mounted from host:
 
-    minikube start --cpus=4 --memory=8gb -disk-size 20GB --kubernetes-version v1.18.14 --mount-string="$(pwd)/secrets:/var/secrets" --mount
+    minikube start --cpus=4 --memory=8gb -disk-size 80GB --kubernetes-version v1.31.0 --driver=<your_driver> --mount-string="$(pwd)/secrets:/var/secrets" --mount
 
 ## Server components
 

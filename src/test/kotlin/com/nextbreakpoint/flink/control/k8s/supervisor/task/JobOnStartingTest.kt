@@ -198,8 +198,8 @@ class JobOnStartingTest {
         inOrder.verify(context, times(1)).isRestartTimeout()
         inOrder.verify(context, times(1)).mustResetSavepoint()
         inOrder.verify(context, times(1)).isJobSuspended()
-        inOrder.verify(context, times(1)).ensureBootstrapJobExists()
         inOrder.verify(context, times(1)).isJobStarted()
+        inOrder.verify(context, times(1)).ensureBootstrapJobExists()
         verifyNoMoreInteractions(context)
     }
 
@@ -227,7 +227,7 @@ class JobOnStartingTest {
 
     @Test
     fun `should behave as expected when bootstrap job doesn't exist`() {
-        given(context.ensureBootstrapJobExists()).thenReturn(false)
+        given(context.isJobStarted()).thenReturn(false)
         task.execute(context)
         val inOrder = inOrder(context)
         inOrder.verify(context, times(1)).isResourceDeleted()
@@ -244,6 +244,7 @@ class JobOnStartingTest {
         inOrder.verify(context, times(1)).isRestartTimeout()
         inOrder.verify(context, times(1)).mustResetSavepoint()
         inOrder.verify(context, times(1)).isJobSuspended()
+        inOrder.verify(context, times(1)).isJobStarted()
         inOrder.verify(context, times(1)).ensureBootstrapJobExists()
         verifyNoMoreInteractions(context)
     }
@@ -266,7 +267,6 @@ class JobOnStartingTest {
         inOrder.verify(context, times(1)).isRestartTimeout()
         inOrder.verify(context, times(1)).mustResetSavepoint()
         inOrder.verify(context, times(1)).isJobSuspended()
-        inOrder.verify(context, times(1)).ensureBootstrapJobExists()
         inOrder.verify(context, times(1)).isJobStarted()
         inOrder.verify(context, times(1)).onJobStarted()
         verifyNoMoreInteractions(context)

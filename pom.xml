@@ -694,7 +694,7 @@
 				<executions>
 					<execution>
 						<id>copy-dummies</id>
-						<phase>pre-integration-test</phase>
+						<phase>clean</phase>
 						<goals>
 							<goal>copy</goal>
 						</goals>
@@ -999,7 +999,7 @@
 									<verbose>true</verbose>
 									<copyright>(c) 2019-2024 Andrea Medeghini</copyright>
 									<description>Kubernetes Custom Controller for Apache Flink</description>
-									<javaoptions>-Djavax.net.debug=ssl:handshake:verbose</javaoptions>
+<!--									<javaoptions>-Djavax.net.debug=ssl:handshake:verbose</javaoptions>-->
 								</configuration>
 							</execution>
 						</executions>
