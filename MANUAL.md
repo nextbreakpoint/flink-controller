@@ -174,29 +174,27 @@ Do not delete the CRDs unless you are happy to delete the resources depending on
 
 Make sure that CRDs and default roles have been installed in Kubernetes (see above).
 
-Pull the flinkctl's Docker image with command:
+Pull the base Docker image with command:
 
     docker pull nextbreakpoint/flinkctl:1.5.0
 
-Create a new Docker image using flinkctl as base image. This image will be used to run the jobs,
-therefore the image must contain the code of a Flink application package into a single JAR file:
+Create the Dockerfile for the bootstrap image which contains the Flink application:
 
-    FROM nextbreakpoint/flinkctl:1.5.0
-    COPY flink-jobs.jar /flink-jobs.jar
+    ARG base_image="nextbreakpoint/flinkctl:1.5.0"
+    FROM ubuntu:latest AS download
+    ARG dummies_version="0.0.5"
+    RUN apt update -y && apt install -y curl
+    RUN curl https://github.com/nextbreakpoint/flink-dummies/releases/download/v${dummies_version}/com.nextbreakpoint.flink.dummies-${dummies_version}.jar -L -o /com.nextbreakpoint.flink.dummies.jar
+    FROM ${base_image}
+    COPY --from=download /com.nextbreakpoint.flink.dummies.jar /
 
 Build the Docker image with command:
 
-    docker build -t demo/jobs:latest .
+    docker build -t example/jobs:latest .
 
-If you don't have the JAR of a Flink application yet, you can try using Flink Dummies:
-
-    curl https://github.com/nextbreakpoint/flink-dummies/releases/download/v0.0.5/com.nextbreakpoint.flink.dummies-0.0.5.jar -L -o /com.nextbreakpoint.flink.dummies.jar
-
-Pull the Flink's Docker image with command:
+Pull Flink Docker image with command:
 
     docker pull apache/flink:1.20.0-scala_2.12-java11
-
-Please note that you can use other images of Flink. The image must have an entrypoint for running JobManager and TaskManager.
 
 Install Minio to simulate a distributed filesystem base on AWS S3 API.
 
@@ -205,13 +203,13 @@ Install Minio to simulate a distributed filesystem base on AWS S3 API.
 Expose Minio port to host:
 
     kubectl -n minio expose service minio --name=minio-external --type=LoadBalancer --external-ip=$(minikube ip) --port=9000 --target-port=9000
-    kubectl -n minio expose service minio --name=minio-console-external --type=LoadBalancer --external-ip=$(minikube ip) --port=9001 --target-port=9001
+    kubectl -n minio expose service minio-console --name=minio-console-external --type=LoadBalancer --external-ip=$(minikube ip) --port=9001 --target-port=9001
 
 Create the bucket with AWS CLI:
 
     export AWS_ACCESS_KEY_ID=minioaccesskey  
     export AWS_SECRET_ACCESS_KEY=miniosecretkey
-    aws s3 mb s3://nextbreakpoint-integration --endpoint-url http://$(minikube ip):9000
+    aws s3 mb s3://nextbreakpoint-example --endpoint-url http://$(minikube ip):9000
 
 Create a file flinkproperties.yaml for the JobManager and TaskManager configuration:
 
