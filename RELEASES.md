@@ -1,3 +1,15 @@
+# 1.5.0
+
+Release notes:
+- Target Flink 1.20
+- Update Flink Client 
+- Update dependencies
+- Replace gradle with maven
+- Use jpackage to create distribution
+- Update example (now based on Flink Dummies)
+- Update documentation
+- Fixed bugs   
+
 # 1.4.4-beta
 
 Release notes:
