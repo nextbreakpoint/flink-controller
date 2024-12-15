@@ -118,14 +118,14 @@ open class IntegrationSetup {
             val flinkBuildArgs = listOf(
                 "--build-arg", "flink_version=$flinkVersion", "--build-arg", "scala_version=$scalaVersion"
             )
-            if (buildDockerImage(path = "integration/flink", name = "integration/flink:latest", args = flinkBuildArgs) != 0) {
+            if (buildDockerImage(path = "integration/docker/flink", name = "integration/flink:latest", args = flinkBuildArgs) != 0) {
                 fail<Any>("Can't build flink image")
             }
             println("Building job image...")
             val jobBuildArgs = listOf(
                 "--build-arg", "base_image=integration/flinkctl:$version", "--build-arg", "flink_version=$flinkVersion", "--build-arg", "scala_version=$scalaVersion", "--build-arg", "dummies_version=$dummiesVersion"
             )
-            if (buildDockerImage(path = "integration/jobs", name = "integration/jobs:latest", args = jobBuildArgs) != 0) {
+            if (buildDockerImage(path = "integration/docker/jobs", name = "integration/jobs:latest", args = jobBuildArgs) != 0) {
                 fail<Any>("Can't build job image")
             }
             println("Images created")
