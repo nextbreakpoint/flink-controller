@@ -1,5 +1,12 @@
 #!/bin/sh
 
-source .utils
+minikubeIp() {
+   minikube ip
+}
 
-java -cp $(classpath) com.nextbreakpoint.flink.control.cli.Main supervisor run --namespace=flink --flink-hostname=$(minikubeIp) --cluster-name=test --kube-config=$(kubeConfig) --dry-run
+kubeConfig() {
+   echo ~/.kube/config
+}
+
+java --module-path com.nextbreakpoint.flink.control-1.5.0-shaded.jar --module com.nextbreakpoint.flink.control/com.nextbreakpoint.flink.control.cli.Main \
+  supervisor run --dry-run --namespace=flink --flink-hostname="$(minikubeIp)" --kube-config="$(kubeConfig)" --cluster-name=cluster-1
