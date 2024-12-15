@@ -188,9 +188,9 @@ Build the Docker image with command:
 
     docker build -t demo/jobs:latest .
 
-If you don't have the JAR of a Flink application yet, you can try using the demo:
+If you don't have the JAR of a Flink application yet, you can try using Flink Dummies:
 
-    docker build -t demo/jobs:latest example/jobs
+    curl https://github.com/nextbreakpoint/flink-dummies/releases/download/v0.0.5/com.nextbreakpoint.flink.dummies-0.0.5.jar -L -o /com.nextbreakpoint.flink.dummies.jar
 
 Pull the Flink's Docker image with command:
 
