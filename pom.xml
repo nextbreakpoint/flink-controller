@@ -1022,7 +1022,12 @@
 									<verbose>true</verbose>
 									<copyright>(c) 2019-2024 Andrea Medeghini</copyright>
 									<description>Kubernetes Custom Controller for Apache Flink</description>
-<!--									<javaoptions>-Djavax.net.debug=ssl:handshake:verbose</javaoptions>-->
+									<javaoptions>
+										-XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90
+									</javaoptions>
+<!--									<javaoptions>-->
+<!--										-XX:+UseParallelGC -XX:MinHeapFreeRatio=5 -XX:MaxHeapFreeRatio=10 -XX:GCTimeRatio=4 -XX:AdaptiveSizePolicyWeight=90 -Djavax.net.debug=ssl:handshake:verbose-->
+<!--									</javaoptions>-->
 								</configuration>
 							</execution>
 						</executions>
