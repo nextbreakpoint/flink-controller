@@ -76,7 +76,7 @@ spec:
       volumes:
         - name: config-vol
           configMap:
-            name: integration-job-parameters-v1
+            name: integration-job-properties-v1
       resources:
         limits:
           cpu: '1'
