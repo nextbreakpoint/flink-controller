@@ -494,6 +494,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/image\",\"value\":\"wrong/jobs:latest\"}]") != 0) {
             fail("Can't update deployment")
         }
+
         assertJobStopping(clusterName = "cluster-2", jobName = "job-1")
         assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStopped(clusterName = "cluster-2", jobName = "job-1")
@@ -519,7 +520,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStopped(clusterName = "cluster-2", jobName = "job-1")
 
-        if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/className\",\"value\":\"com.nextbreakpoint.flink.control.jobs.ComputeMaximum\"}]") != 0) {
+        if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/className\",\"value\":\"com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain\"}]") != 0) {
             fail("Can't update deployment")
         }
 
@@ -796,6 +797,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
 
         val savepointPath15 = getSavepointPath(clusterName = "cluster-2", jobName = "job-1")
         val savepointPath16 = getSavepointPath(clusterName = "cluster-2", jobName = "job-2")
+        assertThat(savepointPath15).isBlank()
         assertThat(savepointPath15).isBlank()
         assertThat(savepointPath16).isBlank()
     }
