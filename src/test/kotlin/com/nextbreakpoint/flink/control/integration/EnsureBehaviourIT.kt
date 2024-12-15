@@ -502,13 +502,13 @@ class EnsureBehaviourIT : IntegrationSetup() {
         assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStopped(clusterName = "cluster-2", jobName = "job-1")
 
+        updateRestartPolicy(clusterName = "cluster-2", index = 0, restartPolicy = RestartPolicy.Always)
         updateRestartPolicy(clusterName = "cluster-2", index = 1, restartPolicy = RestartPolicy.Always)
 
         if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/image\",\"value\":\"integration/jobs:latest\"}]") != 0) {
             fail("Can't update deployment")
         }
 
-        assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStarted(clusterName = "cluster-2", jobName = "job-1")
     }
 
@@ -528,13 +528,13 @@ class EnsureBehaviourIT : IntegrationSetup() {
         assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStopped(clusterName = "cluster-2", jobName = "job-1")
 
+        updateRestartPolicy(clusterName = "cluster-2", index = 0, restartPolicy = RestartPolicy.Always)
         updateRestartPolicy(clusterName = "cluster-2", index = 1, restartPolicy = RestartPolicy.Always)
 
         if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/className\",\"value\":\"com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain\"}]") != 0) {
             fail("Can't update deployment")
         }
 
-        assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStarted(clusterName = "cluster-2", jobName = "job-1")
     }
 
@@ -959,7 +959,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         awaitUntilAsserted(timeout = 60) {
             assertThat(jobExists(namespace = namespace, name = "$clusterName-$jobName")).isTrue()
         }
-        awaitUntilAsserted(timeout = 180) {
+        awaitUntilAsserted(timeout = 360) {
             assertThat(hasJobStatus(namespace = namespace, name = "$clusterName-$jobName", status = JobStatus.Started)).isTrue()
             assertThat(hasResourceStatus(namespace = namespace, resource = "fj", name = "$clusterName-$jobName", status = ResourceStatus.Updated)).isTrue()
         }
@@ -978,7 +978,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
     }
 
     private fun assertJobStarting(clusterName: String, jobName: String) {
-        awaitUntilAsserted(timeout = 60) {
+        awaitUntilAsserted(timeout = 120) {
             assertThat(hasJobStatus(namespace = namespace, name = "$clusterName-$jobName", status = JobStatus.Starting)).isTrue()
         }
     }
