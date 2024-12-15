@@ -491,6 +491,9 @@ class EnsureBehaviourIT : IntegrationSetup() {
     fun `Should stop job when job fails because invalid bootstrap image`() {
         println("Should stop job when job fails because invalid bootstrap image...")
 
+        updateRestartPolicy(clusterName = "cluster-2", index = 0, restartPolicy = RestartPolicy.Never)
+        updateRestartPolicy(clusterName = "cluster-2", index = 1, restartPolicy = RestartPolicy.Never)
+
         if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/image\",\"value\":\"wrong/jobs:latest\"}]") != 0) {
             fail("Can't update deployment")
         }
@@ -498,6 +501,8 @@ class EnsureBehaviourIT : IntegrationSetup() {
         assertJobStopping(clusterName = "cluster-2", jobName = "job-1")
         assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStopped(clusterName = "cluster-2", jobName = "job-1")
+
+        updateRestartPolicy(clusterName = "cluster-2", index = 1, restartPolicy = RestartPolicy.Always)
 
         if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/image\",\"value\":\"integration/jobs:latest\"}]") != 0) {
             fail("Can't update deployment")
@@ -512,6 +517,9 @@ class EnsureBehaviourIT : IntegrationSetup() {
     fun `Should stop job when job fails because invalid bootstrap className`() {
         println("Should stop job when job fails because invalid bootstrap className...")
 
+        updateRestartPolicy(clusterName = "cluster-2", index = 0, restartPolicy = RestartPolicy.Never)
+        updateRestartPolicy(clusterName = "cluster-2", index = 1, restartPolicy = RestartPolicy.Never)
+
         if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/className\",\"value\":\"wrongclassname\"}]") != 0) {
             fail("Can't update deployment")
         }
@@ -519,6 +527,8 @@ class EnsureBehaviourIT : IntegrationSetup() {
         assertJobStopping(clusterName = "cluster-2", jobName = "job-1")
         assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStopped(clusterName = "cluster-2", jobName = "job-1")
+
+        updateRestartPolicy(clusterName = "cluster-2", index = 1, restartPolicy = RestartPolicy.Always)
 
         if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/className\",\"value\":\"com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain\"}]") != 0) {
             fail("Can't update deployment")

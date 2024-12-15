@@ -1,0 +1,132 @@
+{{- $fullname := include "example.fullname" . -}}
+{{- $name := include "example.name" . -}}
+{{- $chart := include "example.chart" . -}}
+{{- $root := . }}
+apiVersion: "nextbreakpoint.com/v1"
+kind: FlinkDeployment
+metadata:
+  name: {{ $name | quote }}
+  namespace: {{ $root.Release.Namespace | quote }}
+  labels:
+    chart: {{ $chart }}
+    release: {{ $root.Release.Name }}
+    heritage: {{ $root.Release.Service }}
+spec:
+  cluster:
+    {{- if $root.Values.taskManagers }}
+    taskManagers: {{ $root.Values.taskManagers }}
+    {{- end }}
+    supervisor:
+      pullPolicy: {{ $root.Values.supervisor.pullPolicy }}
+      image: nextbreakpoint/flinkctl:1.5.0
+      serviceAccount: flink-supervisor
+      taskTimeout: {{ $root.Values.supervisor.taskTimeout }}
+      rescaleDelay: {{ $root.Values.supervisor.rescaleDelay }}
+      rescalePolicy: {{ $root.Values.supervisor.rescalePolicy }}
+      replicas: {{ $root.Values.supervisor.replicas }}
+      resources:
+        limits:
+          cpu: '1'
+          memory: 200Mi
+        requests:
+          cpu: '0.05'
+          memory: 200Mi
+    runtime:
+      pullPolicy: {{ $root.Values.runtime.pullPolicy }}
+      image: {{ $root.Values.runtime.image }}
+    jobManager:
+      serviceMode: {{ $root.Values.jobManager.serviceMode }}
+      annotations:
+        managedBy: "flinkctl"
+      command:
+        - 'bash'
+      args:
+        - '-c'
+        - 'FLINK_PROPERTIES="$(FLINK_PROPERTIES)$(SECRET_PROPERTIES)" /docker-entrypoint.sh jobmanager'
+      environment:
+        - name: ENABLE_BUILT_IN_PLUGINS
+          value: flink-s3-fs-hadoop-{{ $root.Values.flinkVersion }}.jar
+        - name: BUCKET_NAME
+          value: {{ $root.Values.s3BucketName }}
+      environmentFrom:
+        - configMapRef:
+            name: {{ $name }}-jobmanager-properties-v1
+        - secretRef:
+            name: {{ $name }}-cluster-secret-v1
+      extraPorts:
+        - name: prometheus
+          containerPort: 9250
+          protocol: TCP
+      volumeMounts:
+        - name: config-vol
+          mountPath: /var/config/measurement.properties
+          subPath: measurement.properties
+      volumes:
+        - name: config-vol
+          configMap:
+            name: {{ $name }}-job-properties-v1
+      resources:
+        limits:
+          cpu: '1'
+          memory: 600Mi
+        requests:
+          cpu: '0.1'
+          memory: 600Mi
+    taskManager:
+      taskSlots: {{ $root.Values.taskManager.taskSlots }}
+      annotations:
+        managedBy: "flinkctl"
+      command:
+        - 'bash'
+      args:
+        - '-c'
+        - 'FLINK_PROPERTIES="$(FLINK_PROPERTIES)$(SECRET_PROPERTIES)" /docker-entrypoint.sh taskmanager'
+      environment:
+        - name: ENABLE_BUILT_IN_PLUGINS
+          value: flink-s3-fs-hadoop-{{ $root.Values.flinkVersion }}.jar
+        - name: BUCKET_NAME
+          value: {{ $root.Values.s3BucketName }}
+      environmentFrom:
+        - configMapRef:
+            name: {{ $name }}-taskmanager-properties-v1
+        - secretRef:
+            name: {{ $name }}-cluster-secret-v1
+      extraPorts:
+        - name: prometheus
+          containerPort: 9250
+          protocol: TCP
+      resources:
+        limits:
+          cpu: '1'
+          memory: 2200Mi
+        requests:
+          cpu: '0.05'
+          memory: 2200Mi
+  jobs:
+    - name: measurement
+      spec:
+        jobParallelism: {{ $root.Values.example.example.jobParallelism }}
+        savepoint:
+          savepointMode: {{ $root.Values.example.example.savepointMode }}
+          savepointInterval: {{ $root.Values.example.example.savepointInterval }}
+          savepointTargetPath: s3a://{{ $root.Values.s3BucketName }}/savepoints
+        restart:
+          restartPolicy: {{ $root.Values.example.example.restartPolicy }}
+          restartDelay: {{ $root.Values.example.example.restartDelay }}
+          restartTimeout: {{ $root.Values.example.example.restartTimeout }}
+        bootstrap:
+          serviceAccount: flink-bootstrap
+          pullPolicy: {{ $root.Values.example.pullPolicy }}
+          image: {{ $root.Values.example.image }}
+          jarPath: /com.nextbreakpoint.flink.example.jar
+          className: com.nextbreakpoint.flink.example.TemperatureMeasurementMain
+          arguments:
+            - --CONFIG_FILE
+            - file:///var/config/measurement.properties
+          resources:
+            limits:
+              cpu: '1'
+              memory: 200Mi
+            requests:
+              cpu: '0.01'
+              memory: 200Mi

@@ -1,0 +1,103 @@
+{{- $fullname := include "example.fullname" . -}}
+{{- $name := include "example.name" . -}}
+{{- $chart := include "example.chart" . -}}
+{{- $root := . }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-flink-plugins-v1
+  namespace: {{ $root.Release.Namespace | quote }}
+  labels:
+    chart: {{ $chart }}
+    release: {{ $root.Release.Name }}
+    heritage: {{ $root.Release.Service }}
+data:
+  ENABLE_BUILT_IN_PLUGINS: "flink-s3-fs-hadoop-{{ $root.Values.flinkVersion }}.jar;flink-s3-fs-presto-{{ $root.Values.flinkVersion }}.jar"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-jobmanager-properties-v1
+  namespace: {{ $root.Release.Namespace | quote }}
+  labels:
+    chart: {{ $chart }}
+    release: {{ $root.Release.Name }}
+    heritage: {{ $root.Release.Service }}
+data:
+  FLINK_PROPERTIES: |
+    heartbeat.timeout: 90000
+    heartbeat.interval: 15000
+    jobmanager.memory.jvm-overhead.min: 64mb
+    jobmanager.memory.jvm-metaspace.size: 192mb
+    jobmanager.memory.off-heap.size: 64mb
+    jobmanager.memory.process.size: 500mb
+    jobmanager.memory.flink.size: 200mb
+    metrics.reporters: prometheus
+    metrics.reporter.prometheus.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+    metrics.reporter.prometheus.port: 9250
+    metrics.latency.granularity: operator
+    state.backend.type: hashmap
+    {{- if $root.Values.s3Endpoint }}
+    s3.endpoint: {{ $root.Values.s3Endpoint }}
+    {{- end }}
+    {{- if $root.Values.s3PathStyleAccess }}
+    s3.path.style.access: {{ $root.Values.s3PathStyleAccess }}
+    {{- end }}
+    s3.connection.maximum: 200
+    execution.checkpointing.dir: s3p://{{ $root.Values.s3BucketName }}/checkpoints
+    execution.checkpointing.savepoint-dir: s3p://{{ $root.Values.s3BucketName }}/savepoints
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ $name }}-taskmanager-properties-v1
+  namespace: {{ $root.Release.Namespace | quote }}
+  labels:
+    chart: {{ $chart }}
+    release: {{ $root.Release.Name }}
+    heritage: {{ $root.Release.Service }}
+data:
+  FLINK_PROPERTIES: |
+    heartbeat.timeout: 90000
+    heartbeat.interval: 15000
+    taskmanager.memory.jvm-overhead.min: 64mb
+    taskmanager.memory.jvm-metaspace.size: 192mb
+    taskmanager.memory.framework.heap.size: 64mb
+    taskmanager.memory.framework.off-heap.size: 64mb
+    taskmanager.memory.process.size: 600mb
+    taskmanager.memory.flink.size: 300mb
+    taskmanager.memory.network.fraction: 0.1
+    taskmanager.memory.managed.fraction: 0.1
+    metrics.reporters: prometheus
+    metrics.reporter.prometheus.factory.class: org.apache.flink.metrics.prometheus.PrometheusReporterFactory
+    metrics.reporter.prometheus.port: 9250
+    metrics.latency.granularity: operator
+    state.backend.type: hashmap
+    {{- if $root.Values.s3Endpoint }}
+    s3.endpoint: {{ $root.Values.s3Endpoint }}
+    {{- end }}
+    {{- if $root.Values.s3PathStyleAccess }}
+    s3.path.style.access: {{ $root.Values.s3PathStyleAccess }}
+    {{- end }}
+    s3.connection.maximum: 200
+    execution.checkpointing.dir: s3p://{{ $root.Values.s3BucketName }}/checkpoints
+    execution.checkpointing.savepoint-dir: s3p://{{ $root.Values.s3BucketName }}/savepoints
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ $name }}-cluster-secret-v1
+  namespace: {{ $root.Release.Namespace | quote }}
+  labels:
+    chart: {{ $chart }}
+    release: {{ $root.Release.Name }}
+    heritage: {{ $root.Release.Service }}
+type: Opaque
+stringData:
+  SECRET_PROPERTIES: |
+    {{- if $root.Values.s3AccessKey }}
+    s3.access-key: {{ $root.Values.s3AccessKey }}
+    {{- end }}
+    {{- if $root.Values.s3SecretKey }}
+    s3.secret-key: {{ $root.Values.s3SecretKey }}
+    {{- end }}
