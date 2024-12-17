@@ -1,5 +1,6 @@
 package com.nextbreakpoint.flink.control.k8s.supervisor.core
 
+import com.nextbreakpoint.flink.client.model.TaskManagerInfo
 import com.nextbreakpoint.flink.control.common.Action
 import com.nextbreakpoint.flink.control.common.ClusterStatus
 import com.nextbreakpoint.flink.control.common.JobStatus
@@ -15,9 +16,8 @@ import com.nextbreakpoint.flink.control.k8s.controller.core.ResultStatus
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkCluster
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJob
 import com.nextbreakpoint.flink.control.k8s.factory.ClusterResourcesDefaultFactory
-import com.nextbreakpoint.flink.client.model.TaskManagerInfo
 import io.kubernetes.client.openapi.models.V1Pod
-import org.joda.time.DateTime
+import java.time.OffsetDateTime
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.math.max
@@ -33,11 +33,12 @@ class ClusterController(
 ) {
     companion object {
         private val logger = Logger.getLogger(ClusterController::class.simpleName)
+        private val clusterResourcesFactory = ClusterResourcesDefaultFactory()
     }
 
-    fun timeSinceLastUpdateInSeconds() = (controller.currentTimeMillis() - FlinkClusterStatus.getStatusTimestamp(cluster).millis) / 1000L
+    fun timeSinceLastUpdateInSeconds() = (controller.currentTimeMillis() - FlinkClusterStatus.getStatusTimestamp(cluster).toInstant().toEpochMilli()) / 1000L
 
-    fun timeSinceLastRescaleInSeconds() = (controller.currentTimeMillis() - FlinkClusterStatus.getRescaleTimestamp(cluster).millis) / 1000L
+    fun timeSinceLastRescaleInSeconds() = (controller.currentTimeMillis() - FlinkClusterStatus.getRescaleTimestamp(cluster).toInstant().toEpochMilli()) / 1000L
 
     fun removeJars() = controller.removeJars(namespace, clusterName)
 
@@ -59,7 +60,7 @@ class ClusterController(
 
     fun isClusterHealthy() = controller.isClusterHealthy(namespace, clusterName)
 
-    fun refreshStatus(logger: Logger, statusTimestamp: DateTime, actionTimestamp: DateTime, hasFinalizer: Boolean) {
+    fun refreshStatus(logger: Logger, statusTimestamp: OffsetDateTime, actionTimestamp: OffsetDateTime, hasFinalizer: Boolean) {
         FlinkClusterStatus.setTaskManagerReplicas(cluster, getTaskManagerReplicas())
 
         FlinkClusterStatus.setTotalTaskSlots(cluster, getTaskManagerReplicas() * getDeclaredTaskSlots())
@@ -210,7 +211,7 @@ class ClusterController(
     }
 
     fun createService(): Result<String?> {
-        val resource = ClusterResourcesDefaultFactory.createService(
+        val resource = clusterResourcesFactory.createService(
             namespace,
             Resource.RESOURCE_OWNER,
             cluster.metadata?.name ?: throw RuntimeException("Metadata name is null"),
@@ -238,7 +239,7 @@ class ClusterController(
             return Result(ResultStatus.OK, setOf())
         }
 
-        val resource = ClusterResourcesDefaultFactory.createJobManagerPod(
+        val resource = clusterResourcesFactory.createJobManagerPod(
             namespace,
             Resource.RESOURCE_OWNER,
             cluster.metadata?.name ?: throw RuntimeException("Metadata name is null"),
@@ -274,7 +275,7 @@ class ClusterController(
             return Result(ResultStatus.OK, setOf())
         }
 
-        val resource = ClusterResourcesDefaultFactory.createTaskManagerPod(
+        val resource = clusterResourcesFactory.createTaskManagerPod(
             namespace,
             Resource.RESOURCE_OWNER,
             cluster.metadata?.name ?: throw RuntimeException("Metadata name is null"),
@@ -398,13 +399,13 @@ class ClusterController(
     private fun computeRequiredTaskManagers(): Int {
         val requiredTaskSlots = getRequiredTaskSlots()
         val taskSlots = getDeclaredTaskSlots()
-        return (requiredTaskSlots + taskSlots / 2) / taskSlots
+        return Math.ceil(requiredTaskSlots.toDouble() / taskSlots.toDouble()).toInt()
     }
 
     private fun getPodName(taskManagerInfo: TaskManagerInfo): String? {
-        //akka.tcp://flink@172.17.0.12:41545/user/taskmanager_0
+        //pekko.tcp://flink@172.17.0.12:41545/user/taskmanager_0
         logger.info("TaskManager path: ${taskManagerInfo.path}")
-        val regexp = Regex("akka\\.tcp://flink@([0-9.]+):[0-9]+/user/(rpc/)?taskmanager_[0-9]+")
+        val regexp = Regex(".*\\.tcp://flink@([0-9.]+):[0-9]+/user/(rpc/)?taskmanager_[0-9]+")
         val match = regexp.matchEntire(taskManagerInfo.path.toString())
         val nodeIP = match?.groupValues?.get(1)
         logger.info("TaskManager nodeIP: $nodeIP")

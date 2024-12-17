@@ -181,6 +181,8 @@ class JobOnStartingTest {
 
     @Test
     fun `should behave as expected when job hasn't started`() {
+        given(context.ensureBootstrapJobExists()).thenReturn(true)
+        given(context.shouldBootstrapJob()).thenReturn(true)
         given(context.isJobStarted()).thenReturn(false)
         task.execute(context)
         val inOrder = inOrder(context)
@@ -199,7 +201,33 @@ class JobOnStartingTest {
         inOrder.verify(context, times(1)).mustResetSavepoint()
         inOrder.verify(context, times(1)).isJobSuspended()
         inOrder.verify(context, times(1)).isJobStarted()
+        inOrder.verify(context, times(1)).shouldBootstrapJob()
         inOrder.verify(context, times(1)).ensureBootstrapJobExists()
+        verifyNoMoreInteractions(context)
+    }
+
+    @Test
+    fun `should behave as expected when job should not bootstrap`() {
+        given(context.shouldBootstrapJob()).thenReturn(false)
+        given(context.isJobStarted()).thenReturn(false)
+        task.execute(context)
+        val inOrder = inOrder(context)
+        inOrder.verify(context, times(1)).isResourceDeleted()
+        inOrder.verify(context, times(1)).isClusterTerminated()
+        inOrder.verify(context, times(1)).isClusterStopping()
+        inOrder.verify(context, times(1)).isClusterStopped()
+        inOrder.verify(context, times(1)).isClusterStarting()
+        inOrder.verify(context, times(1)).isClusterStarted()
+        inOrder.verify(context, times(1)).setClusterHealth(eq("HEALTHY"))
+        inOrder.verify(context, times(1)).isActionPresent()
+        inOrder.verify(context, times(1)).isClusterUnhealthy()
+        inOrder.verify(context, times(1)).isClusterUpdated()
+        inOrder.verify(context, times(1)).setResourceUpdated(eq(true))
+        inOrder.verify(context, times(1)).isRestartTimeout()
+        inOrder.verify(context, times(1)).mustResetSavepoint()
+        inOrder.verify(context, times(1)).isJobSuspended()
+        inOrder.verify(context, times(1)).isJobStarted()
+        inOrder.verify(context, times(1)).shouldBootstrapJob()
         verifyNoMoreInteractions(context)
     }
 
@@ -227,6 +255,8 @@ class JobOnStartingTest {
 
     @Test
     fun `should behave as expected when bootstrap job doesn't exist`() {
+        given(context.ensureBootstrapJobExists()).thenReturn(false)
+        given(context.shouldBootstrapJob()).thenReturn(true)
         given(context.isJobStarted()).thenReturn(false)
         task.execute(context)
         val inOrder = inOrder(context)
@@ -245,7 +275,9 @@ class JobOnStartingTest {
         inOrder.verify(context, times(1)).mustResetSavepoint()
         inOrder.verify(context, times(1)).isJobSuspended()
         inOrder.verify(context, times(1)).isJobStarted()
+        inOrder.verify(context, times(1)).shouldBootstrapJob()
         inOrder.verify(context, times(1)).ensureBootstrapJobExists()
+        inOrder.verify(context, times(1)).incrementBootstrapAttempts()
         verifyNoMoreInteractions(context)
     }
 

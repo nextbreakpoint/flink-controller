@@ -6,8 +6,8 @@ import com.nextbreakpoint.flink.control.common.RunnerOptions
 import com.nextbreakpoint.flink.control.k8s.common.FlinkClusterStatus
 import com.nextbreakpoint.flink.control.k8s.common.FlinkJobStatus
 import com.nextbreakpoint.flink.control.k8s.controller.Controller
-import com.nextbreakpoint.flink.control.k8s.operator.core.Cache
 import com.nextbreakpoint.flink.control.k8s.operator.core.Adapter
+import com.nextbreakpoint.flink.control.k8s.operator.core.Cache
 import io.kubernetes.client.extended.controller.ControllerManager
 import io.kubernetes.client.extended.controller.LeaderElectingController
 import io.kubernetes.client.extended.controller.builder.ControllerBuilder
@@ -15,8 +15,10 @@ import io.kubernetes.client.extended.leaderelection.LeaderElectionConfig
 import io.kubernetes.client.extended.leaderelection.LeaderElector
 import io.kubernetes.client.extended.leaderelection.resourcelock.EndpointsLock
 import io.kubernetes.client.informer.SharedInformerFactory
+import io.kubernetes.client.openapi.JSON
 import io.micrometer.core.instrument.ImmutableTag
 import io.micrometer.core.instrument.MeterRegistry
+import java.text.SimpleDateFormat
 import java.time.Duration
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -39,6 +41,8 @@ class OperatorRunner(
     }
 
     fun run() {
+        JSON.setDateFormat(SimpleDateFormat("yyyyMMdd'T'HHmmss.SSS'Z'"))
+
         val operatorController = OperatorController(registry, controller, cache, adapter, options)
 
         val controllerManager: ControllerManager = ControllerBuilder.controllerManagerBuilder(factory)

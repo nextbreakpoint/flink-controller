@@ -2,8 +2,8 @@ package com.nextbreakpoint.flink.control.k8s.supervisor
 
 import com.nextbreakpoint.flink.control.common.RunnerOptions
 import com.nextbreakpoint.flink.control.k8s.controller.Controller
-import com.nextbreakpoint.flink.control.k8s.supervisor.core.Cache
 import com.nextbreakpoint.flink.control.k8s.supervisor.core.Adapter
+import com.nextbreakpoint.flink.control.k8s.supervisor.core.Cache
 import io.kubernetes.client.extended.controller.ControllerManager
 import io.kubernetes.client.extended.controller.LeaderElectingController
 import io.kubernetes.client.extended.controller.builder.ControllerBuilder
@@ -11,7 +11,9 @@ import io.kubernetes.client.extended.leaderelection.LeaderElectionConfig
 import io.kubernetes.client.extended.leaderelection.LeaderElector
 import io.kubernetes.client.extended.leaderelection.resourcelock.EndpointsLock
 import io.kubernetes.client.informer.SharedInformerFactory
+import io.kubernetes.client.openapi.JSON
 import io.micrometer.core.instrument.MeterRegistry
+import java.text.SimpleDateFormat
 import java.time.Duration
 import java.util.UUID
 import java.util.concurrent.TimeUnit
@@ -33,6 +35,8 @@ class SupervisorRunner(
     }
 
     fun run() {
+        JSON.setDateFormat(SimpleDateFormat("yyyyMMdd'T'HHmmss.SSS'Z'"))
+
         val supervisorController = SupervisorController(registry, controller, cache, adapter, options)
 
         val controllerManager: ControllerManager = ControllerBuilder.controllerManagerBuilder(factory)

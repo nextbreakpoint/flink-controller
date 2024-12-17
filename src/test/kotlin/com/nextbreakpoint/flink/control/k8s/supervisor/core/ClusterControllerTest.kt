@@ -1,5 +1,7 @@
 package com.nextbreakpoint.flink.control.k8s.supervisor.core
 
+import com.nextbreakpoint.flink.client.model.TaskManagerInfo
+import com.nextbreakpoint.flink.client.model.TaskManagersInfo
 import com.nextbreakpoint.flink.control.common.Action
 import com.nextbreakpoint.flink.control.common.ClusterStatus
 import com.nextbreakpoint.flink.control.common.JobStatus
@@ -7,6 +9,7 @@ import com.nextbreakpoint.flink.control.common.ResourceStatus
 import com.nextbreakpoint.flink.control.k8s.common.FlinkClusterAnnotations
 import com.nextbreakpoint.flink.control.k8s.common.FlinkClusterStatus
 import com.nextbreakpoint.flink.control.k8s.common.FlinkJobStatus
+import com.nextbreakpoint.flink.control.k8s.common.Time
 import com.nextbreakpoint.flink.control.k8s.controller.Controller
 import com.nextbreakpoint.flink.control.k8s.controller.core.Result
 import com.nextbreakpoint.flink.control.k8s.controller.core.ResultStatus
@@ -15,12 +18,9 @@ import com.nextbreakpoint.flink.control.testing.KotlinMockito.any
 import com.nextbreakpoint.flink.control.testing.KotlinMockito.eq
 import com.nextbreakpoint.flink.control.testing.KotlinMockito.given
 import com.nextbreakpoint.flink.control.testing.TestFactory
-import com.nextbreakpoint.flink.client.model.TaskManagerInfo
-import com.nextbreakpoint.flink.client.model.TaskManagersInfo
 import io.kubernetes.client.openapi.models.V1PodIP
 import io.kubernetes.client.openapi.models.V1PodStatus
 import org.assertj.core.api.Assertions.assertThat
-import org.joda.time.DateTime
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
@@ -30,12 +30,13 @@ import org.mockito.Mockito.verifyNoMoreInteractions
 import java.util.logging.Logger
 
 class ClusterControllerTest {
-    private val cluster = TestFactory.aFlinkCluster(name = "test", namespace = "flink", taskSlots = 2)
-    private val job = TestFactory.aFlinkJob(name = "test-test", namespace = "flink")
-    private val pod = TestFactory.aTaskManagerPod(cluster, "1")
-    private val service = TestFactory.aJobManagerService(cluster)
-    private val jobmanagerPods = mutableSetOf(TestFactory.aJobManagerPod(cluster, "1"))
-    private val taskmanagerPods = mutableSetOf(TestFactory.aTaskManagerPod(cluster, "1"))
+    private val testFactory = TestFactory()
+    private val cluster = testFactory.aFlinkCluster("test", "flink", 1, 2)
+    private val job = testFactory.aFlinkJob("test-test", "flink")
+    private val pod = testFactory.aTaskManagerPod(cluster, "1")
+    private val service = testFactory.aJobManagerService(cluster)
+    private val jobmanagerPods = mutableSetOf(testFactory.aJobManagerPod(cluster, "1"))
+    private val taskmanagerPods = mutableSetOf(testFactory.aTaskManagerPod(cluster, "1"))
     private val resources = ClusterResources(
         flinkCluster = cluster,
         jobmanagerService = service,
@@ -46,6 +47,7 @@ class ClusterControllerTest {
     private val logger = mock(Logger::class.java)
     private val controller = mock(Controller::class.java)
     private val clusterController = ClusterController("flink", "test", 5, controller, resources, cluster)
+    private val factory = ClusterResourcesDefaultFactory()
 
     @AfterEach
     fun verifyInteractions() {
@@ -142,14 +144,14 @@ class ClusterControllerTest {
         FlinkClusterStatus.setTaskManagers(cluster, 2)
 
         taskmanagerPods.clear()
-        taskmanagerPods.add(TestFactory.aTaskManagerPod(cluster,"1"))
-        taskmanagerPods.add(TestFactory.aTaskManagerPod(cluster,"2"))
+        taskmanagerPods.add(testFactory.aTaskManagerPod(cluster,"1"))
+        taskmanagerPods.add(testFactory.aTaskManagerPod(cluster,"2"))
 
         cluster.metadata.finalizers = listOf("supervisor.nextbreakpoint.com")
 
         val timestamp = System.currentTimeMillis()
 
-        clusterController.refreshStatus(logger, DateTime(timestamp), DateTime(timestamp), false)
+        clusterController.refreshStatus(logger, Time.toDateTime(timestamp), Time.toDateTime(timestamp), false)
 
         assertThat(FlinkClusterStatus.getTaskManagerReplicas(cluster)).isEqualTo(2)
         assertThat(FlinkClusterStatus.getTotalTaskSlots(cluster)).isEqualTo(4)
@@ -163,7 +165,7 @@ class ClusterControllerTest {
     @Test
     fun `should return true when resource has been deleted`() {
         assertThat(clusterController.hasBeenDeleted()).isEqualTo(false)
-        cluster.metadata.deletionTimestamp = DateTime(System.currentTimeMillis())
+        cluster.metadata.deletionTimestamp = Time.toDateTime(System.currentTimeMillis())
         assertThat(clusterController.hasBeenDeleted()).isEqualTo(true)
     }
 
@@ -206,8 +208,8 @@ class ClusterControllerTest {
 
     @Test
     fun `should initialize annotations`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isBefore(timestamp)
         FlinkClusterAnnotations.setRequestedAction(cluster, Action.STOP)
         FlinkClusterAnnotations.setDeleteResources(cluster, true)
         FlinkClusterAnnotations.setWithoutSavepoint(cluster, true)
@@ -215,13 +217,13 @@ class ClusterControllerTest {
         assertThat(FlinkClusterAnnotations.getRequestedAction(cluster)).isEqualTo(Action.NONE)
         assertThat(FlinkClusterAnnotations.isDeleteResources(cluster)).isFalse()
         assertThat(FlinkClusterAnnotations.isWithoutSavepoint(cluster)).isFalse()
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
     fun `should update digests`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isBefore(timestamp)
         assertThat(FlinkClusterStatus.getRuntimeDigest(cluster)).isNull()
         assertThat(FlinkClusterStatus.getJobManagerDigest(cluster)).isNull()
         assertThat(FlinkClusterStatus.getTaskManagerDigest(cluster)).isNull()
@@ -229,13 +231,13 @@ class ClusterControllerTest {
         assertThat(FlinkClusterStatus.getRuntimeDigest(cluster)).isNotNull()
         assertThat(FlinkClusterStatus.getJobManagerDigest(cluster)).isNotNull()
         assertThat(FlinkClusterStatus.getTaskManagerDigest(cluster)).isNotNull()
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
     fun `should update status`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isBefore(timestamp)
         assertThat(FlinkClusterStatus.getServiceMode(cluster)).isNull()
         assertThat(FlinkClusterStatus.getTaskManagers(cluster)).isEqualTo(0)
         assertThat(FlinkClusterStatus.getTaskSlots(cluster)).isNull()
@@ -245,7 +247,7 @@ class ClusterControllerTest {
         assertThat(FlinkClusterStatus.getServiceMode(cluster)).isNotNull()
         assertThat(FlinkClusterStatus.getTaskManagers(cluster)).isEqualTo(2)
         assertThat(FlinkClusterStatus.getTaskSlots(cluster)).isEqualTo(3)
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
@@ -281,13 +283,13 @@ class ClusterControllerTest {
 
     @Test
     fun `should update supervisor status`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isBefore(timestamp)
         assertThat(FlinkClusterStatus.getSupervisorStatus(cluster)).isEqualTo(ClusterStatus.Unknown)
         clusterController.setSupervisorStatus(ClusterStatus.Started)
         assertThat(clusterController.getSupervisorStatus()).isEqualTo(ClusterStatus.Started)
         assertThat(FlinkClusterStatus.getSupervisorStatus(cluster)).isEqualTo(ClusterStatus.Started)
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
@@ -299,12 +301,12 @@ class ClusterControllerTest {
 
     @Test
     fun `should update resource status`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isBefore(timestamp)
         assertThat(FlinkClusterStatus.getResourceStatus(cluster)).isEqualTo(ResourceStatus.Unknown)
         clusterController.setResourceStatus(ResourceStatus.Updated)
         assertThat(FlinkClusterStatus.getResourceStatus(cluster)).isEqualTo(ResourceStatus.Updated)
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
@@ -316,12 +318,12 @@ class ClusterControllerTest {
 
     @Test
     fun `should reset action`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isBefore(timestamp)
         FlinkClusterAnnotations.setRequestedAction(cluster, Action.STOP)
         clusterController.resetAction()
         assertThat(FlinkClusterAnnotations.getRequestedAction(cluster)).isEqualTo(Action.NONE)
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
@@ -334,12 +336,12 @@ class ClusterControllerTest {
 
     @Test
     fun `should update delete resources`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isBefore(timestamp)
         assertThat(FlinkClusterAnnotations.isDeleteResources(cluster)).isEqualTo(false)
         clusterController.setDeleteResources(true)
         assertThat(FlinkClusterAnnotations.isDeleteResources(cluster)).isEqualTo(true)
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
@@ -352,12 +354,12 @@ class ClusterControllerTest {
 
     @Test
     fun `should update without savepoint`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isBefore(timestamp)
         assertThat(FlinkClusterAnnotations.isWithoutSavepoint(cluster)).isEqualTo(false)
         clusterController.setWithoutSavepoint(true)
         assertThat(FlinkClusterAnnotations.isWithoutSavepoint(cluster)).isEqualTo(true)
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
@@ -370,12 +372,12 @@ class ClusterControllerTest {
 
     @Test
     fun `should update should restart`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isBefore(timestamp)
         assertThat(FlinkClusterAnnotations.shouldRestart(cluster)).isEqualTo(false)
         clusterController.setShouldRestart(true)
         assertThat(FlinkClusterAnnotations.shouldRestart(cluster)).isEqualTo(true)
-        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterAnnotations.getActionTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
@@ -388,18 +390,18 @@ class ClusterControllerTest {
 
     @Test
     fun `should update cluster health`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isBefore(timestamp)
         assertThat(FlinkClusterStatus.getClusterHealth(cluster)).isNull()
         clusterController.setClusterHealth("HEALTHY")
         assertThat(FlinkClusterStatus.getClusterHealth(cluster)).isEqualTo("HEALTHY")
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
     fun `should create service from cluster spec`() {
         cluster.metadata.uid = "123"
-        val service = ClusterResourcesDefaultFactory.createService(
+        val service = factory.createService(
             "flink", "flink-operator", "test", cluster.spec
         )
         val result: Result<String?> = Result(status = ResultStatus.OK, output = "servicename")
@@ -411,7 +413,7 @@ class ClusterControllerTest {
 
     @Test
     fun `should not create jobmanager pods when pods already exists`() {
-        val pod = TestFactory.aJobManagerPod(cluster, "1")
+        val pod = testFactory.aJobManagerPod(cluster, "1")
         val result: Result<String?> = Result(status = ResultStatus.OK, output = null)
         given(controller.createPod(eq("flink"), eq("test"), eq(pod))).thenReturn(result)
         val expectedResult: Result<Set<String>> = Result(status = ResultStatus.OK, output = setOf())
@@ -422,7 +424,7 @@ class ClusterControllerTest {
     fun `should create jobmanager pods from cluster spec when pods don't exist`() {
         cluster.metadata.uid = "123"
         jobmanagerPods.clear()
-        val pod = ClusterResourcesDefaultFactory.createJobManagerPod(
+        val pod = factory.createJobManagerPod(
             "flink", "flink-operator", "test", cluster.spec
         )
         val result: Result<String?> = Result(status = ResultStatus.OK, output = "podname")
@@ -435,7 +437,7 @@ class ClusterControllerTest {
 
     @Test
     fun `should not create taskmanager pods from cluster spec when pods already exist`() {
-        val pod = TestFactory.aTaskManagerPod(cluster, "1")
+        val pod = testFactory.aTaskManagerPod(cluster, "1")
         val result: Result<String?> = Result(status = ResultStatus.OK, output = null)
         given(controller.createPod(eq("flink"), eq("test"), eq(pod))).thenReturn(result)
         val expectedResult: Result<Set<String>> = Result(status = ResultStatus.OK, output = setOf())
@@ -446,7 +448,7 @@ class ClusterControllerTest {
     fun `should create taskmanager pods from cluster spec when pods don't exist`() {
         cluster.metadata.uid = "123"
         taskmanagerPods.clear()
-        val pod = ClusterResourcesDefaultFactory.createTaskManagerPod(
+        val pod = factory.createTaskManagerPod(
             "flink", "flink-operator", "test", cluster.spec
         )
         val result: Result<String?> = Result(status = ResultStatus.OK, output = "podname")
@@ -466,7 +468,7 @@ class ClusterControllerTest {
 
     @Test
     fun `should return status timestamp`() {
-        assertThat(clusterController.getStatusTimestamp()).isEqualTo(DateTime(0))
+        assertThat(clusterController.getStatusTimestamp()).isEqualTo(Time.toDateTime(0))
         FlinkClusterStatus.setSupervisorStatus(cluster, ClusterStatus.Stopped)
         assertThat(clusterController.getStatusTimestamp()).isEqualTo(FlinkClusterStatus.getStatusTimestamp(cluster))
     }
@@ -533,18 +535,18 @@ class ClusterControllerTest {
     @Test
     fun `should return number of jobmanager replicas`() {
         jobmanagerPods.clear()
-        jobmanagerPods.add(TestFactory.aJobManagerPod(cluster,"1"))
-        jobmanagerPods.add(TestFactory.aJobManagerPod(cluster,"2"))
+        jobmanagerPods.add(testFactory.aJobManagerPod(cluster,"1"))
+        jobmanagerPods.add(testFactory.aJobManagerPod(cluster,"2"))
         assertThat(clusterController.getJobManagerReplicas()).isEqualTo(2)
     }
 
     @Test
     fun `should return number of taskmanager replicas`() {
         taskmanagerPods.clear()
-        taskmanagerPods.add(TestFactory.aTaskManagerPod(cluster,"1"))
-        taskmanagerPods.add(TestFactory.aTaskManagerPod(cluster,"2"))
-        taskmanagerPods.add(TestFactory.aTaskManagerPod(cluster,"3"))
-        taskmanagerPods.add(TestFactory.aTaskManagerPod(cluster,"4"))
+        taskmanagerPods.add(testFactory.aTaskManagerPod(cluster,"1"))
+        taskmanagerPods.add(testFactory.aTaskManagerPod(cluster,"2"))
+        taskmanagerPods.add(testFactory.aTaskManagerPod(cluster,"3"))
+        taskmanagerPods.add(testFactory.aTaskManagerPod(cluster,"4"))
         assertThat(clusterController.getTaskManagerReplicas()).isEqualTo(4)
     }
 
@@ -558,12 +560,12 @@ class ClusterControllerTest {
 
     @Test
     fun `should rescale cluster`() {
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isBefore(timestamp)
         FlinkClusterStatus.setTaskManagers(cluster, 2)
         clusterController.rescaleCluster(4)
         assertThat(FlinkClusterStatus.getTaskManagers(cluster)).isEqualTo(4)
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isAfterOrEqualTo(timestamp)
         verify(controller, times(1)).updateTaskManagerReplicas(eq("flink"), eq("test"), eq(4))
     }
 
@@ -576,10 +578,10 @@ class ClusterControllerTest {
 
     @Test
     fun `should remove taskmanagers when there are unused taskmanagers`() {
-        val pod1 = TestFactory.aTaskManagerPod(cluster, "1")
-        val pod2 = TestFactory.aTaskManagerPod(cluster, "2")
-        val pod3 = TestFactory.aTaskManagerPod(cluster, "3")
-        val pod4 = TestFactory.aTaskManagerPod(cluster, "4")
+        val pod1 = testFactory.aTaskManagerPod(cluster, "1")
+        val pod2 = testFactory.aTaskManagerPod(cluster, "2")
+        val pod3 = testFactory.aTaskManagerPod(cluster, "3")
+        val pod4 = testFactory.aTaskManagerPod(cluster, "4")
         taskmanagerPods.clear()
         taskmanagerPods.add(pod1)
         taskmanagerPods.add(pod2)

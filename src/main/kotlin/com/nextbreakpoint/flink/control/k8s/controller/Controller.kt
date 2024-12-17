@@ -1,5 +1,11 @@
 package com.nextbreakpoint.flink.control.k8s.controller
 
+import com.nextbreakpoint.flink.client.model.JarFileInfo
+import com.nextbreakpoint.flink.client.model.JarUploadResponseBody
+import com.nextbreakpoint.flink.client.model.JobDetailsInfo
+import com.nextbreakpoint.flink.client.model.TaskManagerDetailsInfo
+import com.nextbreakpoint.flink.client.model.TaskManagerInfo
+import com.nextbreakpoint.flink.client.model.TaskManagersInfo
 import com.nextbreakpoint.flink.control.common.FlinkOptions
 import com.nextbreakpoint.flink.control.common.JobManagerStats
 import com.nextbreakpoint.flink.control.common.JobStats
@@ -75,12 +81,6 @@ import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJob
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobSpec
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobStatus
 import com.nextbreakpoint.flink.control.k8s.factory.DeploymentResourcesDefaultFactory
-import com.nextbreakpoint.flink.client.model.JarFileInfo
-import com.nextbreakpoint.flink.client.model.JarUploadResponseBody
-import com.nextbreakpoint.flink.client.model.JobDetailsInfo
-import com.nextbreakpoint.flink.client.model.TaskManagerDetailsInfo
-import com.nextbreakpoint.flink.client.model.TaskManagerInfo
-import com.nextbreakpoint.flink.client.model.TaskManagersInfo
 import io.kubernetes.client.openapi.models.V1Deployment
 import io.kubernetes.client.openapi.models.V1Job
 import io.kubernetes.client.openapi.models.V1Pod
@@ -93,6 +93,10 @@ class Controller(
     private val kubeClient: KubeClient,
     private val dryRun: Boolean
 ) {
+    companion object {
+        private val deploymentResourcesFactory = DeploymentResourcesDefaultFactory()
+    }
+
     fun currentTimeMillis() = System.currentTimeMillis()
 
     fun requestScaleCluster(namespace: String, clusterName: String, options: ScaleClusterOptions): Result<Void?> =
@@ -294,15 +298,15 @@ class Controller(
     }
 
     fun makeFlinkDeployment(namespace: String, clusterName: String, deploymentSpec: V1FlinkDeploymentSpec): V1FlinkDeployment {
-        return DeploymentResourcesDefaultFactory.createFlinkDeployment(namespace, Resource.RESOURCE_OWNER, clusterName, deploymentSpec)
+        return deploymentResourcesFactory.createFlinkDeployment(namespace, Resource.RESOURCE_OWNER, clusterName, deploymentSpec)
     }
 
     fun makeFlinkCluster(namespace: String, clusterName: String, clusterSpec: V1FlinkClusterSpec): V1FlinkCluster {
-        return DeploymentResourcesDefaultFactory.createFlinkCluster(namespace, Resource.RESOURCE_OWNER, clusterName, clusterSpec)
+        return deploymentResourcesFactory.createFlinkCluster(namespace, Resource.RESOURCE_OWNER, clusterName, clusterSpec)
     }
 
     fun makeFlinkJob(namespace: String, clusterName: String, jobName: String, jobSpec: V1FlinkJobSpec): V1FlinkJob {
-        return DeploymentResourcesDefaultFactory.createFlinkJob(namespace, Resource.RESOURCE_OWNER, clusterName, jobName, jobSpec)
+        return deploymentResourcesFactory.createFlinkJob(namespace, Resource.RESOURCE_OWNER, clusterName, jobName, jobSpec)
     }
 
     fun isDryRun() = dryRun

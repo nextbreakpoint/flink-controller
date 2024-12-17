@@ -21,7 +21,7 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.verifyNoMoreInteractions
 
 class RequestJobScaleTest {
-    private val job = TestFactory.aFlinkJob(name = "test-test", namespace = "flink")
+    private val job = TestFactory().aFlinkJob("test-test", "flink")
     private val flinkOptions = FlinkOptions(hostname = "localhost", portForward = null, useNodePort = false)
     private val flinkClient = mock(FlinkClient::class.java)
     private val kubeClient = mock(KubeClient::class.java)

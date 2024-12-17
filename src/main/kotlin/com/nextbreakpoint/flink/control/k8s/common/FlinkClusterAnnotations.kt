@@ -2,7 +2,7 @@ package com.nextbreakpoint.flink.control.k8s.common
 
 import com.nextbreakpoint.flink.control.common.Action
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkCluster
-import org.joda.time.DateTime
+import java.time.OffsetDateTime
 
 object FlinkClusterAnnotations {
     val REQUESTED_ACTION    = "operator.nextbreakpoint.com/requested-action"
@@ -25,8 +25,8 @@ object FlinkClusterAnnotations {
         }
     }
 
-    fun getActionTimestamp(flinkCluster: V1FlinkCluster) : DateTime =
-        DateTime(flinkCluster.metadata?.annotations?.get(ACTION_TIMESTAMP)?.toLong() ?: 0L)
+    fun getActionTimestamp(flinkCluster: V1FlinkCluster) : OffsetDateTime =
+        Time.toDateTime(flinkCluster.metadata?.annotations?.get(ACTION_TIMESTAMP)?.toLong() ?: 0L)
 
     fun setRequestedAction(flinkCluster: V1FlinkCluster, action: Action) {
         val annotations = flinkCluster.metadata?.annotations.orEmpty().toMutableMap()

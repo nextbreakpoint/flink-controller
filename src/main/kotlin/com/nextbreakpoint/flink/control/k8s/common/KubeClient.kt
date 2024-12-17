@@ -12,6 +12,7 @@ import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkDeploymentStatus
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJob
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobList
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobStatus
+import com.nextbreakpoint.flink.control.k8s.kube.Register
 import io.kubernetes.client.custom.V1Patch
 import io.kubernetes.client.informer.SharedIndexInformer
 import io.kubernetes.client.informer.SharedInformerFactory
@@ -22,7 +23,6 @@ import io.kubernetes.client.openapi.apis.AppsV1Api
 import io.kubernetes.client.openapi.apis.BatchV1Api
 import io.kubernetes.client.openapi.apis.CoreV1Api
 import io.kubernetes.client.openapi.apis.CustomObjectsApi
-import io.kubernetes.client.openapi.models.V1DeleteOptions
 import io.kubernetes.client.openapi.models.V1Deployment
 import io.kubernetes.client.openapi.models.V1DeploymentList
 import io.kubernetes.client.openapi.models.V1Job
@@ -67,6 +67,7 @@ object KubeClient {
         batchApiWatch.apiClient = apiClient
         coreApiWatch.apiClient = apiClient
         appsApiWatch.apiClient = apiClient
+        Register.registerCustomTypes()
     }
 
     fun createSharedInformerFactory() = SharedInformerFactory(apiClient)
@@ -77,17 +78,9 @@ object KubeClient {
             var jobmanagerPort = flinkOptions.portForward ?: 8081
 
             if (flinkOptions.hostname == null && flinkOptions.portForward == null && flinkOptions.useNodePort) {
-                val nodes = coreApi.listNode(
-                    null,
-                    null,
-                    null,
-                    null,
-                    null,
-                    1,
-                    null,
-                    30,
-                    null
-                )
+                val nodes = coreApi.listNode()
+                    .timeoutSeconds(30)
+                    .execute()
 
                 jobmanagerHost = nodes.items.flatMap {
                     it.status?.addresses.orEmpty()
@@ -99,13 +92,7 @@ object KubeClient {
             }
 
             if (flinkOptions.portForward == null) {
-                val service = coreApi.readNamespacedService(
-                    "jobmanager-$name",
-                    namespace,
-                    null,
-                    null,
-                    null,
-                )
+                val service = coreApi.readNamespacedService("jobmanager-$name", namespace).execute()
 
                 if (flinkOptions.useNodePort) {
                     service.spec?.ports?.filter {
@@ -145,29 +132,7 @@ object KubeClient {
 
     fun getFlinkDeployment(namespace: String, name: String): V1FlinkDeployment {
         try {
-            val response = objectApi.getNamespacedCustomObjectCall(
-                "nextbreakpoint.com",
-                "v1",
-                namespace,
-                "flinkdeployments",
-                name,
-                null
-            ).execute()
-
-            response.body?.use { body ->
-                body.source().use { source ->
-                    val line = source.readUtf8Line() ?: ""
-
-                    if (!response.isSuccessful) {
-                        logger.log(Level.SEVERE, line)
-                        throw NotFoundException("Can't fetch custom object $name")
-                    }
-
-                    return Resource.parseV1FlinkDeployment(line)
-                }
-            }
-
-            throw NotFoundException("Flink deployment not found: $name")
+            return Register.flinkDeploymentKubernetesApi(apiClient).get(namespace, name).`object`
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't fetch custom object: ${e.responseBody}")
             throw e
@@ -176,29 +141,7 @@ object KubeClient {
 
     fun getFlinkCluster(namespace: String, name: String): V1FlinkCluster {
         try {
-            val response = objectApi.getNamespacedCustomObjectCall(
-                "nextbreakpoint.com",
-                "v1",
-                namespace,
-                "flinkclusters",
-                name,
-                null
-            ).execute()
-
-            response.body?.use { body ->
-                body.source().use { source ->
-                    val line = source.readUtf8Line() ?: ""
-
-                    if (!response.isSuccessful) {
-                        logger.log(Level.SEVERE, line)
-                        throw NotFoundException("Can't fetch custom object $name")
-                    }
-
-                    return Resource.parseV1FlinkCluster(line)
-                }
-            }
-
-            throw NotFoundException("Flink cluster not found: $name")
+            return Register.flinkClusterKubernetesApi(apiClient).get(namespace, name).`object`
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't fetch custom object: ${e.responseBody}")
             throw e
@@ -207,30 +150,8 @@ object KubeClient {
 
     fun getFlinkJob(namespace: String, name: String): V1FlinkJob {
         try {
-            val response = objectApi.getNamespacedCustomObjectCall(
-                "nextbreakpoint.com",
-                "v1",
-                namespace,
-                "flinkjobs",
-                name,
-                null
-            ).execute()
-
-            response.body?.use { body ->
-                body.source().use { source ->
-                    val line = source.readUtf8Line() ?: ""
-
-                    if (!response.isSuccessful) {
-                        logger.log(Level.SEVERE, line)
-                        throw NotFoundException("Can't fetch custom object $name")
-                    }
-
-                    return Resource.parseV1FlinkJob(line)
-                }
-            }
-
-            throw NotFoundException("Flink job not found: $name")
-        } catch (e : ApiException) {
+            return Register.flinkJobKubernetesApi(apiClient).get(namespace, name).`object`
+        } catch (e: ApiException) {
             logger.log(Level.SEVERE, "Can't fetch custom object: ${e.responseBody}")
             throw e
         }
@@ -246,18 +167,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkDeployment::class.java, {
-                    objectApi.patchNamespacedCustomObjectCall(
+                    objectApi.patchNamespacedCustomObject(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkdeployments",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -278,18 +195,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkCluster::class.java, {
-                    objectApi.patchNamespacedCustomObjectCall(
+                    objectApi.patchNamespacedCustomObject(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkclusters",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -310,18 +223,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkJob::class.java, {
-                    objectApi.patchNamespacedCustomObjectCall(
+                    objectApi.patchNamespacedCustomObject(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkjobs",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -342,18 +251,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkDeployment::class.java, {
-                    objectApi.patchNamespacedCustomObjectCall(
+                    objectApi.patchNamespacedCustomObject(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkdeployments",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -374,18 +279,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkCluster::class.java, {
-                    objectApi.patchNamespacedCustomObjectCall(
+                    objectApi.patchNamespacedCustomObject(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkclusters",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -406,18 +307,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkJob::class.java, {
-                    objectApi.patchNamespacedCustomObjectCall(
+                    objectApi.patchNamespacedCustomObject(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkjobs",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -434,18 +331,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkCluster::class.java, {
-                    objectApi.patchNamespacedCustomObjectStatusCall(
+                    objectApi.patchNamespacedCustomObjectStatus(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkdeployments",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -462,18 +355,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkCluster::class.java, {
-                    objectApi.patchNamespacedCustomObjectStatusCall(
+                    objectApi.patchNamespacedCustomObjectStatus(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkclusters",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -490,18 +379,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkJob::class.java, {
-                    objectApi.patchNamespacedCustomObjectStatusCall(
+                    objectApi.patchNamespacedCustomObjectStatus(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkjobs",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -522,18 +407,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkCluster::class.java, {
-                    objectApi.patchNamespacedCustomObjectScaleCall(
+                    objectApi.patchNamespacedCustomObjectScale(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkclusters",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -554,18 +435,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkJob::class.java, {
-                    objectApi.patchNamespacedCustomObjectScaleCall(
+                    objectApi.patchNamespacedCustomObjectScale(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkjobs",
                         name,
-                        patch,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        patch
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -579,21 +456,16 @@ object KubeClient {
     fun createFlinkDeploymentsInformer(factory: SharedInformerFactory, namespace: String): SharedIndexInformer<V1FlinkDeployment> =
         factory.sharedIndexInformerFor(
             { params: CallGeneratorParams ->
-                objectApiWatch.listNamespacedCustomObjectCall(
+                objectApiWatch.listNamespacedCustomObject(
                     "nextbreakpoint.com",
                     "v1",
                     namespace,
-                    "flinkdeployments",
-                    null,
-                    null,
-                    null,
-                    null,//"component=flink,owner=flink-operator",
-                    null,
-                    params.resourceVersion,
-                    params.timeoutSeconds,
-                    params.watch,
-                    null
+                    "flinkdeployments"
                 )
+                .resourceVersion(params.resourceVersion)
+                .timeoutSeconds(params.timeoutSeconds)
+                .watch(params.watch)
+                .buildCall(null)
             },
             V1FlinkDeployment::class.java,
             V1FlinkDeploymentList::class.java
@@ -602,21 +474,16 @@ object KubeClient {
     fun createFlinkClustersInformer(factory: SharedInformerFactory, namespace: String): SharedIndexInformer<V1FlinkCluster> =
         factory.sharedIndexInformerFor(
             { params: CallGeneratorParams ->
-                objectApiWatch.listNamespacedCustomObjectCall(
+                objectApiWatch.listNamespacedCustomObject(
                     "nextbreakpoint.com",
                     "v1",
                     namespace,
-                    "flinkclusters",
-                    null,
-                    null,
-                    null,
-                    null,//"component=flink,owner=flink-operator",
-                    null,
-                    params.resourceVersion,
-                    params.timeoutSeconds,
-                    params.watch,
-                    null
+                    "flinkclusters"
                 )
+                .resourceVersion(params.resourceVersion)
+                .timeoutSeconds(params.timeoutSeconds)
+                .watch(params.watch)
+                .buildCall(null)
             },
             V1FlinkCluster::class.java,
             V1FlinkClusterList::class.java
@@ -625,21 +492,16 @@ object KubeClient {
     fun createFlinkJobsInformer(factory: SharedInformerFactory, namespace: String): SharedIndexInformer<V1FlinkJob> =
         factory.sharedIndexInformerFor(
             { params: CallGeneratorParams ->
-                objectApiWatch.listNamespacedCustomObjectCall(
+                objectApiWatch.listNamespacedCustomObject(
                     "nextbreakpoint.com",
                     "v1",
                     namespace,
                     "flinkjobs",
-                    null,
-                    null,
-                    null,
-                    null,//"component=flink,owner=flink-operator",
-                    null,
-                    params.resourceVersion,
-                    params.timeoutSeconds,
-                    params.watch,
-                    null
                 )
+                .resourceVersion(params.resourceVersion)
+                .timeoutSeconds(params.timeoutSeconds)
+                .watch(params.watch)
+                .buildCall(null)
             },
             V1FlinkJob::class.java,
             V1FlinkJobList::class.java
@@ -648,19 +510,14 @@ object KubeClient {
     fun createServicesInformer(factory: SharedInformerFactory, namespace: String): SharedIndexInformer<V1Service> =
         factory.sharedIndexInformerFor(
             { params: CallGeneratorParams ->
-                coreApiWatch.listNamespacedServiceCall(
-                    namespace,
-                    null,
-                    null,
-                    null,
-                    null,
-                    "component=flink,owner=flink-operator",
-                    null,
-                    params.resourceVersion,
-                    params.timeoutSeconds,
-                    params.watch,
-                    null
+                coreApiWatch.listNamespacedService(
+                    namespace
                 )
+                .labelSelector("component=flink,owner=flink-operator")
+                .resourceVersion(params.resourceVersion)
+                .timeoutSeconds(params.timeoutSeconds)
+                .watch(params.watch)
+                .buildCall(null)
             },
             V1Service::class.java,
             V1ServiceList::class.java
@@ -669,19 +526,14 @@ object KubeClient {
     fun createDeploymentsInformer(factory: SharedInformerFactory, namespace: String): SharedIndexInformer<V1Deployment> =
         factory.sharedIndexInformerFor(
             { params: CallGeneratorParams ->
-                appsApiWatch.listNamespacedDeploymentCall(
-                    namespace,
-                    null,
-                    null,
-                    null,
-                    null,
-                    "component=flink,owner=flink-operator",
-                    null,
-                    params.resourceVersion,
-                    params.timeoutSeconds,
-                    params.watch,
-                    null
+                appsApiWatch.listNamespacedDeployment(
+                    namespace
                 )
+                .labelSelector("component=flink,owner=flink-operator")
+                .resourceVersion(params.resourceVersion)
+                .timeoutSeconds(params.timeoutSeconds)
+                .watch(params.watch)
+                .buildCall(null)
             },
             V1Deployment::class.java,
             V1DeploymentList::class.java
@@ -690,19 +542,14 @@ object KubeClient {
     fun createJobsInformer(factory: SharedInformerFactory, namespace: String): SharedIndexInformer<V1Job> =
         factory.sharedIndexInformerFor(
             { params: CallGeneratorParams ->
-                batchApiWatch.listNamespacedJobCall(
-                    namespace,
-                    null,
-                    null,
-                    null,
-                    null,
-                    "component=flink,owner=flink-operator",
-                    null,
-                    params.resourceVersion,
-                    params.timeoutSeconds,
-                    params.watch,
-                    null
+                batchApiWatch.listNamespacedJob(
+                    namespace
                 )
+                .labelSelector("component=flink,owner=flink-operator")
+                .resourceVersion(params.resourceVersion)
+                .timeoutSeconds(params.timeoutSeconds)
+                .watch(params.watch)
+                .buildCall(null)
             },
             V1Job::class.java,
             V1JobList::class.java
@@ -711,19 +558,14 @@ object KubeClient {
     fun createPodsInformer(factory: SharedInformerFactory, namespace: String): SharedIndexInformer<V1Pod> =
         factory.sharedIndexInformerFor(
             { params: CallGeneratorParams ->
-                coreApiWatch.listNamespacedPodCall(
-                    namespace,
-                    null,
-                    null,
-                    null,
-                    null,
-                    "component=flink,owner=flink-operator",
-                    null,
-                    params.resourceVersion,
-                    params.timeoutSeconds,
-                    params.watch,
-                    null
+                coreApiWatch.listNamespacedPod(
+                    namespace
                 )
+                .labelSelector("component=flink,owner=flink-operator")
+                .resourceVersion(params.resourceVersion)
+                .timeoutSeconds(params.timeoutSeconds)
+                .watch(params.watch)
+                .buildCall(null)
             },
             V1Pod::class.java,
             V1PodList::class.java
@@ -732,151 +574,103 @@ object KubeClient {
     fun watchFlinkDeployments(namespace: String): Watchable<V1FlinkDeployment> =
         Watch.createWatch(
             objectApiWatch.apiClient,
-            objectApiWatch.listNamespacedCustomObjectCall(
+            objectApiWatch.listNamespacedCustomObject(
                 "nextbreakpoint.com",
                 "v1",
                 namespace,
-                "flinkdeployments",
-                null,
-                null,
-                null,
-                null,//"component=flink,owner=flink-operator",
-                null,
-                null,
-                600,
-                true,
-                null
-            ),
+                "flinkdeployments"
+            )
+            .timeoutSeconds(600)
+            .watch(true)
+            .buildCall(null),
             object : TypeToken<Watch.Response<V1FlinkDeployment>>() {}.type
         )
 
     fun watchFlinkClusters(namespace: String): Watchable<V1FlinkCluster> =
         Watch.createWatch(
             objectApiWatch.apiClient,
-            objectApiWatch.listNamespacedCustomObjectCall(
+            objectApiWatch.listNamespacedCustomObject(
                 "nextbreakpoint.com",
                 "v1",
                 namespace,
                 "flinkclusters",
-                null,
-                null,
-                null,
-                null,//"component=flink,owner=flink-operator",
-                null,
-                null,
-                600,
-                true,
-                null
-            ),
+            )
+            .timeoutSeconds(600)
+            .watch(true)
+            .buildCall(null),
             object : TypeToken<Watch.Response<V1FlinkCluster>>() {}.type
         )
 
     fun watchFlinkJobs(namespace: String): Watchable<V1FlinkJob> =
         Watch.createWatch(
             objectApiWatch.apiClient,
-            objectApiWatch.listNamespacedCustomObjectCall(
+            objectApiWatch.listNamespacedCustomObject(
                 "nextbreakpoint.com",
                 "v1",
                 namespace,
                 "flinkjobs",
-                null,
-                null,
-                null,
-                null,//"component=flink,owner=flink-operator",
-                null,
-                null,
-                600,
-                true,
-                null
-            ),
+            )
+            .timeoutSeconds(600)
+            .watch(true)
+            .buildCall(null),
             object : TypeToken<Watch.Response<V1FlinkJob>>() {}.type
         )
 
     fun watchServices(namespace: String): Watchable<V1Service> =
         Watch.createWatch(
             coreApiWatch.apiClient,
-            coreApiWatch.listNamespacedServiceCall(
-                namespace,
-                null,
-                null,
-                null,
-                null,
-                "component=flink,owner=flink-operator",
-                null,
-                null,
-                600,
-                true,
-                null
-            ),
+            coreApiWatch.listNamespacedService(
+                namespace
+            )
+            .labelSelector("component=flink,owner=flink-operator")
+            .timeoutSeconds(600)
+            .watch(true)
+            .buildCall(null),
             object : TypeToken<Watch.Response<V1Service>>() {}.type
         )
 
     fun watchDeployments(namespace: String): Watchable<V1Deployment> =
         Watch.createWatch(
             appsApiWatch.apiClient,
-            appsApiWatch.listNamespacedDeploymentCall(
+            appsApiWatch.listNamespacedDeployment(
                 namespace,
-                null,
-                null,
-                null,
-                null,
-                "component=flink,owner=flink-operator",
-                null,
-                null,
-                600,
-                true,
-                null
-            ),
+            )
+            .labelSelector("component=flink,owner=flink-operator")
+            .timeoutSeconds(600)
+            .watch(true)
+            .buildCall(null),
             object : TypeToken<Watch.Response<V1Deployment>>() {}.type
         )
 
     fun watchJobs(namespace: String): Watchable<V1Job> =
         Watch.createWatch(
             batchApiWatch.apiClient,
-            batchApiWatch.listNamespacedJobCall(
+            batchApiWatch.listNamespacedJob(
                 namespace,
-                null,
-                null,
-                null,
-                null,
-                "component=flink,owner=flink-operator",
-                null,
-                null,
-                600,
-                true,
-                null
-            ),
+            )
+            .labelSelector("component=flink,owner=flink-operator")
+            .timeoutSeconds(600)
+            .watch(true)
+            .buildCall(null),
             object : TypeToken<Watch.Response<V1Job>>() {}.type
         )
 
     fun watchPods(namespace: String): Watchable<V1Pod> =
         Watch.createWatch(
             coreApiWatch.apiClient,
-            coreApiWatch.listNamespacedPodCall(
+            coreApiWatch.listNamespacedPod(
                 namespace,
-                null,
-                null,
-                null,
-                null,
-                "component=flink,owner=flink-operator",
-                null,
-                null,
-                600,
-                true,
-                null
-            ),
+            )
+            .labelSelector("component=flink,owner=flink-operator")
+            .timeoutSeconds(600)
+            .watch(true)
+            .buildCall(null),
             object : TypeToken<Watch.Response<V1Pod>>() {}.type
         )
 
     fun createService(namespace: String, resource: V1Service): V1Service {
         try {
-             return coreApi.createNamespacedService(
-                namespace,
-                resource,
-                null,
-                null,
-                null
-            )
+             return coreApi.createNamespacedService(namespace, resource).execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't create service: ${e.responseBody}")
             throw e
@@ -885,18 +679,10 @@ object KubeClient {
 
     fun deleteService(namespace: String, name: String) {
         try {
-            val deleteOptions = V1DeleteOptions().propagationPolicy("Background")
-
-            coreApi.deleteNamespacedService(
-                name,
-                namespace,
-                null,
-                null,
-                5,
-                null,
-                null,
-                deleteOptions
-            )
+            coreApi.deleteNamespacedService(name, namespace)
+                .propagationPolicy("Background")
+                .gracePeriodSeconds(5)
+                .execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't delete service: ${e.responseBody}")
             throw e
@@ -905,13 +691,7 @@ object KubeClient {
 
     fun createPod(namespace: String, resource: V1Pod): V1Pod {
         try {
-            return coreApi.createNamespacedPod(
-                namespace,
-                resource,
-                null,
-                null,
-                null
-            )
+            return coreApi.createNamespacedPod(namespace, resource).execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't create pod: ${e.responseBody}")
             throw e
@@ -920,18 +700,10 @@ object KubeClient {
 
     fun deletePod(namespace: String, name: String) {
         try {
-            val deleteOptions = V1DeleteOptions().propagationPolicy("Background")
-
-            coreApi.deleteNamespacedPod(
-                name,
-                namespace,
-                null,
-                null,
-                5,
-                null,
-                null,
-                deleteOptions
-            )
+            coreApi.deleteNamespacedPod(name, namespace)
+                .propagationPolicy("Background")
+                .gracePeriodSeconds(5)
+                .execute()
         } catch (e: ApiException) {
             logger.log(Level.SEVERE, "Can't delete pod: ${e.responseBody}")
             throw e
@@ -940,16 +712,13 @@ object KubeClient {
 
     fun createFlinkDeployment(namespace: String, resource: V1FlinkDeployment) {
         try {
-            objectApi.createNamespacedCustomObjectWithHttpInfo(
+            objectApi.createNamespacedCustomObject(
                 "nextbreakpoint.com",
                 "v1",
                 namespace,
                 "flinkdeployments",
-                resource,
-                null,
-                null,
-                null
-            )
+                resource
+            ).execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't create flinkdeployment: ${e.responseBody}")
             throw e
@@ -958,20 +727,16 @@ object KubeClient {
 
     fun deleteFlinkDeployment(namespace: String, name: String) {
         try {
-            val deleteOptions = V1DeleteOptions().propagationPolicy("Background")
-
-            objectApi.deleteNamespacedCustomObjectWithHttpInfo(
+            objectApi.deleteNamespacedCustomObject(
                 "nextbreakpoint.com",
                 "v1",
                 namespace,
                 "flinkdeployments",
-                name,
-                5,
-                null,
-                null,
-                null,
-                deleteOptions
+                name
             )
+            .propagationPolicy("Background")
+            .gracePeriodSeconds(5)
+            .execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't delete flinkdeployment: ${e.responseBody}")
             throw e
@@ -982,18 +747,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkDeployment::class.java, {
-                    objectApi.patchNamespacedCustomObjectCall(
+                    objectApi.patchNamespacedCustomObject(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkdeployments",
                         resource.metadata.name,
-                        resource,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        resource
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -1006,16 +767,13 @@ object KubeClient {
 
     fun createFlinkCluster(namespace: String, resource: V1FlinkCluster) {
         try {
-            objectApi.createNamespacedCustomObjectWithHttpInfo(
+            objectApi.createNamespacedCustomObject(
                 "nextbreakpoint.com",
                 "v1",
                 namespace,
                 "flinkclusters",
-                resource,
-                null,
-                null,
-                null
-            )
+                resource
+            ).execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't create flinkcluster: ${e.responseBody}")
             throw e
@@ -1024,20 +782,16 @@ object KubeClient {
 
     fun deleteFlinkCluster(namespace: String, name: String) {
         try {
-            val deleteOptions = V1DeleteOptions().propagationPolicy("Background")
-
-            objectApi.deleteNamespacedCustomObjectWithHttpInfo(
+            objectApi.deleteNamespacedCustomObject(
                 "nextbreakpoint.com",
                 "v1",
                 namespace,
                 "flinkclusters",
-                name,
-                5,
-                null,
-                null,
-                null,
-                deleteOptions
+                name
             )
+            .propagationPolicy("Background")
+            .gracePeriodSeconds(5)
+            .execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't delete flinkcluster: ${e.responseBody}")
             throw e
@@ -1048,18 +802,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkCluster::class.java, {
-                    objectApi.patchNamespacedCustomObjectCall(
+                    objectApi.patchNamespacedCustomObject(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkclusters",
                         resource.metadata.name,
-                        resource,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        resource
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -1072,16 +822,13 @@ object KubeClient {
 
     fun createFlinkJob(namespace: String, resource: V1FlinkJob) {
         try {
-            objectApi.createNamespacedCustomObjectWithHttpInfo(
+            objectApi.createNamespacedCustomObject(
                 "nextbreakpoint.com",
                 "v1",
                 namespace,
                 "flinkjobs",
-                resource,
-                null,
-                null,
-                null
-            )
+                resource
+            ).execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't create flinkjob: ${e.responseBody}")
             throw e
@@ -1090,20 +837,16 @@ object KubeClient {
 
     fun deleteFlinkJob(namespace: String, name: String) {
         try {
-            val deleteOptions = V1DeleteOptions().propagationPolicy("Background")
-
-            objectApi.deleteNamespacedCustomObjectWithHttpInfo(
+            objectApi.deleteNamespacedCustomObject(
                 "nextbreakpoint.com",
                 "v1",
                 namespace,
                 "flinkjobs",
-                name,
-                5,
-                null,
-                null,
-                null,
-                deleteOptions
+                name
             )
+            .propagationPolicy("Background")
+            .gracePeriodSeconds(5)
+            .execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't delete flinkjob: ${e.responseBody}")
             throw e
@@ -1114,18 +857,14 @@ object KubeClient {
         try {
             PatchUtils.patch(
                 V1FlinkJob::class.java, {
-                    objectApi.patchNamespacedCustomObjectCall(
+                    objectApi.patchNamespacedCustomObject(
                         "nextbreakpoint.com",
                         "v1",
                         namespace,
                         "flinkjobs",
                         resource.metadata.name,
-                        resource,
-                        null,
-                        null,
-                        null,
-                        null
-                    )
+                        resource
+                    ).buildCall(null)
                 },
                 V1Patch.PATCH_FORMAT_JSON_MERGE_PATCH,
                 objectApi.apiClient
@@ -1138,13 +877,7 @@ object KubeClient {
 
     fun createJob(namespace: String, resource: V1Job): V1Job {
         try {
-            return batchApi.createNamespacedJob(
-                namespace,
-                resource,
-                null,
-                null,
-                null
-            )
+            return batchApi.createNamespacedJob(namespace, resource).execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't create job: ${e.responseBody}")
             throw e
@@ -1153,18 +886,10 @@ object KubeClient {
 
     fun deleteJob(namespace: String, name: String) {
         try {
-            val deleteOptions = V1DeleteOptions().propagationPolicy("Background")
-
-            batchApi.deleteNamespacedJob(
-                name,
-                namespace,
-                null,
-                null,
-                5,
-                null,
-                null,
-                deleteOptions
-            )
+            batchApi.deleteNamespacedJob(name, namespace)
+                .propagationPolicy("Background")
+                .gracePeriodSeconds(5)
+                .execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't delete job: ${e.responseBody}")
             throw e
@@ -1173,13 +898,7 @@ object KubeClient {
 
     fun createDeployment(namespace: String, resource: V1Deployment): V1Deployment {
         try {
-            return appsApi.createNamespacedDeployment(
-                namespace,
-                resource,
-                null,
-                null,
-                null
-            )
+            return appsApi.createNamespacedDeployment(namespace, resource).execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't create deployment: ${e.responseBody}")
             throw e
@@ -1188,18 +907,10 @@ object KubeClient {
 
     fun deleteDeployment(namespace: String, name: String) {
         try {
-            val deleteOptions = V1DeleteOptions().propagationPolicy("Background")
-
-            appsApi.deleteNamespacedDeployment(
-                name,
-                namespace,
-                null,
-                null,
-                5,
-                null,
-                null,
-                deleteOptions
-            )
+            appsApi.deleteNamespacedDeployment(name, namespace)
+                .propagationPolicy("Background")
+                .gracePeriodSeconds(5)
+                .execute()
         } catch (e : ApiException) {
             logger.log(Level.SEVERE, "Can't delete deployment: ${e.responseBody}")
             throw e

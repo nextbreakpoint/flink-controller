@@ -4,11 +4,11 @@ import com.nextbreakpoint.flink.control.common.ResourceStatus
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkDeployment
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkDeploymentDigest
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkDeploymentStatus
-import org.joda.time.DateTime
+import java.time.OffsetDateTime
 
 object FlinkDeploymentStatus {
-    fun getStatusTimestamp(flinkDeployment: V1FlinkDeployment) : DateTime =
-        flinkDeployment.status?.timestamp ?: DateTime(0)
+    fun getStatusTimestamp(flinkDeployment: V1FlinkDeployment) : OffsetDateTime =
+        flinkDeployment.status?.timestamp ?: Time.toDateTime(0)
 
     fun setResourceStatus(flinkDeployment: V1FlinkDeployment, status: ResourceStatus) {
         if (flinkDeployment.status?.resourceStatus != status.toString()) {
@@ -37,7 +37,7 @@ object FlinkDeploymentStatus {
         flinkDeployment.status?.digest
 
     private fun updateStatusTimestamp(flinkDeployment: V1FlinkDeployment, currentTimeMillis: Long) {
-        flinkDeployment.status?.timestamp = DateTime(currentTimeMillis)
+        flinkDeployment.status?.timestamp = Time.toDateTime(currentTimeMillis)
     }
 
     private fun currentTimeMillis(): Long {

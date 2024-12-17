@@ -22,11 +22,16 @@ class OperatorController(
     private val controller: Controller,
     private val serverConfig: ServerConfig
 ) {
-    fun timeSinceLastUpdateInSeconds(deployment: V1FlinkDeployment) = (controller.currentTimeMillis() - FlinkDeploymentStatus.getStatusTimestamp(deployment).millis) / 1000L
+    companion object {
+        val supervisorResourcesFactory = SupervisorResourcesDefaultFactory()
+        val deploymentResourcesFactory = DeploymentResourcesDefaultFactory()
+    }
 
-    fun timeSinceLastUpdateInSeconds(cluster: V1FlinkCluster) = (controller.currentTimeMillis() - FlinkClusterStatus.getStatusTimestamp(cluster).millis) / 1000L
+    fun timeSinceLastUpdateInSeconds(deployment: V1FlinkDeployment) = (controller.currentTimeMillis() - FlinkDeploymentStatus.getStatusTimestamp(deployment).toInstant().toEpochMilli()) / 1000L
 
-    fun timeSinceLastUpdateInSeconds(job: V1FlinkJob) = (controller.currentTimeMillis() - FlinkJobStatus.getStatusTimestamp(job).millis) / 1000L
+    fun timeSinceLastUpdateInSeconds(cluster: V1FlinkCluster) = (controller.currentTimeMillis() - FlinkClusterStatus.getStatusTimestamp(cluster).toInstant().toEpochMilli()) / 1000L
+
+    fun timeSinceLastUpdateInSeconds(job: V1FlinkJob) = (controller.currentTimeMillis() - FlinkJobStatus.getStatusTimestamp(job).toInstant().toEpochMilli()) / 1000L
 
     fun hasFinalizer(cluster: V1FlinkCluster) =
         cluster.metadata.finalizers.orEmpty().contains(Resource.OPERATOR_FINALIZER_VALUE)
@@ -88,7 +93,7 @@ class OperatorController(
     }
 
     fun createSupervisorDeployment(namespace: String, clusterName: String, cluster: V1FlinkCluster) {
-        val deployment = SupervisorResourcesDefaultFactory.createSupervisorDeployment(
+        val deployment = supervisorResourcesFactory.createSupervisorDeployment(
             namespace,
             Resource.RESOURCE_OWNER,
             clusterName,
@@ -103,7 +108,7 @@ class OperatorController(
         controller.deleteFlinkCluster(namespace, clusterName)
 
     fun createCluster(namespace: String, clusterName: String, clusterSpec: V1FlinkClusterSpec): Result<Void?> {
-        val cluster = DeploymentResourcesDefaultFactory.createFlinkCluster(
+        val cluster = deploymentResourcesFactory.createFlinkCluster(
             namespace,
             Resource.RESOURCE_OWNER,
             clusterName,
@@ -121,7 +126,7 @@ class OperatorController(
         controller.deleteFlinkJob(namespace, clusterName, jobName)
 
     fun createJob(namespace: String, clusterName: String, jobName: String, jobSpec: V1FlinkJobSpec): Result<Void?> {
-        val job = DeploymentResourcesDefaultFactory.createFlinkJob(
+        val job = deploymentResourcesFactory.createFlinkJob(
             namespace,
             Resource.RESOURCE_OWNER,
             clusterName,

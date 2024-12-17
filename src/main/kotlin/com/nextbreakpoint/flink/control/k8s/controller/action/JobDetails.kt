@@ -1,12 +1,12 @@
 package com.nextbreakpoint.flink.control.k8s.controller.action
 
+import com.nextbreakpoint.flink.client.model.JobDetailsInfo
 import com.nextbreakpoint.flink.control.common.FlinkOptions
 import com.nextbreakpoint.flink.control.k8s.common.FlinkClient
 import com.nextbreakpoint.flink.control.k8s.common.KubeClient
 import com.nextbreakpoint.flink.control.k8s.controller.core.JobAction
 import com.nextbreakpoint.flink.control.k8s.controller.core.Result
 import com.nextbreakpoint.flink.control.k8s.controller.core.ResultStatus
-import com.nextbreakpoint.flink.client.model.JobDetailsInfo
 import java.util.logging.Level
 import java.util.logging.Logger
 

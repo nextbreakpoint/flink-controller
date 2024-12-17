@@ -36,7 +36,7 @@ class MonitoringVerticle(
         }
 
         mainRouter.get("/version").handler { routingContext ->
-            handleRequest(routingContext, Function { JSON().serialize(getVersion()) })
+            handleRequest(routingContext, Function { JSON.serialize(getVersion()) })
         }
 
         mainRouter.get("/metrics").handler(PrometheusScrapingHandler.create(registryName))

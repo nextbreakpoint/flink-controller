@@ -1,6 +1,7 @@
 package com.nextbreakpoint.flink.control.integration
 
 import com.google.gson.reflect.TypeToken
+import com.nextbreakpoint.flink.client.model.TaskManagerInfo
 import com.nextbreakpoint.flink.control.common.ClusterStatus
 import com.nextbreakpoint.flink.control.common.JobStatus
 import com.nextbreakpoint.flink.control.common.ResourceStatus
@@ -13,12 +14,11 @@ import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkClusterSpec
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkClusterStatus
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobSpec
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobStatus
-import com.nextbreakpoint.flink.client.model.TaskManagerInfo
 import io.kubernetes.client.openapi.JSON
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
+import okhttp3.RequestBody.Companion.toRequestBody
 import org.apache.commons.io.IOUtils
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.fail
@@ -566,7 +566,7 @@ open class IntegrationSetup {
             val mediaType = "application/json".toMediaType()
             val builder = Request.Builder().url(url)
             if (body != null) {
-                val jsonBody = JSON().serialize(body)
+                val jsonBody = JSON.serialize(body)
                 val payload = jsonBody.toRequestBody(mediaType)
                 builder.post(payload)
             }
@@ -578,7 +578,7 @@ open class IntegrationSetup {
             val mediaType = "application/json".toMediaType()
             val builder = Request.Builder().url(url)
             if (body != null) {
-                val jsonBody = JSON().serialize(body)
+                val jsonBody = JSON.serialize(body)
                 val payload = jsonBody.toRequestBody(mediaType)
                 builder.put(payload)
             }
@@ -1126,7 +1126,7 @@ open class IntegrationSetup {
                 response.body?.use {
                     val line = it.source().readUtf8Line()
                     println("Response code: ${response.code}, body: $line")
-                    return response.code to JSON().deserialize(line, typeToken.type)
+                    return response.code to JSON.deserialize(line, typeToken.type)
                 }
                 println("ERROR: Empty response")
                 return 500 to null

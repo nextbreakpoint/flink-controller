@@ -1,5 +1,6 @@
 package com.nextbreakpoint.flink.control.k8s.controller.action
 
+import com.nextbreakpoint.flink.client.model.TriggerResponse
 import com.nextbreakpoint.flink.control.common.FlinkAddress
 import com.nextbreakpoint.flink.control.common.FlinkOptions
 import com.nextbreakpoint.flink.control.common.SavepointOptions
@@ -10,7 +11,6 @@ import com.nextbreakpoint.flink.control.k8s.controller.core.JobContext
 import com.nextbreakpoint.flink.control.k8s.controller.core.ResultStatus
 import com.nextbreakpoint.flink.control.testing.KotlinMockito.eq
 import com.nextbreakpoint.flink.control.testing.KotlinMockito.given
-import com.nextbreakpoint.flink.client.model.TriggerResponse
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test

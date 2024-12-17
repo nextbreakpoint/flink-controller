@@ -5,14 +5,14 @@ import com.nextbreakpoint.flink.control.common.ResourceStatus
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkCluster
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkClusterDigest
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkClusterStatus
-import org.joda.time.DateTime
+import java.time.OffsetDateTime
 
 object FlinkClusterStatus {
-    fun getStatusTimestamp(flinkCluster: V1FlinkCluster) : DateTime =
-        flinkCluster.status?.timestamp ?: DateTime(0)
+    fun getStatusTimestamp(flinkCluster: V1FlinkCluster) : OffsetDateTime =
+        flinkCluster.status?.timestamp ?: Time.toDateTime(0)
 
-    fun getRescaleTimestamp(flinkCluster: V1FlinkCluster) : DateTime =
-        flinkCluster.status?.rescaleTimestamp ?: DateTime(0)
+    fun getRescaleTimestamp(flinkCluster: V1FlinkCluster) : OffsetDateTime =
+        flinkCluster.status?.rescaleTimestamp ?: Time.toDateTime(0)
 
     fun setSupervisorStatus(flinkCluster: V1FlinkCluster, status: ClusterStatus) {
         if (flinkCluster.status?.supervisorStatus != status.toString()) {
@@ -187,11 +187,11 @@ object FlinkClusterStatus {
         flinkCluster.status?.serviceMode
 
     fun updateStatusTimestamp(flinkCluster: V1FlinkCluster, currentTimeMillis: Long) {
-        flinkCluster.status?.timestamp = DateTime(currentTimeMillis)
+        flinkCluster.status?.timestamp = Time.toDateTime(currentTimeMillis)
     }
 
     fun updateRescaleTimestamp(flinkCluster: V1FlinkCluster, currentTimeMillis: Long) {
-        flinkCluster.status?.rescaleTimestamp = DateTime(currentTimeMillis)
+        flinkCluster.status?.rescaleTimestamp = Time.toDateTime(currentTimeMillis)
     }
 
     @JvmStatic

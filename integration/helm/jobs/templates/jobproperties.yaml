@@ -27,7 +27,7 @@ data:
     window.size: 60000
     window.slide: 60000
     flink.rest.bind-port: 8081
-    flink.parallelism.default: 4
+    flink.parallelism.default: 1
     flink.pipeline.max-parallelism: 128
     flink.pipeline.auto-watermark-interval: 10000
     flink.pipeline.operator-chaining.enabled: true
@@ -52,7 +52,7 @@ data:
     window.size: 60000
     window.slide: 60000
     flink.rest.bind-port: 8081
-    flink.parallelism.default: 4
+    flink.parallelism.default: 1
     flink.pipeline.max-parallelism: 128
     flink.pipeline.auto-watermark-interval: 10000
     flink.pipeline.operator-chaining.enabled: true

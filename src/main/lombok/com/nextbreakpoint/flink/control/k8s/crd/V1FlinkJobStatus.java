@@ -3,9 +3,9 @@ package com.nextbreakpoint.flink.control.k8s.crd;
 import com.google.gson.annotations.SerializedName;
 import lombok.Builder;
 import lombok.Data;
-import org.joda.time.DateTime;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
@@ -27,7 +27,7 @@ public class V1FlinkJobStatus {
     @SerializedName("jobParallelism")
     private Integer jobParallelism;
     @SerializedName("timestamp")
-    private DateTime timestamp;
+    private OffsetDateTime timestamp;
     @SerializedName("jobId")
     private String jobId;
     @SerializedName("jobStatus")
@@ -39,13 +39,15 @@ public class V1FlinkJobStatus {
     @SerializedName("savepointTriggerId")
     private String savepointTriggerId;
     @SerializedName("savepointTimestamp")
-    private DateTime savepointTimestamp;
+    private OffsetDateTime savepointTimestamp;
     @SerializedName("savepointRequestTimestamp")
-    private DateTime savepointRequestTimestamp;
+    private OffsetDateTime savepointRequestTimestamp;
     @SerializedName("savepointMode")
     private String savepointMode;
     @SerializedName("restartPolicy")
     private String restartPolicy;
+    @SerializedName("bootstrapAttempts")
+    private Integer bootstrapAttempts;
     @SerializedName("digest")
     private V1FlinkJobDigest digest;
 }

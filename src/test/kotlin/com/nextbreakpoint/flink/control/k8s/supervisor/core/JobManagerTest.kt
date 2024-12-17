@@ -107,6 +107,7 @@ class JobManagerTest {
     @Test
     fun `should change status on job ready to restart event`() {
         manager.onJobReadyToRestart()
+        verify(controller, times(1)).setBootstrapAttempts(0)
         verify(controller, times(1)).updateStatus()
         verify(controller, times(1)).updateDigests()
         verify(controller, times(1)).setSupervisorStatus(eq(JobStatus.Starting))
