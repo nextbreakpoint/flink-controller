@@ -15,7 +15,7 @@ import org.mockito.Mockito.mock
 import org.mockito.Mockito.verifyNoMoreInteractions
 
 class FlinkJobGetStatusTest {
-    private val job = TestFactory.aFlinkJob(name = "test-test", namespace = "flink")
+    private val job = TestFactory().aFlinkJob("test-test", "flink")
     private val flinkOptions = FlinkOptions(hostname = "localhost", portForward = null, useNodePort = false)
     private val flinkClient = mock(FlinkClient::class.java)
     private val kubeClient = mock(KubeClient::class.java)

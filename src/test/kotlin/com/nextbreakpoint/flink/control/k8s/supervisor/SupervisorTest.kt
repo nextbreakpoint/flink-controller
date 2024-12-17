@@ -6,6 +6,7 @@ import com.nextbreakpoint.flink.control.common.ServerConfig
 import com.nextbreakpoint.flink.control.k8s.common.FlinkClusterStatus
 import com.nextbreakpoint.flink.control.k8s.common.FlinkJobStatus
 import com.nextbreakpoint.flink.control.k8s.common.Task
+import com.nextbreakpoint.flink.control.k8s.common.Time
 import com.nextbreakpoint.flink.control.k8s.controller.Controller
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkCluster
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJob
@@ -19,7 +20,6 @@ import com.nextbreakpoint.flink.control.testing.KotlinMockito.eq
 import com.nextbreakpoint.flink.control.testing.KotlinMockito.given
 import com.nextbreakpoint.flink.control.testing.TestFactory
 import org.assertj.core.api.Assertions.assertThat
-import org.joda.time.DateTime
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.spy
@@ -27,18 +27,19 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 
 class SupervisorTest {
-    private val cluster = TestFactory.aFlinkCluster(name = "test", namespace = "flink")
-    private val job = TestFactory.aFlinkJob(name = "test-test", namespace = "flink")
+    private val testFactory = TestFactory()
+    private val cluster = testFactory.aFlinkCluster("test", "flink")
+    private val job = testFactory.aFlinkJob("test-test", "flink")
     private val clusterResources = ClusterResources(
         flinkCluster = cluster,
-        jobmanagerService = TestFactory.aJobManagerService(cluster),
-        jobmanagerPods = setOf(TestFactory.aJobManagerPod(cluster, "1")),
-        taskmanagerPods = setOf(TestFactory.aTaskManagerPod(cluster, "1")),
+        jobmanagerService = testFactory.aJobManagerService(cluster),
+        jobmanagerPods = setOf(testFactory.aJobManagerPod(cluster, "1")),
+        taskmanagerPods = setOf(testFactory.aTaskManagerPod(cluster, "1")),
         flinkJobs = setOf(job)
     )
     private val jobResources = JobResources(
         flinkJob = job,
-        bootstrapJob = TestFactory.aBootstrapJob(cluster, job)
+        bootstrapJob = testFactory.aBootstrapJob(cluster, job)
     )
     private val clusterTask = spy(DummyClusterTask(cluster))
     private val clusterTasks = mapOf(
@@ -71,20 +72,20 @@ class SupervisorTest {
         given(cache.clusterName).thenReturn("test")
         given(cache.getClusterResources()).thenReturn(clusterResources)
         given(cache.getJobResources(eq("test"))).thenReturn(jobResources)
-        val timestamp = DateTime(System.currentTimeMillis())
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isLessThan(timestamp)
-        assertThat(FlinkJobStatus.getStatusTimestamp(job)).isLessThan(timestamp)
+        val timestamp = Time.toDateTime(System.currentTimeMillis())
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isBefore(timestamp)
+        assertThat(FlinkJobStatus.getStatusTimestamp(job)).isBefore(timestamp)
         supervisor.reconcile()
         verify(clusterTask, times(1)).execute(any())
         verify(jobTask, times(1)).execute(any())
-        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isGreaterThanOrEqualTo(timestamp)
-        assertThat(FlinkJobStatus.getStatusTimestamp(job)).isGreaterThanOrEqualTo(timestamp)
+        assertThat(FlinkClusterStatus.getStatusTimestamp(cluster)).isAfterOrEqualTo(timestamp)
+        assertThat(FlinkJobStatus.getStatusTimestamp(job)).isAfterOrEqualTo(timestamp)
     }
 
     @Test
     fun `should match podIP`() {
-        val regexp = Regex("akka\\.tcp://flink@([0-9.]+):[0-9]+/user/taskmanager_[0-9]+")
-        val match = regexp.matchEntire("akka.tcp://flink@172.17.0.12:41545/user/taskmanager_0")
+        val regexp = Regex(".*\\.tcp://flink@([0-9.]+):[0-9]+/user/taskmanager_[0-9]+")
+        val match = regexp.matchEntire("pekko.tcp://flink@172.17.0.12:41545/user/taskmanager_0")
         val nodeIP = match?.groupValues?.get(1)
         assertThat(nodeIP).isEqualTo("172.17.0.12")
     }

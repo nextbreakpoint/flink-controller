@@ -255,7 +255,7 @@ class ClusterManager(
             return false
         }
 
-        logger.info("Detected change: TaskManagers ($requiredTaskManagers/$declaredTaskManagers)")
+        logger.info("Detected change: TaskManagers (required: $requiredTaskManagers, declared: $declaredTaskManagers)")
 
         controller.rescaleCluster(requiredTaskManagers)
 

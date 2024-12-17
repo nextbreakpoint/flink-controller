@@ -208,6 +208,9 @@
       "restartPolicy": {
         "type": "string"
       },
+      "bootstrapAttempts": {
+        "type": "integer"
+      },
       "savepointJobId": {
         "type": "string"
       },

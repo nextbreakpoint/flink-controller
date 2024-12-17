@@ -87,6 +87,7 @@ class JobManager(
 
     fun onJobReadyToRestart() {
         logger.info("Job restarted")
+        controller.setBootstrapAttempts(0)
         controller.resetSavepointRequest()
         controller.resetJob()
         controller.updateStatus()
@@ -211,6 +212,14 @@ class JobManager(
         }
 
         return bootstrapJobExists
+    }
+
+    fun getBootstrapAttempts(): Int {
+        return controller.getBootstrapAttempts()
+    }
+
+    fun incrementBootstrapAttempts() {
+        controller.setBootstrapAttempts(controller.getBootstrapAttempts() + 1)
     }
 
     fun cancelJob(): Boolean {
@@ -381,6 +390,8 @@ class JobManager(
     fun shouldRestartJob() = controller.getRestartPolicy() == RestartPolicy.Always || (controller.getRestartPolicy() == RestartPolicy.OnlyIfFailed && isJobFailed())
 
     fun shouldRestart() = controller.shouldRestart()
+
+    fun shouldBootstrapJob() = shouldRestartJob() || getBootstrapAttempts() == 0
 
     fun isReadyToRestart() = controller.timeSinceLastUpdateInSeconds() > controller.getRestartDelay()
 

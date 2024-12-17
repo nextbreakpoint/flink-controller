@@ -1,10 +1,10 @@
 package com.nextbreakpoint.flink.control.k8s.bootstrap
 
+import com.nextbreakpoint.flink.client.model.UploadStatus
 import com.nextbreakpoint.flink.control.common.BootstrapOptions
 import com.nextbreakpoint.flink.control.common.RunJarOptions
 import com.nextbreakpoint.flink.control.k8s.common.FlinkJobStatus
 import com.nextbreakpoint.flink.control.k8s.controller.Controller
-import com.nextbreakpoint.flink.client.model.UploadStatus
 import java.io.File
 import java.util.logging.Level
 import java.util.logging.Logger

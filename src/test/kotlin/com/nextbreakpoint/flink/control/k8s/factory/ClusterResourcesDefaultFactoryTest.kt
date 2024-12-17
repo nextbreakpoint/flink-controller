@@ -5,11 +5,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class ClusterResourcesDefaultFactoryTest {
-    private val cluster = TestFactory.aFlinkCluster(name = "test", namespace ="flink", taskManagers = 3, taskSlots = 2)
+    private val cluster = TestFactory().aFlinkCluster("test", "flink", 3, 2)
+    private val factory = ClusterResourcesDefaultFactory()
 
     @Test
     fun `should create jobmanager service`() {
-        val service = ClusterResourcesDefaultFactory.createService("test", "myself", "test", cluster.spec)
+        val service = factory.createService("test", "myself", "test", cluster.spec)
 
         assertThat(service).isNotNull()
 
@@ -41,7 +42,7 @@ class ClusterResourcesDefaultFactoryTest {
 
     @Test
     fun `should create jobmanager pod`() {
-        val pod = ClusterResourcesDefaultFactory.createJobManagerPod("test", "myself", "test", cluster.spec)
+        val pod = factory.createJobManagerPod("test", "myself", "test", cluster.spec)
 
         assertThat(pod).isNotNull()
 
@@ -89,7 +90,7 @@ class ClusterResourcesDefaultFactoryTest {
 
     @Test
     fun `should create taskmanager pod`() {
-        val pod = ClusterResourcesDefaultFactory.createTaskManagerPod("test", "myself", "test", cluster.spec)
+        val pod = factory.createTaskManagerPod("test", "myself", "test", cluster.spec)
 
         assertThat(pod).isNotNull()
 

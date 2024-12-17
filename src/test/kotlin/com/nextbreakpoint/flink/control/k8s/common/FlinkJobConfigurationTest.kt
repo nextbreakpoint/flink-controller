@@ -8,7 +8,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class FlinkJobConfigurationTest {
-    private val flinkJob = TestFactory.aFlinkJob(name = "test-test", namespace = "flink")
+    private val flinkJob = TestFactory().aFlinkJob("test-test", "flink")
 
     @BeforeEach
     fun configure() {

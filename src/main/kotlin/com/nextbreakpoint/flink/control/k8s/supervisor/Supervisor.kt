@@ -120,7 +120,7 @@ class Supervisor(
         }
 
         if (lastState == null || newState.status != lastState.status) {
-            logger.info("Supervisor status: ${newState.status}")
+            logger.info("Cluster status: ${newState.status}")
         }
 
         clusterRevisions[clusterName] = newState
@@ -156,7 +156,7 @@ class Supervisor(
         }
 
         if (lastState == null || newState.status != lastState.status) {
-            logger.info("Supervisor status: ${newState.status}")
+            logger.info("Job status: ${newState.status}")
         }
 
         jobRevisions["$clusterName-$jobName"] = newState

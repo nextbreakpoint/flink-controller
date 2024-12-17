@@ -51,8 +51,6 @@ class OperatorVerticle(
 ) : AbstractVerticle() {
     companion object {
         private val logger: Logger = Logger.getLogger(OperatorVerticle::class.simpleName)
-
-        private val json = JSON()
     }
 
     override fun rxStart(): Completable {
@@ -281,7 +279,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<JobCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), JobCommand::class.java
                 )
             },
@@ -300,7 +298,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<JobCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), JobCommand::class.java
                 )
             },
@@ -319,7 +317,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<JobCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), JobCommand::class.java
                 )
             },
@@ -338,7 +336,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<JobCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), JobCommand::class.java
                 )
             },
@@ -357,7 +355,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<JobCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), JobCommand::class.java
                 )
             },
@@ -375,7 +373,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<JobCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), JobCommand::class.java
                 )
             },
@@ -384,7 +382,7 @@ class OperatorVerticle(
                     it.selector.namespace,
                     it.selector.clusterName,
                     it.selector.jobName,
-                    json.deserialize(it.json, ScaleJobOptions::class.java)
+                    JSON.deserialize(it.json, ScaleJobOptions::class.java)
                 )
             }
         )
@@ -394,7 +392,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<JobCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), JobCommand::class.java
                 )
             },
@@ -403,7 +401,7 @@ class OperatorVerticle(
                     it.selector.namespace,
                     it.selector.clusterName,
                     it.selector.jobName,
-                    json.deserialize(it.json, StopOptions::class.java),
+                    JSON.deserialize(it.json, StopOptions::class.java),
                     JobContext(cache.getFlinkJob(it.selector.resourceName()) ?: throw RuntimeException("Job not found"))
                 )
             }
@@ -414,7 +412,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<JobCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), JobCommand::class.java
                 )
             },
@@ -423,7 +421,7 @@ class OperatorVerticle(
                     it.selector.namespace,
                     it.selector.clusterName,
                     it.selector.jobName,
-                    json.deserialize(it.json, StartOptions::class.java),
+                    JSON.deserialize(it.json, StartOptions::class.java),
                     JobContext(cache.getFlinkJob(it.selector.resourceName()) ?: throw RuntimeException("Job not found"))
                 )
             }
@@ -434,7 +432,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<DeploymentCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), DeploymentCommand::class.java
                 )
             },
@@ -452,7 +450,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<DeploymentCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), DeploymentCommand::class.java
                 )
             },
@@ -470,7 +468,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<DeploymentCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), DeploymentCommand::class.java
                 )
             },
@@ -487,7 +485,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<ClusterCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), ClusterCommand::class.java
                 )
             },
@@ -505,7 +503,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<ClusterCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), ClusterCommand::class.java
                 )
             },
@@ -523,7 +521,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<ClusterCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), ClusterCommand::class.java
                 )
             },
@@ -540,7 +538,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<ClusterCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), ClusterCommand::class.java
                 )
             },
@@ -548,7 +546,7 @@ class OperatorVerticle(
                 controller.requestScaleCluster(
                     it.selector.namespace,
                     it.selector.clusterName,
-                    json.deserialize(it.json, ScaleClusterOptions::class.java)
+                    JSON.deserialize(it.json, ScaleClusterOptions::class.java)
                 )
             }
         )
@@ -558,7 +556,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<ClusterCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), ClusterCommand::class.java
                 )
             },
@@ -566,7 +564,7 @@ class OperatorVerticle(
                 controller.requestStopCluster(
                     it.selector.namespace,
                     it.selector.clusterName,
-                    json.deserialize(it.json, StopOptions::class.java),
+                    JSON.deserialize(it.json, StopOptions::class.java),
                     ClusterContext(cache.getFlinkCluster(it.selector.resourceName()) ?: throw RuntimeException("Cluster not found"))
                 )
             }
@@ -577,7 +575,7 @@ class OperatorVerticle(
         processCommandAndReplyToSender<ClusterCommand, Void?>(
             message,
             {
-                json.deserialize(
+                JSON.deserialize(
                     it.body(), ClusterCommand::class.java
                 )
             },
@@ -585,7 +583,7 @@ class OperatorVerticle(
                 controller.requestStartCluster(
                     it.selector.namespace,
                     it.selector.clusterName,
-                    json.deserialize(it.json, StartOptions::class.java),
+                    JSON.deserialize(it.json, StartOptions::class.java),
                     ClusterContext(cache.getFlinkCluster(it.selector.resourceName()) ?: throw RuntimeException("Cluster not found"))
                 )
             }
@@ -703,7 +701,7 @@ class OperatorVerticle(
 
     private fun handleDeploymentCommand(routingContext: RoutingContext, namespace: String, path: String, payloadSupplier: Function<RoutingContext, String>) {
         sendMessageAndWaitForReply(routingContext, namespace, path, BiFunction { context, namespace ->
-            json.serialize(DeploymentCommand(
+            JSON.serialize(DeploymentCommand(
                 DeploymentSelector(namespace = namespace, deploymentName = context.pathParam("deploymentName")), payloadSupplier.apply(context)
             ))
         })
@@ -711,7 +709,7 @@ class OperatorVerticle(
 
     private fun handleClusterCommand(routingContext: RoutingContext, namespace: String, path: String, payloadSupplier: Function<RoutingContext, String>) {
         sendMessageAndWaitForReply(routingContext, namespace, path, BiFunction { context, namespace ->
-            json.serialize(ClusterCommand(
+            JSON.serialize(ClusterCommand(
                 ClusterSelector(namespace = namespace, clusterName = context.pathParam("clusterName")), payloadSupplier.apply(context)
             ))
         })
@@ -719,7 +717,7 @@ class OperatorVerticle(
 
     private fun handleJobCommand(routingContext: RoutingContext, namespace: String, path: String, payloadSupplier: Function<RoutingContext, String>) {
         sendMessageAndWaitForReply(routingContext, namespace, path, BiFunction { context, namespace ->
-            json.serialize(JobCommand(
+            JSON.serialize(JobCommand(
                 JobSelector(namespace = namespace, clusterName = context.pathParam("clusterName"), jobName = context.pathParam("jobName")), payloadSupplier.apply(context)
             ))
         })
@@ -778,9 +776,9 @@ class OperatorVerticle(
                 val result = handler.apply(context)
 
                 if (result.isSuccessful()) {
-                    json.serialize(Result(ResultStatus.OK, result.output?.let { json.serialize(it) }))
+                    JSON.serialize(Result(ResultStatus.OK, result.output?.let { JSON.serialize(it) }))
                 } else {
-                    json.serialize(Result(ResultStatus.ERROR, null))
+                    JSON.serialize(Result(ResultStatus.ERROR, null))
                 }
             }
             .doOnSuccess {
@@ -833,9 +831,9 @@ class OperatorVerticle(
                 val result = handler.apply(it)
 
                 if (result.isSuccessful()) {
-                    json.serialize(Result(ResultStatus.OK, result.output?.let { json.serialize(it) }))
+                    JSON.serialize(Result(ResultStatus.OK, result.output?.let { JSON.serialize(it) }))
                 } else {
-                    json.serialize(Result(ResultStatus.ERROR, null))
+                    JSON.serialize(Result(ResultStatus.ERROR, null))
                 }
             }
             .doOnError {

@@ -5,12 +5,13 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 
 class BootstrapResourcesDefaultFactoryTest {
-    private val flinkCluster = TestFactory.aFlinkCluster(name = "test", namespace ="flink", taskManagers = 3, taskSlots = 2)
-    private val flinkJob = TestFactory.aFlinkJob(name = "test-test", namespace = "flink")
+    private val testFactory = TestFactory()
+    private val flinkJob = testFactory.aFlinkJob("test-test", "flink")
+    private val factory = BootstrapResourcesDefaultFactory()
 
     @Test
     fun `should create bootstrap job when submitting job`() {
-        val job = BootstrapResourcesDefaultFactory.createBootstrapJob("flink", "myself", "test", "test", flinkJob.spec.bootstrap, "tmp/001", 4, false)
+        val job = factory.createBootstrapJob("flink", "myself", "test", "test", flinkJob.spec.bootstrap, "tmp/001", 4, false)
 
         assertThat(job).isNotNull()
 
@@ -51,7 +52,7 @@ class BootstrapResourcesDefaultFactoryTest {
         assertThat(podSpec?.containers).hasSize(1)
 
         val container = podSpec?.containers?.get(0)
-        assertThat(container?.ports).isNull()
+        assertThat(container?.ports).isEmpty()
         assertThat(container?.imagePullPolicy).isEqualTo("IfNotPresent")
         assertThat(container?.args).hasSize(11)
         assertThat(container?.args?.get(0)).isEqualTo("bootstrap")

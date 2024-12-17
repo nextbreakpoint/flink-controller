@@ -26,7 +26,7 @@ class SavepointTriggerTest {
     private val kubeClient = mock(KubeClient::class.java)
     private val flinkAddress = FlinkAddress(host = "localhost", port = 8080)
     private val savepointOptions = SavepointOptions(targetPath = "file://tmp")
-    private val job = TestFactory.aFlinkJob(name = "test-test", namespace = "flink")
+    private val job = TestFactory().aFlinkJob("test-test", "flink")
     private val context = JobContext(job)
     private val command = SavepointTrigger(flinkOptions, flinkClient, kubeClient, context)
 

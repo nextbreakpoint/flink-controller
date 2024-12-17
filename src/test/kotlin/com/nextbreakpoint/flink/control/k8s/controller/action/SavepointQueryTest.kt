@@ -2,8 +2,8 @@ package com.nextbreakpoint.flink.control.k8s.controller.action
 
 import com.nextbreakpoint.flink.control.common.FlinkAddress
 import com.nextbreakpoint.flink.control.common.FlinkOptions
-import com.nextbreakpoint.flink.control.common.SavepointStatus
 import com.nextbreakpoint.flink.control.common.SavepointRequest
+import com.nextbreakpoint.flink.control.common.SavepointStatus
 import com.nextbreakpoint.flink.control.k8s.common.FlinkClient
 import com.nextbreakpoint.flink.control.k8s.common.FlinkJobStatus
 import com.nextbreakpoint.flink.control.k8s.common.KubeClient
@@ -25,7 +25,7 @@ class SavepointQueryTest {
     private val flinkClient = mock(FlinkClient::class.java)
     private val kubeClient = mock(KubeClient::class.java)
     private val flinkAddress = FlinkAddress(host = "localhost", port = 8080)
-    private val job = TestFactory.aFlinkJob(name = "test-test", namespace = "flink")
+    private val job = TestFactory().aFlinkJob("test-test", "flink")
     private val context = JobContext(job)
     private val command = SavepointQuery(flinkOptions, flinkClient, kubeClient, context)
     private val savepointRequest = SavepointRequest(jobId = "1", triggerId = "100")

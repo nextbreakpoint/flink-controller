@@ -19,7 +19,7 @@ import com.nextbreakpoint.flink.control.k8s.controller.core.Result
 import com.nextbreakpoint.flink.control.k8s.controller.core.ResultStatus
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJob
 import com.nextbreakpoint.flink.control.k8s.factory.BootstrapResourcesDefaultFactory
-import org.joda.time.DateTime
+import java.time.OffsetDateTime
 import java.util.logging.Level
 import java.util.logging.Logger
 import kotlin.math.max
@@ -35,9 +35,13 @@ class JobController(
     private val jobResources: JobResources,
     private val job: V1FlinkJob
 ) {
-    fun timeSinceLastUpdateInSeconds() = (controller.currentTimeMillis() - FlinkJobStatus.getStatusTimestamp(job).millis) / 1000L
+    companion object {
+        val bootstrapResourcesFactory = BootstrapResourcesDefaultFactory()
+    }
 
-    fun timeSinceLastSavepointRequestInSeconds() = (controller.currentTimeMillis() - FlinkJobStatus.getSavepointRequestTimestamp(job).millis) / 1000L
+    fun timeSinceLastUpdateInSeconds() = (controller.currentTimeMillis() - FlinkJobStatus.getStatusTimestamp(job).toInstant().toEpochMilli()) / 1000L
+
+    fun timeSinceLastSavepointRequestInSeconds() = (controller.currentTimeMillis() - FlinkJobStatus.getSavepointRequestTimestamp(job).toInstant().toEpochMilli()) / 1000L
 
     fun triggerSavepoint(options: SavepointOptions) = controller.triggerSavepoint(namespace, clusterName, jobName, options, JobContext(job))
 
@@ -71,7 +75,7 @@ class JobController(
 
     fun isClusterUpdated() = clusterResources.flinkCluster?.status?.resourceStatus == ResourceStatus.Updated.toString()
 
-    fun refreshStatus(logger: Logger, statusTimestamp: DateTime, actionTimestamp: DateTime, hasFinalizer: Boolean) {
+    fun refreshStatus(logger: Logger, statusTimestamp: OffsetDateTime, actionTimestamp: OffsetDateTime, hasFinalizer: Boolean) {
         val savepointMode = SavepointMode.valueOf(job.spec.savepoint.savepointMode)
         FlinkJobStatus.setSavepointMode(job, savepointMode)
 
@@ -258,7 +262,7 @@ class JobController(
     fun doesBootstrapJobExists() = jobResources.bootstrapJob != null
 
     fun createBootstrapJob(): Result<String?> {
-        val resource = BootstrapResourcesDefaultFactory.createBootstrapJob(
+        val resource = bootstrapResourcesFactory.createBootstrapJob(
             namespace,
             Resource.RESOURCE_OWNER,
             clusterName,
@@ -309,6 +313,10 @@ class JobController(
     fun getJobStatus() = if (job.status != null) controller.getJobStatus(namespace, clusterName, jobName, job.status.jobId) else Result(ResultStatus.ERROR, null)
 
     fun isJobSuspended() = getCurrentJobParallelism() == 0
+
+    fun getBootstrapAttempts(): Int = FlinkJobStatus.getBootstrapAttempts(job) ?: 0
+
+    fun setBootstrapAttempts(attempts: Int) = FlinkJobStatus.setBootstrapAttempts(job, attempts)
 
     private fun clampJobParallelism(parallelism: Int) = min(max(parallelism, job.spec.minJobParallelism ?: 0), job.spec.maxJobParallelism ?: 32)
 

@@ -9,8 +9,8 @@ import com.nextbreakpoint.flink.control.k8s.common.FlinkClient
 import com.nextbreakpoint.flink.control.k8s.common.KubeClient
 import com.nextbreakpoint.flink.control.k8s.controller.Controller
 import com.nextbreakpoint.flink.control.k8s.supervisor.SupervisorRunner
-import com.nextbreakpoint.flink.control.k8s.supervisor.core.Cache
 import com.nextbreakpoint.flink.control.k8s.supervisor.core.Adapter
+import com.nextbreakpoint.flink.control.k8s.supervisor.core.Cache
 import com.nextbreakpoint.flink.control.vertex.MonitoringVerticle
 import com.nextbreakpoint.flink.control.vertex.SupervisorVerticle
 import io.vertx.core.VertxOptions

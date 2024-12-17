@@ -3,9 +3,9 @@ package com.nextbreakpoint.flink.control.k8s.crd;
 import com.google.gson.annotations.SerializedName;
 import lombok.Builder;
 import lombok.Data;
-import org.joda.time.DateTime;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
+import java.time.OffsetDateTime;
 
 @Data
 @AllArgsConstructor
@@ -29,11 +29,11 @@ public class V1FlinkClusterStatus {
     @SerializedName("totalTaskSlots")
     private Integer totalTaskSlots;
     @SerializedName("timestamp")
-    private DateTime timestamp;
+    private OffsetDateTime timestamp;
     @SerializedName("serviceMode")
     private String serviceMode;
     @SerializedName("digest")
     private V1FlinkClusterDigest digest;
     @SerializedName("rescaleTimestamp")
-    private DateTime rescaleTimestamp;
+    private OffsetDateTime rescaleTimestamp;
 }

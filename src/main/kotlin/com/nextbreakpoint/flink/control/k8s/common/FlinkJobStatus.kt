@@ -8,17 +8,17 @@ import com.nextbreakpoint.flink.control.common.SavepointRequest
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJob
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobDigest
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobStatus
-import org.joda.time.DateTime
+import java.time.OffsetDateTime
 
 object FlinkJobStatus {
-    fun getStatusTimestamp(flinkJob: V1FlinkJob) : DateTime =
-        flinkJob.status?.timestamp ?: DateTime(0)
+    fun getStatusTimestamp(flinkJob: V1FlinkJob) : OffsetDateTime =
+        flinkJob.status?.timestamp ?: Time.toDateTime(0)
 
-    fun getSavepointTimestamp(flinkJob: V1FlinkJob) : DateTime =
-        flinkJob.status?.savepointTimestamp ?: DateTime(0)
+    fun getSavepointTimestamp(flinkJob: V1FlinkJob) : OffsetDateTime =
+        flinkJob.status?.savepointTimestamp ?: Time.toDateTime(0)
 
-    fun getSavepointRequestTimestamp(flinkJob: V1FlinkJob) : DateTime =
-        flinkJob.status?.savepointRequestTimestamp ?: DateTime(0)
+    fun getSavepointRequestTimestamp(flinkJob: V1FlinkJob) : OffsetDateTime =
+        flinkJob.status?.savepointRequestTimestamp ?: Time.toDateTime(0)
 
     fun getSupervisorStatus(flinkJob: V1FlinkJob) : JobStatus {
         val status = flinkJob.status?.supervisorStatus
@@ -53,7 +53,7 @@ object FlinkJobStatus {
 
             val currentTimeMillis = currentTimeMillis()
 
-            flinkJob.status?.savepointRequestTimestamp = DateTime(currentTimeMillis)
+            flinkJob.status?.savepointRequestTimestamp = Time.toDateTime(currentTimeMillis)
 
             flinkJob.status?.savepointJobId = request.jobId
             flinkJob.status?.savepointTriggerId = request.triggerId
@@ -75,10 +75,10 @@ object FlinkJobStatus {
 
             val currentTimeMillis = currentTimeMillis()
 
-            flinkJob.status?.savepointRequestTimestamp = DateTime(currentTimeMillis)
+            flinkJob.status?.savepointRequestTimestamp = Time.toDateTime(currentTimeMillis)
 
             if ((path.isNotBlank() && flinkJob.status?.savepointPath != path) || (path.isBlank() && flinkJob.status?.savepointPath.orEmpty().isNotBlank())) {
-                flinkJob.status?.savepointTimestamp = DateTime(currentTimeMillis)
+                flinkJob.status?.savepointTimestamp = Time.toDateTime(currentTimeMillis)
             }
 
             flinkJob.status?.savepointPath = path
@@ -245,8 +245,20 @@ object FlinkJobStatus {
         }
     }
 
+    fun getBootstrapAttempts(flinkJob: V1FlinkJob) = flinkJob.status?.bootstrapAttempts
+
+    fun setBootstrapAttempts(flinkJob: V1FlinkJob, bootstrapAttempts: Int) {
+        if (flinkJob.status?.bootstrapAttempts != bootstrapAttempts) {
+            ensureState(flinkJob)
+
+            flinkJob.status?.bootstrapAttempts = bootstrapAttempts
+
+            updateStatusTimestamp(flinkJob, currentTimeMillis())
+        }
+    }
+
     fun updateStatusTimestamp(flinkJob: V1FlinkJob, currentTimeMillis: Long) {
-        flinkJob.status?.timestamp = DateTime(currentTimeMillis)
+        flinkJob.status?.timestamp = Time.toDateTime(currentTimeMillis)
     }
 
     @JvmStatic

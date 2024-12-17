@@ -454,6 +454,8 @@ spec:
                   type: string
                 restartPolicy:
                   type: string
+                bootstrapAttempts:
+                  type: integer
                 digest:
                   type: object
                   properties:
@@ -495,6 +497,9 @@ spec:
       - name: JOB-RESTART
         type: string
         jsonPath: .status.restartPolicy
+      - name: BOOTSTRAP-ATTEMPTS
+        type: integer
+        jsonPath: .status.bootstrapAttempts
       - name: JOB-PARALLELISM
         type: integer
         jsonPath: .status.jobParallelism

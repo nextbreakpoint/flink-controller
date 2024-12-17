@@ -34,11 +34,11 @@ class TestRecording {
 
                 val coreApi = CoreV1Api(client)
 
-                coreApi.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null)
+                coreApi.listPodForAllNamespaces()
 
 //                wireMockServer.stopRecording()
 
-                coreApi.listPodForAllNamespaces(null, null, null, null, null, null, null, null, null)
+                coreApi.listPodForAllNamespaces()
             } finally {
                 wireMockServer.stop()
             }

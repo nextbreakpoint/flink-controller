@@ -1,9 +1,5 @@
 package com.nextbreakpoint.flink.control.k8s.common
 
-import com.nextbreakpoint.flink.control.common.FlinkAddress
-import com.nextbreakpoint.flink.control.common.RescaleStatus
-import com.nextbreakpoint.flink.control.common.SavepointStatus
-import com.nextbreakpoint.flink.control.common.TaskManagerId
 import com.nextbreakpoint.flink.client.api.FlinkApi
 import com.nextbreakpoint.flink.client.model.AsynchronousOperationInfo
 import com.nextbreakpoint.flink.client.model.CheckpointingStatistics
@@ -21,6 +17,10 @@ import com.nextbreakpoint.flink.client.model.TaskManagerDetailsInfo
 import com.nextbreakpoint.flink.client.model.TaskManagersInfo
 import com.nextbreakpoint.flink.client.model.TerminationMode
 import com.nextbreakpoint.flink.client.model.TriggerResponse
+import com.nextbreakpoint.flink.control.common.FlinkAddress
+import com.nextbreakpoint.flink.control.common.RescaleStatus
+import com.nextbreakpoint.flink.control.common.SavepointStatus
+import com.nextbreakpoint.flink.control.common.TaskManagerId
 import java.io.File
 import java.util.concurrent.TimeUnit
 import java.util.logging.Level

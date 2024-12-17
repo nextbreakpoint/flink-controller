@@ -2,7 +2,9 @@ package com.nextbreakpoint.flink.control.k8s.common
 
 import com.nextbreakpoint.flink.control.common.Action
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJob
-import org.joda.time.DateTime
+import java.time.Instant
+import java.time.OffsetDateTime
+import java.time.ZoneId
 
 object FlinkJobAnnotations {
     val REQUESTED_ACTION    = "operator.nextbreakpoint.com/requested-action"
@@ -25,8 +27,8 @@ object FlinkJobAnnotations {
         }
     }
 
-    fun getActionTimestamp(flinkJob: V1FlinkJob) : DateTime =
-        DateTime(flinkJob.metadata?.annotations?.get(ACTION_TIMESTAMP)?.toLong() ?: 0L)
+    fun getActionTimestamp(flinkJob: V1FlinkJob) : OffsetDateTime =
+        toDateTime(flinkJob.metadata?.annotations?.get(ACTION_TIMESTAMP)?.toLong() ?: 0L)
 
     fun setRequestedAction(flinkJob: V1FlinkJob, action: Action) {
         val annotations = flinkJob.metadata?.annotations.orEmpty().toMutableMap()
@@ -71,4 +73,6 @@ object FlinkJobAnnotations {
     fun shouldRestart(flinkJob: V1FlinkJob): Boolean {
         return flinkJob.metadata?.annotations?.get(SHOULD_RESTART)?.uppercase() == "TRUE"
     }
+
+    private fun toDateTime(timestamp: Long) = OffsetDateTime.ofInstant(Instant.ofEpochMilli(timestamp), ZoneId.of("UTC"))
 }

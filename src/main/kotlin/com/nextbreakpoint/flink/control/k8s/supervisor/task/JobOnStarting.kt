@@ -83,7 +83,9 @@ class JobOnStarting : Task<JobManager>() {
             return
         }
 
-        if (!manager.ensureBootstrapJobExists()) {
+        if (manager.shouldBootstrapJob() && !manager.ensureBootstrapJobExists()) {
+            manager.incrementBootstrapAttempts();
+
             return
         }
     }

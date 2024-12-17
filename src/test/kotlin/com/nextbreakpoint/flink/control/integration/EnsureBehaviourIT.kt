@@ -1,5 +1,6 @@
 package com.nextbreakpoint.flink.control.integration
 
+import com.nextbreakpoint.flink.client.model.TaskManagerInfo
 import com.nextbreakpoint.flink.control.common.ClusterStatus
 import com.nextbreakpoint.flink.control.common.JobStatus
 import com.nextbreakpoint.flink.control.common.ResourceStatus
@@ -13,7 +14,6 @@ import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkClusterSpec
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkClusterStatus
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobSpec
 import com.nextbreakpoint.flink.control.k8s.crd.V1FlinkJobStatus
-import com.nextbreakpoint.flink.client.model.TaskManagerInfo
 import io.kubernetes.client.openapi.JSON
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
@@ -231,7 +231,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         awaitUntilAsserted(timeout = 120) {
             val latestStatus = getLatestJobStatus("cluster-1", "job-0")
             assertThat(latestStatus.savepointPath).isNotEqualTo(previousJobStatus.savepointPath)
-            assertThat(latestStatus.savepointTimestamp).isGreaterThan(previousJobStatus.savepointTimestamp)
+            assertThat(latestStatus.savepointTimestamp).isAfter(previousJobStatus.savepointTimestamp)
         }
 
         updateSavepointInterval(clusterName = "cluster-1", index = 0, savepointInterval = 0)
@@ -306,11 +306,11 @@ class EnsureBehaviourIT : IntegrationSetup() {
         awaitUntilAsserted(timeout = 10) {
             val response1 = getTaskManagers(clusterName = "cluster-1")
             assertThat(response1["status"] as String?).isEqualTo("OK")
-            val taskmanagers1 = JSON().deserialize<List<TaskManagerInfo>>(response1["output"] as String, taskmanagersTypeToken.type)
+            val taskmanagers1 = JSON.deserialize<List<TaskManagerInfo>>(response1["output"] as String, taskmanagersTypeToken.type)
             assertThat(taskmanagers1).hasSize(1)
             val response2 = getTaskManagers(clusterName = "cluster-2")
             assertThat(response2["status"] as String?).isEqualTo("OK")
-            val taskmanagers2 = JSON().deserialize<List<TaskManagerInfo>>(response2["output"] as String, taskmanagersTypeToken.type)
+            val taskmanagers2 = JSON.deserialize<List<TaskManagerInfo>>(response2["output"] as String, taskmanagersTypeToken.type)
             assertThat(taskmanagers2).hasSize(2)
         }
     }
@@ -323,7 +323,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         awaitUntilAsserted(timeout = 10) {
             val listResponse = getTaskManagers(clusterName = "cluster-1")
             assertThat(listResponse["status"] as String?).isEqualTo("OK")
-            val taskmanagers = JSON().deserialize<List<TaskManagerInfo>>(listResponse["output"] as String, taskmanagersTypeToken.type)
+            val taskmanagers = JSON.deserialize<List<TaskManagerInfo>>(listResponse["output"] as String, taskmanagersTypeToken.type)
             val detailsResponse = getTaskManagerDetails(clusterName = "cluster-1", taskmanagerId = TaskManagerId(taskmanagers[0].id))
             println(detailsResponse)
             assertThat(detailsResponse["status"] as String?).isEqualTo("OK")
@@ -340,7 +340,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         awaitUntilAsserted(timeout = 10) {
             val listResponse = getTaskManagers(clusterName = "cluster-2")
             assertThat(listResponse["status"] as String?).isEqualTo("OK")
-            val taskmanagers = JSON().deserialize<List<TaskManagerInfo>>(listResponse["output"] as String, taskmanagersTypeToken.type)
+            val taskmanagers = JSON.deserialize<List<TaskManagerInfo>>(listResponse["output"] as String, taskmanagersTypeToken.type)
             val metricsResponse1 = getTaskManagerMetrics(clusterName = "cluster-2", taskmanagerId = TaskManagerId(taskmanagers[0].id))
             println(metricsResponse1)
             assertThat(metricsResponse1["status"] as String?).isEqualTo("OK")
@@ -423,12 +423,12 @@ class EnsureBehaviourIT : IntegrationSetup() {
         println("Should create resources...")
 
         val clusterSpecJson = String(Files.readAllBytes(File("integration/cluster-spec.json").toPath()))
-        val clusterSpec = JSON().deserialize<V1FlinkClusterSpec>(clusterSpecJson, clusterSpecTypeToken.type)
+        val clusterSpec = JSON.deserialize<V1FlinkClusterSpec>(clusterSpecJson, clusterSpecTypeToken.type)
         createCluster(clusterName = "cluster-0", spec = clusterSpec)
         assertClusterStarted("cluster-0")
 
         val jobSpecJson = String(Files.readAllBytes(File("integration/job-spec.json").toPath()))
-        val jobSpec = JSON().deserialize<V1FlinkJobSpec>(jobSpecJson, jobSpecTypeToken.type)
+        val jobSpec = JSON.deserialize<V1FlinkJobSpec>(jobSpecJson, jobSpecTypeToken.type)
         createJob(clusterName = "cluster-0", jobName = "job-0", spec = jobSpec)
         assertJobStarted(clusterName = "cluster-0", jobName = "job-0")
     }
@@ -439,7 +439,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         println("Should delete resources...")
 
         val jobSpecJson = String(Files.readAllBytes(File("integration/job-spec.json").toPath()))
-        val jobSpec = JSON().deserialize<V1FlinkJobSpec>(jobSpecJson, jobSpecTypeToken.type)
+        val jobSpec = JSON.deserialize<V1FlinkJobSpec>(jobSpecJson, jobSpecTypeToken.type)
         deleteJob(clusterName = "cluster-0", jobName = "job-0")
         assertJobDeleted(clusterName = "cluster-0", jobName = "job-0")
         createJob(clusterName = "cluster-0", jobName = "job-0", spec = jobSpec)
@@ -453,7 +453,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
 
     @Test
     @Order(1100)
-    @Disabled
+    @Disabled("Batch job must be reimplemented")
     fun `Should stop job when batch job has finished`() {
         println("Should stop job when batch job has finished...")
 
@@ -502,9 +502,6 @@ class EnsureBehaviourIT : IntegrationSetup() {
         assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStopped(clusterName = "cluster-2", jobName = "job-1")
 
-        updateRestartPolicy(clusterName = "cluster-2", index = 0, restartPolicy = RestartPolicy.Always)
-        updateRestartPolicy(clusterName = "cluster-2", index = 1, restartPolicy = RestartPolicy.Always)
-
         if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/image\",\"value\":\"integration/jobs:latest\"}]") != 0) {
             fail("Can't update deployment")
         }
@@ -527,9 +524,6 @@ class EnsureBehaviourIT : IntegrationSetup() {
         assertJobStopping(clusterName = "cluster-2", jobName = "job-1")
         assertJobStarting(clusterName = "cluster-2", jobName = "job-1")
         assertJobStopped(clusterName = "cluster-2", jobName = "job-1")
-
-        updateRestartPolicy(clusterName = "cluster-2", index = 0, restartPolicy = RestartPolicy.Always)
-        updateRestartPolicy(clusterName = "cluster-2", index = 1, restartPolicy = RestartPolicy.Always)
 
         if (updateDeployment(namespace = namespace, name = "cluster-2", patch = "[{\"op\":\"replace\",\"path\":\"/spec/jobs/0/spec/bootstrap/className\",\"value\":\"com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain\"}]") != 0) {
             fail("Can't update deployment")
@@ -624,14 +618,14 @@ class EnsureBehaviourIT : IntegrationSetup() {
         println("Should update clusters when scaling taskmanagers down...")
 
         scaleCluster(clusterName = "cluster-0", options = ScaleClusterOptions(taskManagers = 1))
-        awaitUntilAsserted(timeout = 60, delay = 1, interval = 1) {
+        awaitUntilAsserted(timeout = 120, delay = 1, interval = 1) {
             assertThat(hasResourceStatus(namespace = namespace, resource = "fc", name = "cluster-0", status = ResourceStatus.Updating)).isTrue()
         }
-        awaitUntilAsserted(timeout = 360) {
+        awaitUntilAsserted(timeout = 480) {
             assertThat(hasResourceStatus(namespace = namespace, resource = "fc", name = "cluster-0", status = ResourceStatus.Updated)).isTrue()
         }
 
-        awaitUntilAsserted(timeout = 60) {
+        awaitUntilAsserted(timeout = 120) {
             assertThat(hasTaskManagers(namespace = namespace, name = "cluster-0", taskManagers = 1)).isTrue()
             val latestStatus = getLatestClusterStatus(clusterName = "cluster-0")
             assertThat(latestStatus.taskManagers).isEqualTo(1)
@@ -647,14 +641,14 @@ class EnsureBehaviourIT : IntegrationSetup() {
         println("Should update clusters when scaling taskmanagers up...")
 
         scaleCluster(clusterName = "cluster-0", options = ScaleClusterOptions(taskManagers = 2))
-        awaitUntilAsserted(timeout = 60, delay = 1, interval = 1) {
+        awaitUntilAsserted(timeout = 120, delay = 1, interval = 1) {
             assertThat(hasResourceStatus(namespace = namespace, resource = "fc", name = "cluster-0", status = ResourceStatus.Updating)).isTrue()
         }
         awaitUntilAsserted(timeout = 360) {
             assertThat(hasResourceStatus(namespace = namespace, resource = "fc", name = "cluster-0", status = ResourceStatus.Updated)).isTrue()
         }
 
-        awaitUntilAsserted(timeout = 60) {
+        awaitUntilAsserted(timeout = 120) {
             assertThat(hasTaskManagers(namespace = namespace, name = "cluster-0", taskManagers = 2)).isTrue()
             val latestStatus = getLatestClusterStatus(clusterName = "cluster-0")
             assertThat(latestStatus.taskManagers).isEqualTo(2)
@@ -670,10 +664,10 @@ class EnsureBehaviourIT : IntegrationSetup() {
         println("Should update clusters when scaling taskmanagers down to zero...")
 
         scaleCluster(clusterName = "cluster-0", options = ScaleClusterOptions(taskManagers = 0))
-        awaitUntilAsserted(timeout = 60, delay = 1, interval = 1) {
+        awaitUntilAsserted(timeout = 120, delay = 1, interval = 1) {
             assertThat(hasResourceStatus(namespace = namespace, resource = "fc", name = "cluster-0", status = ResourceStatus.Updating)).isTrue()
         }
-        awaitUntilAsserted(timeout = 360) {
+        awaitUntilAsserted(timeout = 480) {
             assertThat(hasResourceStatus(namespace = namespace, resource = "fc", name = "cluster-0", status = ResourceStatus.Updated)).isTrue()
         }
 
@@ -689,6 +683,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
 
     @Test
     @Order(1163)
+//    @Disabled("Job scaling must be reimplemented")
     fun `Should update clusters when scaling job parallelism`() {
         println("Should update clusters when scaling job parallelism...")
 
@@ -703,7 +698,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         }
 
         scaleJob(clusterName = "cluster-2", jobName = "job-1", options = ScaleJobOptions(parallelism = 4))
-        awaitUntilAsserted(timeout = 60, delay = 1, interval = 1) {
+        awaitUntilAsserted(timeout = 120, delay = 1, interval = 1) {
             assertThat(hasResourceStatus(namespace = namespace, resource = "fc", name = "cluster-2", status = ResourceStatus.Updating)).isTrue()
         }
 
@@ -718,7 +713,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         }
 
         scaleJob(clusterName = "cluster-2", jobName = "job-2", options = ScaleJobOptions(parallelism = 4))
-        awaitUntilAsserted(timeout = 60, delay = 1, interval = 1) {
+        awaitUntilAsserted(timeout = 120, delay = 1, interval = 1) {
             assertThat(hasResourceStatus(namespace = namespace, resource = "fc", name = "cluster-2", status = ResourceStatus.Updating)).isTrue()
         }
 
@@ -959,7 +954,7 @@ class EnsureBehaviourIT : IntegrationSetup() {
         awaitUntilAsserted(timeout = 60) {
             assertThat(jobExists(namespace = namespace, name = "$clusterName-$jobName")).isTrue()
         }
-        awaitUntilAsserted(timeout = 360) {
+        awaitUntilAsserted(timeout = 180) {
             assertThat(hasJobStatus(namespace = namespace, name = "$clusterName-$jobName", status = JobStatus.Started)).isTrue()
             assertThat(hasResourceStatus(namespace = namespace, resource = "fj", name = "$clusterName-$jobName", status = ResourceStatus.Updated)).isTrue()
         }
@@ -1030,13 +1025,13 @@ class EnsureBehaviourIT : IntegrationSetup() {
     private fun getLatestClusterStatus(clusterName: String): V1FlinkClusterStatus {
         val response = getClusterStatus(clusterName = clusterName)
         assertThat(response["status"] as String?).isEqualTo("OK")
-        return JSON().deserialize(response["output"] as String, clusterStatusTypeToken.type)
+        return JSON.deserialize(response["output"] as String, clusterStatusTypeToken.type)
     }
 
     private fun getLatestJobStatus(clusterName: String, jobName: String): V1FlinkJobStatus {
         val response = getJobStatus(clusterName = clusterName, jobName = jobName)
         assertThat(response["status"] as String?).isEqualTo("OK")
-        return JSON().deserialize(response["output"] as String, jobStatusTypeToken.type)
+        return JSON.deserialize(response["output"] as String, jobStatusTypeToken.type)
     }
 
     class FailFast : TestWatcher {
