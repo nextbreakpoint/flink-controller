@@ -2,13 +2,17 @@
 
 Release notes:
 - Target Flink 1.20
+- Target Kubernetes 1.31
+- Update Java to version 21
+- Update Kotlin to version 2.0
 - Update Flink Client 
 - Update dependencies
+- Update example
+- Add dependency to Flink Dummies
 - Replace gradle with maven
 - Use jpackage to create distribution
-- Update example (now based on Flink Dummies)
 - Update documentation
-- Fixed bugs   
+- Fixed several bugs   
 
 # 1.4.4-beta
 
