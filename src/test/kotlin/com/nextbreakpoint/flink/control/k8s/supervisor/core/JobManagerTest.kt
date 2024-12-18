@@ -107,7 +107,6 @@ class JobManagerTest {
     @Test
     fun `should change status on job ready to restart event`() {
         manager.onJobReadyToRestart()
-        verify(controller, times(1)).setBootstrapAttempts(0)
         verify(controller, times(1)).updateStatus()
         verify(controller, times(1)).updateDigests()
         verify(controller, times(1)).setSupervisorStatus(eq(JobStatus.Starting))
@@ -164,6 +163,7 @@ class JobManagerTest {
     @Test
     fun `should change status on resource changed event`() {
         manager.onResourceChanged()
+        verify(controller, times(1)).setBootstrapAttempts(0)
         verify(controller, times(1)).setShouldRestart(eq(true))
         verify(controller, times(1)).setSupervisorStatus(eq(JobStatus.Stopping))
         verify(controller, times(1)).setResourceStatus(eq(ResourceStatus.Updating))

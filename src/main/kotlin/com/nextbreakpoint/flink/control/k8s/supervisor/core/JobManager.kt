@@ -87,7 +87,6 @@ class JobManager(
 
     fun onJobReadyToRestart() {
         logger.info("Job restarted")
-        controller.setBootstrapAttempts(0)
         controller.resetSavepointRequest()
         controller.resetJob()
         controller.updateStatus()
@@ -145,6 +144,7 @@ class JobManager(
 
     fun onResourceChanged() {
         logger.info("Resource changed")
+        controller.setBootstrapAttempts(0)
         controller.resetSavepointRequest()
         controller.setShouldRestart(true)
         controller.setSupervisorStatus(JobStatus.Stopping)

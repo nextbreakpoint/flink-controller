@@ -172,4 +172,6 @@ class OperatorController(
     fun updateStatus(namespace: String, clusterName: String, deployment: V1FlinkDeployment) {
         controller.updateStatus(namespace, clusterName, deployment)
     }
+
+    fun isDryRun() = controller.isDryRun()
 }

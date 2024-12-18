@@ -70,7 +70,7 @@ class SupervisorManager(
             }
         }
 
-        if (supervisorResources.supervisorDep != null && supervisorResources.supervisorPods.isEmpty()) {
+        if (!controller.isDryRun() && supervisorResources.supervisorDep != null && supervisorResources.supervisorPods.isEmpty()) {
             logger.log(Level.WARNING, "Supervisor pod not running")
         }
     }
