@@ -375,7 +375,7 @@ open class IntegrationSetup {
             }
         }
 
-        fun awaitUntilAsserted(timeout: Long = 120, delay: Long = 1, interval: Long = 2, assertion: () -> Unit) {
+        fun awaitUntilAsserted(timeout: Long = 120, delay: Long = 5, interval: Long = 5, assertion: () -> Unit) {
             Awaitility.await()
                 .atMost(Duration.ofSeconds(timeout))
                 .pollDelay(Duration.ofSeconds(delay))
@@ -383,7 +383,7 @@ open class IntegrationSetup {
                 .untilAsserted(assertion)
         }
 
-        fun awaitUntilCondition(timeout: Long = 120, delay: Long = 1, interval: Long = 2, condition: () -> Boolean) {
+        fun awaitUntilCondition(timeout: Long = 120, delay: Long = 5, interval: Long = 5, condition: () -> Boolean) {
             Awaitility.await()
                 .atMost(Duration.ofSeconds(timeout))
                 .pollDelay(Duration.ofSeconds(delay))
