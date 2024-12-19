@@ -485,13 +485,6 @@
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-surefire-plugin</artifactId>
 					<version>${maven-surefire-plugin.version}</version>
-					<executions>
-						<execution>
-							<goals>
-								<goal>test</goal>
-							</goals>
-						</execution>
-					</executions>
 					<configuration>
 						<useSystemClassLoader>false</useSystemClassLoader>
 <!--						<argLine>@{argLine}</argLine>-->
@@ -504,9 +497,7 @@
 								junit.jupiter.execution.parallel.config.fixed.parallelism = 5
 							</configurationParameters>
 						</properties>
-						<includes>
-							<include>**/*Test.java</include>
-						</includes>
+						<excludedGroups>IntegrationTest</excludedGroups>
 						<systemPropertyVariables>
 							<flink.version>${flink.version}</flink.version>
 							<scala.version>${scala-major.version}</scala.version>
