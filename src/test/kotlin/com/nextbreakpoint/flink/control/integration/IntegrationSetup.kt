@@ -35,7 +35,7 @@ open class IntegrationSetup {
         val version = "1.5.0"
         val flinkVersion = getVariable("FLINK_VERSION", "1.20.0")
         val scalaVersion = getVariable("SCALA_VERSION", "2.12")
-        val dummiesVersion = getVariable("DUMMIES_VERSION", "0.0.5")
+        val dummiesVersion = getVariable("DUMMIES_VERSION", "0.0.6")
         val timestamp = System.currentTimeMillis()
         val namespace = "integration"
         val port = getVariable("OPERATOR_PORT", "30000").toInt()

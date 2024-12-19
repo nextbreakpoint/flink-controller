@@ -182,7 +182,7 @@ Create the Dockerfile for the bootstrap image which contains the Flink applicati
 
     ARG base_image="nextbreakpoint/flinkctl:1.5.0"
     FROM ubuntu:latest AS download
-    ARG dummies_version="0.0.5"
+    ARG dummies_version="0.0.6"
     RUN apt update -y && apt install -y curl
     RUN curl https://github.com/nextbreakpoint/flink-dummies/releases/download/v${dummies_version}/com.nextbreakpoint.flink.dummies-${dummies_version}.jar -L -o /com.nextbreakpoint.flink.dummies.jar
     FROM ${base_image}
