@@ -19,7 +19,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.BeforeEach
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Tag
@@ -453,7 +452,6 @@ class EnsureBehaviourIT : IntegrationSetup() {
 
     @Test
     @Order(1100)
-    @Disabled("Batch job must be reimplemented")
     fun `Should stop job when batch job has finished`() {
         println("Should stop job when batch job has finished...")
 
