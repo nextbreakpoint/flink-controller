@@ -2,7 +2,7 @@
   <configuration default="false" name="bootstrap run" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.control.cli.Main" />
     <module name="com.nextbreakpoint.flink.control" />
-    <option name="PROGRAM_PARAMETERS" value="bootstrap run --namespace=flink-jobs --flink-hostname=192.168.70.4 --kube-config=$USER_HOME$/.kube/config --cluster-name=cluster-1 --job-name=job-1 --jar-path=$PROJECT_DIR$/target/downloaded/com.nextbreakpoint.flink.dummies-0.0.5-shaded.jar --class-name=com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain --parallelism=1 --argument=--CONFIG_FILE --argument=file:///var/config/measurement.properties" />
+    <option name="PROGRAM_PARAMETERS" value="bootstrap run --namespace=flink-jobs --flink-hostname=192.168.70.4 --kube-config=$USER_HOME$/.kube/config --cluster-name=cluster-1 --job-name=job-1 --jar-path=$PROJECT_DIR$/target/downloaded/com.nextbreakpoint.flink.dummies-0.0.6-shaded.jar --class-name=com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain --parallelism=1 --argument=--CONFIG_FILE --argument=file:///var/config/measurement.properties" />
     <shortenClasspath name="NONE" />
     <method v="2">
       <option name="Make" enabled="true" />

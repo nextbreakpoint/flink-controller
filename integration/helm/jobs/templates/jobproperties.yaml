@@ -17,7 +17,7 @@ data:
     log.verbosity: 2
     watermark.strategy.max-out-of-orderness: 5000
     watermark.strategy.idle-timeout: 30000
-    source.max-delay: 5000
+    source.max-delay: 1000
     source.max-count: 0
     bucket.output-path: s3a://${BUCKET_NAME}/temperature-measurement
     bucket.check-interval: 30000
@@ -42,8 +42,8 @@ data:
     log.verbosity: 2
     watermark.strategy.max-out-of-orderness: 5000
     watermark.strategy.idle-timeout: 30000
-    source.max-delay: 5000
-    source.max-count: 100
+    source.max-delay: 1000
+    source.max-count: 50
     bucket.output-path: s3a://${BUCKET_NAME}/temperature-measurement
     bucket.check-interval: 30000
     bucket.rollover-interval: 300000
