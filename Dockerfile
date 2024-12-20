@@ -7,7 +7,7 @@ RUN mvn -t toolchains-docker.xml -Pdistribution clean package
 #COPY --from=build /src/build/libs/* /build/libs/
 #COPY --from=build /src/build/.classpath /build/.classpath
 #WORKDIR /
-#RUN native-image --verbose -J-Xmx4G -cp $(cat /build/.classpath) -H:+UnlockExperimentalVMOptions -H:+StaticExecutableWithDynamicLibC -H:Name=flinkctl -H:Class=com.nextbreakpoint.flink.control.cli.Main
+#RUN native-image --verbose -J-Xmx4G -cp $(cat /build/.classpath) -H:+UnlockExperimentalVMOptions -H:+StaticExecutableWithDynamicLibC -H:Name=flinkctl -H:Class=com.nextbreakpoint.flink.controller.cli.Main
 
 FROM gcr.io/distroless/base
 COPY --from=build /src/target/jpackage/flinkctl /flinkctl

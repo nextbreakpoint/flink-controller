@@ -1,0 +1,81 @@
+package com.nextbreakpoint.flink.controller.cli.factory
+
+import com.nextbreakpoint.flink.controller.cli.core.ClusterCommand
+import com.nextbreakpoint.flink.controller.cli.core.DeploymentCommand
+import com.nextbreakpoint.flink.controller.cli.core.JobCommand
+import com.nextbreakpoint.flink.controller.cli.core.LaunchCommand
+import com.nextbreakpoint.flink.controller.cli.core.OperatorCommand
+import com.nextbreakpoint.flink.controller.common.BootstrapOptions
+import com.nextbreakpoint.flink.controller.common.OperatorOptions
+import com.nextbreakpoint.flink.controller.common.ScaleClusterOptions
+import com.nextbreakpoint.flink.controller.common.ScaleJobOptions
+import com.nextbreakpoint.flink.controller.common.StartOptions
+import com.nextbreakpoint.flink.controller.common.StopOptions
+import com.nextbreakpoint.flink.controller.common.SupervisorOptions
+import com.nextbreakpoint.flink.controller.common.TaskManagerId
+
+interface CommandFactory {
+    fun createLaunchOperatorCommand() : LaunchCommand<OperatorOptions>
+
+    fun createLaunchBootstrapCommand() : LaunchCommand<BootstrapOptions>
+
+    fun createLaunchSupervisorCommand() : LaunchCommand<SupervisorOptions>
+
+    fun createListDeploymentsCommand() : OperatorCommand
+
+    fun createCreateDeploymentCommand() : DeploymentCommand<String>
+
+    fun createDeleteDeploymentCommand() : DeploymentCommand<Void?>
+
+    fun createUpdateDeploymentCommand() : DeploymentCommand<String>
+
+    fun createGetDeploymentStatusCommand(): DeploymentCommand<Void?>
+
+    fun createListClustersCommand() : OperatorCommand
+
+    fun createCreateClusterCommand() : ClusterCommand<String>
+
+    fun createDeleteClusterCommand() : ClusterCommand<Void?>
+
+    fun createUpdateClusterCommand() : ClusterCommand<String>
+
+    fun createStartClusterCommand() : ClusterCommand<StartOptions>
+
+    fun createStopClusterCommand() : ClusterCommand<StopOptions>
+
+    fun createScaleClusterCommand() : ClusterCommand<ScaleClusterOptions>
+
+    fun createGetClusterStatusCommand(): ClusterCommand<Void?>
+
+    fun createGetJobManagerMetricsCommand() : ClusterCommand<Void?>
+
+    fun createListTaskManagersCommand() : ClusterCommand<Void?>
+
+    fun createGetTaskManagerDetailsCommand() : ClusterCommand<TaskManagerId>
+
+    fun createGetTaskManagerMetricsCommand() : ClusterCommand<TaskManagerId>
+
+    fun createListJobsCommand() : ClusterCommand<Void?>
+
+    fun createCreateJobCommand() : JobCommand<String>
+
+    fun createDeleteJobCommand() : JobCommand<Void?>
+
+    fun createUpdateJobCommand() : JobCommand<String>
+
+    fun createStartJobCommand() : JobCommand<StartOptions>
+
+    fun createStopJobCommand() : JobCommand<StopOptions>
+
+    fun createScaleJobCommand() : JobCommand<ScaleJobOptions>
+
+    fun createGetJobStatusCommand(): JobCommand<Void?>
+
+    fun createTriggerSavepointCommand(): JobCommand<Void?>
+
+    fun createForgetSavepointCommand(): JobCommand<Void?>
+
+    fun createGetJobDetailsCommand() : JobCommand<Void?>
+
+    fun createGetJobMetricsCommand() : JobCommand<Void?>
+}

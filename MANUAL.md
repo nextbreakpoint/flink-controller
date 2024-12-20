@@ -1,178 +1,10 @@
-# Flink Kubernetes Toolbox - Manual
+# Flink Control - User Manual
 
-This document describes how to install and use the Flink Kubernetes Toolbox.
-
-Currently, Flink Kubernetes Toolbox requires Kubernetes 1.18.14 or later, and it supports Apache Flink 1.11 or later.
-
-## Generate SSL certificates
-
-The toolbox provides client and server components. The client component communicates to the server component over HTTP.
-To ensure that the communication is secure, flinkctl uses HTTPS and SSL certificates for authentication.
-The HTTPS protocol is optional, and flinkctl can use just HTTP, but in that case it is recommended to restrict the access to port 4444.
-
-Execute the script secrets.sh to generate self-signed certificates and keystores to use with the operator:
-
-    ./secrets.sh flink-operator key-password keystore-password truststore-password
-
-This command will generate new certificates and keystores in the directory secrets.
-
-## Install toolbox
-
-Create a namespace for the operator:
-
-    kubectl create namespace flink-operator
-
-The name of the namespace can be any name you like.
-
-Create a namespace for executing the Flink jobs:
-
-    kubectl create namespace flink-jobs
-
-The name of the namespace can be any name you like.
-
-Create a secret which contains the keystore and truststore files (optional):
-
-    kubectl -n flink-operator create secret generic flink-operator-ssl \
-        --from-file=keystore.jks=secrets/keystore-operator-api.jks \
-        --from-file=truststore.jks=secrets/truststore-operator-api.jks \
-        --from-literal=keystore-secret=keystore-password \
-        --from-literal=truststore-secret=truststore-password
-
-The name of the secret can be any name you like.
-
-Install the CRDs (Custom Resource Definitions) with Helm command:
-
-    helm install flink-k8s-toolbox-crd helm/flink-k8s-toolbox-crd
-
-Install the default roles with Helm command:
-
-    helm install flink-k8s-toolbox-roles helm/flink-k8s-toolbox-roles --namespace flink-operator --set targetNamespace=flink-jobs
-
-Install the operator and enable SSL with Helm command:
-
-    helm install flink-k8s-toolbox-operator helm/flink-k8s-toolbox-operator --namespace flink-operator --set targetNamespace=flink-jobs --set secretName=flink-operator-ssl
-
-Remove "--set secretName=flink-operator-ssl" if you don't want to enable SSL.
-
-Scale the operator with command:
-
-    kubectl -n flink-operator scale deployment flink-operator --replicas=1
-
-Increase the number of replicas to enable HA (High Availability).
-
-Alternatively, you can pass the argument --set replicas=1 when installing the operator with Helm.
-
-## Uninstall toolbox
-
-Delete all FlinkDeployment resources:
-
-    kubectl -n flink-jobs delete fd --all
-
-and wait until the resources are deleted.
-
-Delete all FlinkCluster resource:
-
-    kubectl -n flink-jobs delete fc --all
-
-and wait until the resources are deleted.
-
-Delete all FlinkJob resource:
-
-    kubectl -n flink-jobs delete fj --all
-
-and wait until the resources are deleted.
-
-Stop the operator with command:
-
-    kubectl -n flink-operator scale deployment flink-operator --replicas=0
-
-Remove the operator with command:    
-
-    helm uninstall flink-k8s-toolbox-operator --namespace flink-operator
-
-Remove the default roles with command:    
-
-    helm uninstall flink-k8s-toolbox-roles --namespace flink-operator
-
-Remove the CRDs with command:    
-
-    helm uninstall flink-k8s-toolbox-crd
-
-Remove secret with command:    
-
-    kubectl -n flink-operator delete secret flink-operator-ssl
-
-Remove operator namespace with command:    
-
-    kubectl delete namespace flink-operator
-
-Remove Flink jobs namespace with command:    
-
-    kubectl delete namespace flink-jobs
-
-Please note that Kubernetes is not able to remove all resources until there are finalizers pending.
-The operator is responsible for removing the finalizers but, in case of misconfiguration, it might
-not be able to properly remove the finalizers. If you are in that situation, you can always manually
-remove the finalizers to allow Kubernetes to delete all resources. However, remember that without
-finalizers the operator won't be able to terminate all resources, which ultimately have to be removed manually.
-
-## Upgrade toolbox
-
-PLEASE NOTE THAT THE OPERATOR IS STILL IN BETA VERSION AND IT DOESN'T HAVE A STABLE API YET, THEREFORE EACH RELEASE MIGHT INTRODUCE BREAKING CHANGES.
-
-Before upgrading to a new release, you must cancel all jobs creating a savepoint into a durable storage location (for instance AWS S3).
-
-Create a copy of your FlinkDeployment resources:
-
-    kubectl -n flink-operator get fd -o yaml > deployments-backup.yaml
-
-Create a copy of your FlinkCluster resources:
-
-    kubectl -n flink-operator get fc -o yaml > clusters-backup.yaml
-
-Create a copy of your FlinkJob resources:
-
-    kubectl -n flink-operator get fj -o yaml > jobs-backup.yaml
-
-Upgrade the default roles using Helm:
-
-    helm upgrade flink-k8s-toolbox-roles --install helm/flink-k8s-toolbox-roles --namespace flink-operator --set targetNamespace=flink-jobs
-
-Upgrade the CRDs using Helm:
-
-    helm upgrade flink-k8s-toolbox-crd --install helm/flink-k8s-toolbox-crd
-
-After installing the new CRDs, you can recreate all the custom resources. However, the old resources might not be compatible with the new CRDs.
-If that is the case, then you have to fix each resource's specification editing the yaml file and then recreate the resource. You might be
-interested of restoring the latest savepoint in the jobs resource. The savepoint path can be copied from the backup into the new resource.
-
-Finally, upgrade and restart the operator using Helm:
-
-    helm upgrade flink-k8s-toolbox-operator --install helm/flink-k8s-toolbox-operator --namespace flink-operator --set targetNamespace=flink-jobs --set secretName=flink-operator-ssl --set replicas=1
-
-## Custom resources and schemas
-
-FlinkDeployment, FlinkCluster and FlinkJob resources can be created, deleted, and inspected using the kubectl command as any other Kubernetes resource.
-
-The CRDs and their schemas are defined in the Helm templates:
-
-    https://github.com/nextbreakpoint/flink-k8s-toolbox/blob/master/helm/flink-k8s-toolbox-crd/templates/flinkdeployment.yaml
-    https://github.com/nextbreakpoint/flink-k8s-toolbox/blob/master/helm/flink-k8s-toolbox-crd/templates/flinkcluster.yaml
-    https://github.com/nextbreakpoint/flink-k8s-toolbox/blob/master/helm/flink-k8s-toolbox-crd/templates/flinkjob.yaml
-
-The schema of the resource contains the documentation for each field, and it can be consulted as reference when creating new resource:
-
-    kubectl get crd -o json flinkdeployments.nextbreakpoint.com | jq '.spec.versions[0].schema.openAPIV3Schema.properties' > schemas/flinkdeployment-schema.json
-    kubectl get crd -o json flinkclusters.nextbreakpoint.com | jq '.spec.versions[0].schema.openAPIV3Schema.properties' > schemas/flinkcluster-schema.json
-    kubectl get crd -o json flinkjobs.nextbreakpoint.com | jq '.spec.versions[0].schema.openAPIV3Schema.properties' > schemas/flinkjob-schema.json
-
-Do not delete the CRDs unless you are happy to delete the resources depending on them. Upgrade the CRDs instead of deleting and recreating them:
-
-    helm upgrade flink-k8s-toolbox-crd --install helm/flink-k8s-toolbox-crd  
+This document describes how to use Flink Control. For installation instructions, see [README](https://github.com/nextbreakpoint/flink-controller/blob/master/README.md).
 
 ## Create your first deployment
 
-Make sure that CRDs and default roles have been installed in Kubernetes (see above).
+Make sure that CRDs and default roles have been installed in Kubernetes (see [README](https://github.com/nextbreakpoint/flink-control/blob/master/README.md)).
 
 Pull the base Docker image with command:
 
@@ -461,7 +293,9 @@ Deploy the resource with command:
 
     kubectl -n flink-jobs apply -f deployment.yaml
 
-Wait few minutes until the operator creates the supervisor of the cluster, deploys the JobManager, creates the required TaskManagers, and starts the jobs. The operator should create these derived resources: one FlinkCluster resource, two FlinkJob resources, one Service resource, and several Pod resources.
+The operator should create these derived resources: one FlinkCluster resource, two FlinkJob resources.
+
+Wait few minutes until the operator creates the supervisor of the cluster which will deploy the JobManager, create the required TaskManagers, and start the jobs. 
 
 You can see what the operator is doing tailing the logs:
 
@@ -1059,19 +893,19 @@ The server commands instead are the ones used to run the processes which togethe
 
 ### Operator process
 
-The operator process is required to orchestrate resources and processes.
+The operator process is required to orchestrate supervisors:
 
     flinkctl operator run --namespace=flink-jobs --task-timeout=180 --polling-interval=5
 
 ### Supervisor process
 
-The supervisor process is required to reconcile the status of the resources.
+The supervisor process is required to reconcile the status of a cluster and its jobs:
 
     flinkctl supervisor run --namespace=flink-jobs --cluster-name=demo --task-timeout=180 --polling-interval=5
 
 ### Bootstrap process
 
-The bootstrap process is required to upload the JAR to the JobManager and run the job.
+The bootstrap process is required to upload the JAR to the JobManager and run the job:
 
     flinkctl bootstrap run --namespace=flink-jobs --cluster-name=demo --job-name=computeaverage --class-name=your-main-class --jar-path=/your-job-jar.jar --parallelism=2
 
@@ -1099,21 +933,39 @@ The supervisor process exposes a version endpoint which can be used to check the
 
 The supervisor implements two state machines for managing clusters and jobs.
 
-The state machine associate to a cluster is documented in this graph:
+The state machine associated to a cluster is documented in this graph:
 
 ![Cluster state machine](/graphs/flink-cluster.png "Cluster state machine")
 
-The state machine associate to a job is documented in this graph:
+The state machine associated to a job is documented in this graph:
 
 ![Job state machine](/graphs/flink-job.png "Job state machine")
 
+## Custom Resources
+
+FlinkDeployment, FlinkCluster and FlinkJob are the custom resources provide by Flink Control.  
+
+They can be created, deleted, and inspected as any other Kubernetes resource using kubectl or Helm.
+
+The custom resources are defined in the Helm chart:
+
+    https://github.com/nextbreakpoint/flink-control/blob/master/helm/flink-controller-crd/templates/flinkdeployment.yaml
+    https://github.com/nextbreakpoint/flink-control/blob/master/helm/flink-controller-crd/templates/flinkcluster.yaml
+    https://github.com/nextbreakpoint/flink-control/blob/master/helm/flink-controller-crd/templates/flinkjob.yaml
+
+The schema of the resource contains the documentation for each field:
+
+    kubectl get crd -o json flinkdeployments.nextbreakpoint.com | jq '.spec.versions[0].schema.openAPIV3Schema.properties' > schemas/flinkdeployment-schema.json
+    kubectl get crd -o json flinkclusters.nextbreakpoint.com | jq '.spec.versions[0].schema.openAPIV3Schema.properties' > schemas/flinkcluster-schema.json
+    kubectl get crd -o json flinkjobs.nextbreakpoint.com | jq '.spec.versions[0].schema.openAPIV3Schema.properties' > schemas/flinkjob-schema.json
+
 ## Developers instructions
 
-Instruction for building and running the flinkctl command.
+This section provides the instructions for building and running the flinkctl command.
 
 ### Build with Maven
 
-Install Java 11 and Maven 3.9.
+Install Java 21 and Maven 3.8.
 
 Compile and package the code with command:
 
@@ -1152,11 +1004,11 @@ Run the operator with a given namespace and Kubernetes config using Docker:
 
 Run the operator with a given namespace and Kubernetes config with java command:
 
-    java --module-path target/com.nextbreakpoint.flink.control-1.5.0-shaded.jar --module com.nextbreakpoint.flink.control/com.nextbreakpoint.flink.control.cli.Main operator run --namespace=test --kube-config=~/.kube/config
+    java --module-path target/com.nextbreakpoint.flink.control-1.5.0-shaded.jar --module com.nextbreakpoint.flink.control/com.nextbreakpoint.flink.controller.cli.Main operator run --namespace=test --kube-config=~/.kube/config
 
 Run the operator with a given namespace and Kubernetes config and with debug agent enabled:
 
-    java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5555 --module-path target/com.nextbreakpoint.flink.control-1.5.0-shaded.jar --module com.nextbreakpoint.flink.control/com.nextbreakpoint.flink.control.cli.Main operator run --namespace=test --kube-config=~/.kube/config
+    java -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=5555 --module-path target/com.nextbreakpoint.flink.control-1.5.0-shaded.jar --module com.nextbreakpoint.flink.control/com.nextbreakpoint.flink.controller.cli.Main operator run --namespace=test --kube-config=~/.kube/config
 
 ### Run automated tests
 
@@ -1176,7 +1028,7 @@ You can skip the Docker images build step if the images already exist:
 
 ## Advanced configuration
 
-Instruction for configuring operator, supervisor, and bootstrap processes.
+Below are the instructions for configuring operator, supervisor, and bootstrap processes.
 
 ### Configure service accounts
 
@@ -1194,7 +1046,7 @@ If not specified, the default service account will be used for JobManagers and T
 In case the default account are not used, then new account must be created with the correct permissions.
 The required permissions should match the ones which are defined in the default accounts.
 
-### Periodic savepoints and automatic savepoints
+### Configure automatic savepoints
 
 The operator automatically creates savepoints before stopping a job, and automatically starts a job from the latest savepoint when the job restarts.
 The job typically restarts when a change is applied to a specification, or the cluster is rescaled, or the job parallelism is changed, or the job is stopped manually.

@@ -2,12 +2,12 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.nextbreakpoint</groupId>
-	<artifactId>com.nextbreakpoint.flink.control</artifactId>
+	<artifactId>com.nextbreakpoint.flink.controller</artifactId>
 	<version>1.5.0</version>
 	<packaging>jar</packaging>
-	<name>NextBreakpoint Flink Control</name>
-	<description>Flink Control</description>
-	<url>https://github.com/nextbreakpoint/flinkctl</url>
+	<name>NextBreakpoint Flink Controller</name>
+	<description>Flink Controller</description>
+	<url>https://github.com/nextbreakpoint/flink-controller</url>
 	<licenses>
 		<license>
 			<name>BSD 3</name>
@@ -21,9 +21,9 @@
 		</developer>
 	</developers>
 	<scm>
-		<connection>scm:git:git@github.com:nextbreakpoint/flinkctl.git</connection>
-		<developerConnection>scm:git:git@github.com:nextbreakpoint/flinkctl.git</developerConnection>
-		<url>git@github.com:nextbreakpoint/flinkctl.git</url>
+		<connection>scm:git:git@github.com:nextbreakpoint/flink-controller.git</connection>
+		<developerConnection>scm:git:git@github.com:nextbreakpoint/flink-controller.git</developerConnection>
+		<url>git@github.com:nextbreakpoint/flink-controller.git</url>
 	</scm>
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -77,7 +77,7 @@
 		<lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
 		<kotlin-maven-plugin.version>2.1.0</kotlin-maven-plugin.version>
 		<maven-surefire-junit5-tree-reporter.version>1.4.0</maven-surefire-junit5-tree-reporter.version>
-		<main-class>com.nextbreakpoint.flink.control.cli.Main</main-class>
+		<main-class>com.nextbreakpoint.flink.controller.cli.Main</main-class>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -855,6 +855,12 @@
 									</excludes>
 								</filter>
 								<filter>
+									<artifact>io.kubernetes:client-java-api-fluent</artifact>
+									<excludes>
+										<exclude>io/kubernetes/client/openapi/models/**</exclude>
+									</excludes>
+								</filter>
+								<filter>
 									<artifact>com.nextbreakpoint:com.nextbreakpoint.flink.client</artifact>
 									<excludes>
 										<exclude>log4j2.xml</exclude>
@@ -911,12 +917,12 @@
 										<module>
 											<artifact>
 												<groupId>com.nextbreakpoint</groupId>
-												<artifactId>com.nextbreakpoint.flink.control</artifactId>
+												<artifactId>com.nextbreakpoint.flink.controller</artifactId>
 												<version>${project.version}</version>
 												<classifier>shaded</classifier>
 											</artifact>
 											<moduleInfoSource>
-												open module com.nextbreakpoint.flink.control {
+												open module com.nextbreakpoint.flink.controller {
 													requires java.compiler;
 													requires java.desktop;
 													requires java.logging;
@@ -994,9 +1000,9 @@
 										</filesets>
 									</modulepath>
 									<addmodules>
-										<addmodule>com.nextbreakpoint.flink.control</addmodule>
+										<addmodule>com.nextbreakpoint.flink.controller</addmodule>
 									</addmodules>
-									<module>com.nextbreakpoint.flink.control/${main-class}</module>
+									<module>com.nextbreakpoint.flink.controller/${main-class}</module>
 									<name>flinkctl</name>
 									<type>IMAGE</type>
 									<vendor>NextBreakpoint</vendor>

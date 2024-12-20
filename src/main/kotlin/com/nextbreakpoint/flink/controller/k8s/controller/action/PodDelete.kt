@@ -1,0 +1,34 @@
+package com.nextbreakpoint.flink.controller.k8s.controller.action
+
+import com.nextbreakpoint.flink.controller.common.FlinkOptions
+import com.nextbreakpoint.flink.controller.k8s.common.FlinkClient
+import com.nextbreakpoint.flink.controller.k8s.common.KubeClient
+import com.nextbreakpoint.flink.controller.k8s.controller.core.ClusterAction
+import com.nextbreakpoint.flink.controller.k8s.controller.core.Result
+import com.nextbreakpoint.flink.controller.k8s.controller.core.ResultStatus
+import java.util.logging.Level
+import java.util.logging.Logger
+
+class PodDelete(flinkOptions: FlinkOptions, flinkClient: FlinkClient, kubeClient: KubeClient) : ClusterAction<String, Void?>(flinkOptions, flinkClient, kubeClient) {
+    companion object {
+        private val logger = Logger.getLogger(PodDelete::class.simpleName)
+    }
+
+    override fun execute(namespace: String, clusterName: String, params: String): Result<Void?> {
+        return try {
+            kubeClient.deletePod(namespace, params)
+
+            Result(
+                ResultStatus.OK,
+                null
+            )
+        } catch (e : Exception) {
+            logger.log(Level.SEVERE, "Can't delete pod", e)
+
+            Result(
+                ResultStatus.ERROR,
+                null
+            )
+        }
+    }
+}

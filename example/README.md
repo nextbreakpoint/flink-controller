@@ -22,9 +22,9 @@ Create flink-jobs namespace:
 
 Install toolbox resources:
 
-    helm install flink-k8s-toolbox-crd helm/flink-k8s-toolbox-crd
-    helm install flink-k8s-toolbox-roles helm/flink-k8s-toolbox-roles --namespace flink-operator --set targetNamespace=flink-jobs
-    helm install flink-k8s-toolbox-operator helm/flink-k8s-toolbox-operator --namespace flink-operator --set targetNamespace=flink-jobs
+    helm install flink-controller-crd helm/flink-controller-crd
+    helm install flink-controller-roles helm/flink-controller-roles --namespace flink-operator --set targetNamespace=flink-jobs
+    helm install flink-controller-operator helm/flink-controller-operator --namespace flink-operator --set targetNamespace=flink-jobs
 
 Start the operator:
 
@@ -277,6 +277,6 @@ Start the operator:
 
 Uninstall toolbox resources:
 
-    helm uninstall flink-k8s-toolbox-operator --namespace flink-operator
-    helm uninstall flink-k8s-toolbox-roles --namespace flink-operator
-    helm uninstall flink-k8s-toolbox-crd
+    helm uninstall flink-controller-operator --namespace flink-operator
+    helm uninstall flink-controller-roles --namespace flink-operator
+    helm uninstall flink-controller-crd

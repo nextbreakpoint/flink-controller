@@ -1,4 +1,4 @@
-name: Flink Kubernetes Toolbox
+name: Flink Controller
 on:
   push:
     branches:
