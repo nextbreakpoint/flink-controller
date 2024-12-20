@@ -855,7 +855,7 @@
 									</excludes>
 								</filter>
 								<filter>
-									<artifact>io.kubernetes:client-java-api-fluent</artifact>
+									<artifact>io.kubernetes:client-java-api</artifact>
 									<excludes>
 										<exclude>io/kubernetes/client/openapi/models/**</exclude>
 									</excludes>
