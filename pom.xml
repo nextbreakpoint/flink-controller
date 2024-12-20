@@ -76,7 +76,13 @@
 		<versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
 		<lombok-maven-plugin.version>1.18.20.0</lombok-maven-plugin.version>
 		<kotlin-maven-plugin.version>2.1.0</kotlin-maven-plugin.version>
+		<nexus-staging-maven-plugin.version>1.7.0</nexus-staging-maven-plugin.version>
+		<github-release-plugin.version>1.6.0</github-release-plugin.version>
 		<maven-surefire-junit5-tree-reporter.version>1.4.0</maven-surefire-junit5-tree-reporter.version>
+		<nexus.host>https://oss.sonatype.org</nexus.host>
+		<nexus.url>https://oss.sonatype.org/content/repositories/snapshots</nexus.url>
+		<nexus.autoreleaseafterclose>true</nexus.autoreleaseafterclose>
+		<github.draft>true</github.draft>
 		<main-class>com.nextbreakpoint.flink.controller.cli.Main</main-class>
 	</properties>
 	<dependencyManagement>
@@ -630,6 +636,16 @@
 					<groupId>org.codehaus.mojo</groupId>
 					<artifactId>build-helper-maven-plugin</artifactId>
 					<version>${build-helper-maven-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>org.sonatype.plugins</groupId>
+					<artifactId>nexus-staging-maven-plugin</artifactId>
+					<version>${nexus-staging-maven-plugin.version}</version>
+				</plugin>
+				<plugin>
+					<groupId>de.jutzig</groupId>
+					<artifactId>github-release-plugin</artifactId>
+					<version>${github-release-plugin.version}</version>
 				</plugin>
 			</plugins>
 		</pluginManagement>
@@ -1216,6 +1232,39 @@
 								</configuration>
 							</execution>
 						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>github</id>
+			<activation>
+				<property>
+					<name>channel</name>
+					<value>github</value>
+				</property>
+			</activation>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>de.jutzig</groupId>
+						<artifactId>github-release-plugin</artifactId>
+						<executions>
+							<execution>
+								<id>release</id>
+								<goals>
+									<goal>release</goal>
+								</goals>
+							</execution>
+						</executions>
+						<configuration>
+							<releaseName>Flink Controller ${project.version}</releaseName>
+							<tag>v${project.version}</tag>
+							<failOnExistingRelease>false</failOnExistingRelease>
+							<overwriteArtifact>false</overwriteArtifact>
+							<draft>${github.draft}</draft>
+							<artifact>${project.build.directory}/${project.artifactId}-${project.version}-shaded.${project.packaging}</artifact>
+						</configuration>
 					</plugin>
 				</plugins>
 			</build>

@@ -40,7 +40,8 @@ build-image:
 
 .PHONY: release
 release:
-	mvn -Dchannel=ossrh clean deploy
+	#mvn -Dchannel=ossrh clean deploy
+	mvn clean package -DskipTests=true -Pshaded
 	mvn -Dchannel=github de.jutzig:github-release-plugin:release
 
 .PHONY: version
