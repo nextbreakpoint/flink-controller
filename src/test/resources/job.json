@@ -6,7 +6,7 @@
     "pullPolicy": "IfNotPresent",
     "image": "registry:30000/jobs:latest",
     "jarPath": "/flink-jobs.jar",
-    "className": "com.nextbreakpoint.flink.control.jobs.stream.TestJob",
+    "className": "com.nextbreakpoint.flink.controller.jobs.stream.TestJob",
     "arguments": [
       "--BUCKET_BASE_PATH",
       "file:///var/tmp"

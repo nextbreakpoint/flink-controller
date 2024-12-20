@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="supervisor run" type="JetRunConfigurationType">
+    <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.controller.cli.Main" />
+    <module name="com.nextbreakpoint.flink.controller" />
+    <option name="PROGRAM_PARAMETERS" value="supervisor run --port=4445 --namespace=flink-jobs --flink-hostname=192.168.70.4 --cluster-name=cluster-1 --kube-config=$USER_HOME$/.kube/config --task-timeout=60 --polling-interval=5 --dry-run" />
+    <shortenClasspath name="NONE" />
+    <option name="VM_PARAMETERS" value="-Dmonitoring.port=8083" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -1,0 +1,120 @@
+{{- $fullname := include "flink-controller.fullname" . -}}
+{{- $name := include "flink-controller.name" . -}}
+{{- $chart := include "flink-controller.chart" . -}}
+{{- $root := . }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $root.Values.name | default "flink-operator" | quote }}
+  namespace: {{ $root.Release.Namespace | quote }}
+  labels:
+    app: {{ $root.Values.name | default "flink-operator" | quote }}
+    chart: {{ $chart }}
+    release: {{ $root.Release.Name }}
+    heritage: {{ $root.Release.Service }}
+spec:
+  replicas: {{ $root.Values.replicas | default 0 }}
+  {{- if $root.Values.strategy }}
+  strategy:
+    {{ toYaml $root.Values.strategy | indent 4 | trim }}
+  {{- end}}
+  selector:
+    matchLabels:
+      app: {{ $root.Values.name | default "flink-operator" | quote }}
+  template:
+    metadata:
+      {{- if $root.Values.annotations }}
+      annotations:
+        {{ toYaml $root.Values.annotations | indent 8 | trim }}
+      {{- end}}
+      labels:
+        app: {{ $root.Values.name | default "flink-operator" | quote }}
+    spec:
+      serviceAccountName: {{ $root.Values.serviceAccount | default "flink-operator" }}
+      {{- if $root.Values.image }}
+      {{- if $root.Values.image.pullSecrets }}
+      imagePullSecrets:
+        - name: {{ toYaml $root.Values.image.pullSecrets | indent 8 | trim }}
+      {{- end}}
+      {{- end}}
+      volumes:
+        {{- if $root.Values.secretName}}
+        - name: secret-vol
+          secret:
+            secretName: {{ $root.Values.secretName | quote }}
+        {{- end}}
+      containers:
+        - name: {{ $root.Values.name | default "flink-operator" | quote }}
+          image: "{{ $root.Values.image.registry }}{{ $root.Values.image.repository }}:{{ $root.Values.image.tag }}"
+          imagePullPolicy: {{ $root.Values.image.pullPolicy }}
+          ports:
+            - name: control
+              containerPort: 4444
+              protocol: TCP
+            - name: monitor
+              containerPort: 8080
+              protocol: TCP
+          args:
+            - operator
+            - run
+            - --namespace
+            - {{ $root.Values.targetNamespace | default $root.Release.Namespace | quote }}
+            {{- if $root.Values.secretName }}
+            - --keystore-path
+            - /etc/keystore.jks
+            - --keystore-secret
+            - $(KEYSTORE_SECRET)
+            - --truststore-path
+            - /etc/truststore.jks
+            - --truststore-secret
+            - $(TRUSTSTORE_SECRET)
+            {{- end}}
+            - --polling-interval
+            - {{ $root.Values.pollingInterval | default 10 | quote }}
+            - --task-timeout
+            - {{ $root.Values.taskTimeout | default 120 | quote }}
+            {{- if $root.Values.dryRun }}
+            - --dry-run
+            {{- end}}
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: POD_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            {{- if $root.Values.secretName}}
+            - name: KEYSTORE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $root.Values.secretName }}
+                  key: {{ $root.Values.keystore.secretKey }}
+            - name: TRUSTSTORE_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $root.Values.secretName }}
+                  key: {{ $root.Values.truststore.secretKey }}
+            {{- end}}
+          volumeMounts:
+            {{- if $root.Values.secretName}}
+            - name: secret-vol
+              readOnly: true
+              mountPath: /etc/keystore.jks
+              subPath: {{ $root.Values.keystore.pathKey }}
+            - name: secret-vol
+              readOnly: true
+              mountPath: /etc/truststore.jks
+              subPath: {{ $root.Values.truststore.pathKey }}
+            {{- end}}
+          {{- if $root.Values.resources }}
+          resources:
+            {{ $root.Values.resources | toYaml | indent 12 | trim }}
+          {{- end}}
+          livenessProbe:
+            httpGet:
+              path: /version
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 30

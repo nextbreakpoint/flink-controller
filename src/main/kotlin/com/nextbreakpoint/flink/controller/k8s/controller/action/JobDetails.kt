@@ -1,0 +1,37 @@
+package com.nextbreakpoint.flink.controller.k8s.controller.action
+
+import com.nextbreakpoint.flink.client.model.JobDetailsInfo
+import com.nextbreakpoint.flink.controller.common.FlinkOptions
+import com.nextbreakpoint.flink.controller.k8s.common.FlinkClient
+import com.nextbreakpoint.flink.controller.k8s.common.KubeClient
+import com.nextbreakpoint.flink.controller.k8s.controller.core.JobAction
+import com.nextbreakpoint.flink.controller.k8s.controller.core.Result
+import com.nextbreakpoint.flink.controller.k8s.controller.core.ResultStatus
+import java.util.logging.Level
+import java.util.logging.Logger
+
+class JobDetails(flinkOptions: FlinkOptions, flinkClient: FlinkClient, kubeClient: KubeClient) : JobAction<String, JobDetailsInfo?>(flinkOptions, flinkClient, kubeClient) {
+    companion object {
+        private val logger = Logger.getLogger(JobDetails::class.simpleName)
+    }
+
+    override fun execute(namespace: String, clusterName: String, jobName: String, params: String): Result<JobDetailsInfo?> {
+        try {
+            val address = kubeClient.findFlinkAddress(flinkOptions, namespace, clusterName)
+
+            val details = flinkClient.getJobDetails(address, params)
+
+            return Result(
+                ResultStatus.OK,
+                details
+            )
+        } catch (e : Exception) {
+            logger.log(Level.SEVERE, "Can't get job's details ($params)", e)
+
+            return Result(
+                ResultStatus.ERROR,
+                null
+            )
+        }
+    }
+}
