@@ -1,7 +1,7 @@
 # Flink Controller
 
 Flink Controller implements a Kubernetes Custom Controller (aka Kubernetes Operator) for Apache Flink.
-That means you can operate Flink and manage applications using Kubernetes native tooling like kubectl.  
+That means you can operate Flink and manage Flink applications using Kubernetes native tooling like kubectl.  
 
 ## License
 
@@ -45,11 +45,11 @@ This is the list of the main features implemented in Flink Controller:
 - Automatically restart clusters or jobs when resources are modified
 - Automatically create a savepoint before stopping a job
 - Automatically recover from latest savepoint when restarting a job
-- Support periodic savepoints  
+- Support automatic and periodic savepoints  
 - Support batch and stream jobs
 - Ability to rescale clusters and jobs via Kubernetes scale interface
 - Support autoscaling based on custom metrics (compatible with HPA)
-- Allow init containers and side containers in JobManager and TaskManager pods
+- Allow configuration of init containers and side containers in JobManager and TaskManager pods
 - Allow configuration of user annotations   
 - Allow configuration of container resources, environment variables, ports, and volumes 
 - Allow configuration of security context, service account, affinity, and tolerations 
@@ -60,13 +60,13 @@ This is the list of the main features implemented in Flink Controller:
 
 ## Overview
 
-Flink Controller is implemented as single command line tool, called flinkctl, but the tool has 4 main functions:   
-- execute the Operator process
-- execute the Supervisor process
-- execute the Bootstrap process
-- provide a command line interface for interacting with the operator
+Flink Controller is implemented as single command line tool, called flinkctl, however, it fulfills 4 different functions:   
+- it can launch the Operator process
+- it can launch the Supervisor process
+- it can launch the Bootstrap process
+- it provides a command line interface for interacting with the operator
 
-Each function is activated by passing the relevant arguments to the flinkctl command.
+Each function is activated by passing the relevant arguments to the flinkctl command (see [MANUAL](https://github.com/nextbreakpoint/flink-controller/blob/master/MANUAL.md)).
 
 Flink Controller supports the following custom resources:
 - FlinkDeployment: it represents a cluster deployment, and it provides the configuration of the cluster with an optional list of jobs.
@@ -77,23 +77,25 @@ The FlinkDeployment, FlinkCluster and FlinkJob resources are called primary reso
 
 The primary resources can be created and modified using Kubernetes native tooling like kubectl or helm.
 
-Once installed, the operator will observe a given namespace and reacts to any change in the primary resources in that namespace.
-Please note that it is recommended to install the operator in a separate namespace, different from the one observed. 
-Also, multiple operators are required to observe multiple namespaces.
+Once installed, the operator observes a given namespace and reacts to any change in the primary resources in that namespace.
+Please note that it is recommended to install the operator in a separate namespace, different from the one observed, and
+restrict the access to the operator's namespace to improve stability. Moreover, multiple operators are required 
+to observe multiple namespaces (this might change in the near future).
 
 For instance, when a deployment resource is created, the operator detects the resource and creates a supervisor, 
 then the supervisor creates the JobManager and TaskManagers, and bootstraps the jobs. Once the jobs are running,
 the supervisor will make sure they are still running, and it will do the best effort to recover from temporary issues.  
 
 Both operator and supervisor detect changes in the primary resources, and eventually creates,
-updates or deletes one or more secondary resources, such as Pods, Services and BatchJobs, however
-the operator is responsible for reconciling the status of all supervisors (one for each cluster), 
-and each supervisor is responsible for reconciling the status of a single cluster and its jobs.
+updates or deletes one or more secondary resources, such as Pods, Services and BatchJobs, however, 
+they have different responsibilities: the operator is responsible for reconciling the status of all supervisors 
+(one for each cluster), and the supervisor is responsible for reconciling the status of a cluster and its jobs.
 
-The status of the cluster and jobs is persisted in the primary resources, and it can be inspected with flinkctl or kubectl.
+The status of clusters and jobs is persisted in the primary resources, and it can be inspected with flinkctl or kubectl.
 
 The supervisor can perform several tasks automatically, such as creating savepoints when a job is restarted,
-or restarting the cluster when the specification has changed, making it easier to operate Flink on Kubernetes.  
+or restarting the cluster when the specification has changed. The automation provided by the operator and 
+the supervisor reduces the operational effort required to manage Flink on Kubernetes.  
 
 The deployment resource is convenient for defining a cluster with multiple jobs as single resource,
 however, clusters and jobs can be created independently. Jobs can be added or removed to an existing
@@ -128,29 +130,29 @@ Flink Controller requires Kubernetes 1.31, and it supports Apache Flink 1.20.
 ### Generate SSL certificates
 
 Flink Controller provides client and server components. The client component communicates to the server component over HTTP.
-To ensure that the communication is secure, flinkctl can use HTTPS and SSL certificates for authentication if enabled.
+To ensure that the communication is secure, flinkctl can use HTTPS and SSL certificates for authentication.
 
-Execute the script secrets.sh to generate the required keystores and truststores with self-signed certificates:
+Generate the required keystores and truststores with self-signed certificates:
 
     ./secrets.sh flink-operator key-password keystore-password truststore-password
 
 The keystores and truststores will be created in the directory secrets.
 
-### Install
+### How to install the operator
 
-Create a namespace flink-operator for the operator:
+Create a namespace for the operator:
 
     kubectl create namespace flink-operator
 
 The name of the namespace can be anything you like.
 
-Create a namespace flink-jobs for executing Flink:
+Create a namespace for executing Flink:
 
     kubectl create namespace flink-jobs
 
 The name of the namespace can be anything you like.
 
-Create a secret which contains the keystore and truststore files (required to enable SSL):
+Create a secret which contains the keystore and truststore files (required for enabling SSL):
 
     kubectl -n flink-operator create secret generic flink-operator-ssl \
         --from-file=keystore.jks=secrets/keystore-operator-api.jks \
@@ -160,29 +162,29 @@ Create a secret which contains the keystore and truststore files (required to en
 
 The name of the secret can be anything you like.
 
-Install the CRDs (Custom Resource Definitions) with command:
+Install the CRDs (Custom Resource Definitions):
 
     helm install flink-controller-crd helm/flink-controller-crd
 
-Install the default roles with command:
+Install the required roles:
 
     helm install flink-controller-roles helm/flink-controller-roles --namespace flink-operator --set targetNamespace=flink-jobs
 
-Install the operator and enable SSL with command:
+Install the operator with SSL enabled:
 
     helm install flink-controller-operator helm/flink-controller-operator --namespace flink-operator --set targetNamespace=flink-jobs --set secretName=flink-operator-ssl
 
 Remove "--set secretName=flink-operator-ssl" if you don't want to enable SSL.
 
-Scale the operator with command:
+Scale the operator up:
 
     kubectl -n flink-operator scale deployment flink-operator --replicas=1
 
 Increase the number of replicas to enable HA (High Availability).
 
-Alternatively, you can add the argument "--set replicas=1" when installing the operator with Helm.
+Alternatively, you can add the argument "--set replicas=2" when installing the operator with Helm.
 
-### Uninstall 
+### How to uninstall the operator
 
 Delete all FlinkDeployment resources:
 
@@ -202,40 +204,40 @@ Delete all FlinkJob resource:
 
 and wait until the resources are deleted.
 
-Stop the operator with command:
+Stop the operator:
 
     kubectl -n flink-operator scale deployment flink-operator --replicas=0
 
-Remove the operator with command:
+Remove the operator:
 
     helm uninstall flink-controller-operator --namespace flink-operator
 
-Remove the default roles with command:
+Remove the default roles:
 
     helm uninstall flink-controller-roles --namespace flink-operator
 
-Remove the CRDs with command:
+Remove the CRDs:
 
     helm uninstall flink-controller-crd
 
-Remove secret with command:
+Remove the secrets:
 
     kubectl -n flink-operator delete secret flink-operator-ssl
 
-Remove flink-operator namespace with command:
-
-    kubectl delete namespace flink-operator
-
-Remove flink-jobs namespace with command:
+Remove jobs namespace:
 
     kubectl delete namespace flink-jobs
+
+Remove operator namespace:
+
+    kubectl delete namespace flink-operator
 
 Please note that Kubernetes is not able to remove all resources until there are finalizers pending.
 The operator and the supervisor are responsible for removing the finalizers but, in case of misconfiguration, 
 they might not be able to properly remove the finalizers. If you are in such situation, you can always manually
 remove the finalizers to allow Kubernetes to delete all resources.
 
-### Upgrade
+### How to upgrade the operator to a new version
 
 PLEASE NOTE THAT THE OPERATOR IS STILL EXPERIMENTAL, THEREFORE EACH RELEASE MIGHT INTRODUCE BREAKING CHANGES.
 
@@ -253,11 +255,11 @@ Create a copy of your FlinkJob resources:
 
     kubectl -n flink-operator get fj -o yaml > jobs-backup.yaml
 
-Upgrade the default roles with command:
+Upgrade the roles:
 
     helm upgrade flink-controller-roles --install helm/flink-controller-roles --namespace flink-operator --set targetNamespace=flink-jobs
 
-Upgrade the CRDs with command:
+Upgrade the CRDs:
 
     helm upgrade flink-controller-crd --install helm/flink-controller-crd
 
@@ -265,13 +267,13 @@ After installing the new CRDs, you can recreate all the custom resources. Howeve
 with the new CRDs. If that is the case, you have to fix the resource editing the yaml file and then recreate the resource. 
 If you want to restore the latest savepoint of a job, copy the savepoint path from the backup into the new resource.
 
-Finally, upgrade and restart the operator with command:
+Finally, upgrade and restart the operator:
 
     helm upgrade flink-controller-operator --install helm/flink-controller-operator --namespace flink-operator --set targetNamespace=flink-jobs --set secretName=flink-operator-ssl --set replicas=1
 
 ## User Manual
 
-See user manual for detailed instructions about how to use Flink Control:
+See manual for detailed instructions about how to use Flink Controller:
 
 https://github.com/nextbreakpoint/flink-controller/blob/master/MANUAL.md
 
