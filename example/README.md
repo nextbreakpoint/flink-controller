@@ -2,7 +2,7 @@
 
 Follow the instructions below to install Flink Controller on Minikube and deploy a Flink application.
 
-## Prepare environment
+## Setup test environment
 
 Install Minikube 1.34. Install kubectl, Helm 3, and AWS CLI.
 
@@ -12,23 +12,29 @@ Start Minikube with at least 8Gb of memory and Kubernetes 1.31:
 
 ## Install the operator    
 
-Create flink-operator namespace:
+Create a namespace for the operator:
 
     kubectl create namespace flink-operator
 
-Create flink-jobs namespace:
+Create a namespace for executing Flink:
 
     kubectl create namespace flink-jobs
 
-Install operator resources:
+Install the CRDs (Custom Resource Definitions):
 
     helm install flink-controller-crd helm/flink-controller-crd
+
+Install the required roles:
+
     helm install flink-controller-roles helm/flink-controller-roles --namespace flink-operator --set targetNamespace=flink-jobs
-    helm install flink-controller-operator helm/flink-controller-operator --namespace flink-operator --set targetNamespace=flink-jobs
 
-Start the operator:
+Install the operator with SSL enabled:
 
-    kubectl scale deployment -n flink-operator flink-operator --replicas=1
+    helm install flink-controller-operator helm/flink-controller-operator --namespace flink-operator --set targetNamespace=flink-jobs --set secretName=flink-operator-ssl
+
+Scale the operator up:
+
+    kubectl -n flink-operator scale deployment flink-operator --replicas=1
 
 Tail the logs of the operator:
 
@@ -59,6 +65,9 @@ Install Minio with Helm:
 Expose Minio port to host:
 
     kubectl -n minio expose service minio --name=minio-external --type=LoadBalancer --external-ip=$(minikube ip) --port=9000 --target-port=9000
+
+Expose Minio console port to host (optional):
+
     kubectl -n minio expose service-console minio --name=minio-console-external --type=LoadBalancer --external-ip=$(minikube ip) --port=9001 --target-port=9001
 
 Create the bucket with AWS CLI:

@@ -160,15 +160,15 @@ Create a secret which contains the keystore and truststore files (required to en
 
 The name of the secret can be anything you like.
 
-Install the CRDs (Custom Resource Definitions) with Helm command:
+Install the CRDs (Custom Resource Definitions) with command:
 
     helm install flink-controller-crd helm/flink-controller-crd
 
-Install the default roles with Helm command:
+Install the default roles with command:
 
     helm install flink-controller-roles helm/flink-controller-roles --namespace flink-operator --set targetNamespace=flink-jobs
 
-Install the operator and enable SSL with Helm command:
+Install the operator and enable SSL with command:
 
     helm install flink-controller-operator helm/flink-controller-operator --namespace flink-operator --set targetNamespace=flink-jobs --set secretName=flink-operator-ssl
 
@@ -253,11 +253,11 @@ Create a copy of your FlinkJob resources:
 
     kubectl -n flink-operator get fj -o yaml > jobs-backup.yaml
 
-Upgrade the default roles using Helm:
+Upgrade the default roles with command:
 
     helm upgrade flink-controller-roles --install helm/flink-controller-roles --namespace flink-operator --set targetNamespace=flink-jobs
 
-Upgrade the CRDs using Helm:
+Upgrade the CRDs with command:
 
     helm upgrade flink-controller-crd --install helm/flink-controller-crd
 
@@ -265,7 +265,7 @@ After installing the new CRDs, you can recreate all the custom resources. Howeve
 with the new CRDs. If that is the case, you have to fix the resource editing the yaml file and then recreate the resource. 
 If you want to restore the latest savepoint of a job, copy the savepoint path from the backup into the new resource.
 
-Finally, upgrade and restart the operator using Helm:
+Finally, upgrade and restart the operator with command:
 
     helm upgrade flink-controller-operator --install helm/flink-controller-operator --namespace flink-operator --set targetNamespace=flink-jobs --set secretName=flink-operator-ssl --set replicas=1
 
