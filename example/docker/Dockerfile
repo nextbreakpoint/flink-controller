@@ -1,4 +1,4 @@
-ARG base_image="nextbreakpoint/flinkctl:latest"
+ARG base_image="nextbreakpoint/flinkctl:1.5.0"
 FROM ubuntu:latest AS download
 ARG dummies_version="0.0.6"
 RUN apt update -y && apt install -y curl

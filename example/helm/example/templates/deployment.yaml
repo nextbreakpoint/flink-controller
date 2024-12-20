@@ -27,7 +27,7 @@ spec:
       resources:
         limits:
           cpu: '1'
-          memory: 200Mi
+          memory: 256Mi
         requests:
           cpu: '0.05'
           memory: 200Mi
@@ -45,7 +45,7 @@ spec:
         - 'FLINK_PROPERTIES="$(FLINK_PROPERTIES)$(SECRET_PROPERTIES)" /docker-entrypoint.sh jobmanager'
       environment:
         - name: ENABLE_BUILT_IN_PLUGINS
-          value: flink-s3-fs-hadoop-{{ $root.Values.flinkVersion }}.jar
+          value: "flink-s3-fs-hadoop-{{ $root.Values.flinkVersion }}.jar;flink-s3-fs-presto-{{ $root.Values.flinkVersion }}.jar"
         - name: BUCKET_NAME
           value: {{ $root.Values.s3BucketName }}
       environmentFrom:
@@ -83,7 +83,7 @@ spec:
         - 'FLINK_PROPERTIES="$(FLINK_PROPERTIES)$(SECRET_PROPERTIES)" /docker-entrypoint.sh taskmanager'
       environment:
         - name: ENABLE_BUILT_IN_PLUGINS
-          value: flink-s3-fs-hadoop-{{ $root.Values.flinkVersion }}.jar
+          value: "flink-s3-fs-hadoop-{{ $root.Values.flinkVersion }}.jar;flink-s3-fs-presto-{{ $root.Values.flinkVersion }}.jar"
         - name: BUCKET_NAME
           value: {{ $root.Values.s3BucketName }}
       environmentFrom:
@@ -105,21 +105,21 @@ spec:
   jobs:
     - name: measurement
       spec:
-        jobParallelism: {{ $root.Values.example.example.jobParallelism }}
+        jobParallelism: {{ $root.Values.jobs.example.jobParallelism }}
         savepoint:
-          savepointMode: {{ $root.Values.example.example.savepointMode }}
-          savepointInterval: {{ $root.Values.example.example.savepointInterval }}
+          savepointMode: {{ $root.Values.jobs.example.savepointMode }}
+          savepointInterval: {{ $root.Values.jobs.example.savepointInterval }}
           savepointTargetPath: s3a://{{ $root.Values.s3BucketName }}/savepoints
         restart:
-          restartPolicy: {{ $root.Values.example.example.restartPolicy }}
-          restartDelay: {{ $root.Values.example.example.restartDelay }}
-          restartTimeout: {{ $root.Values.example.example.restartTimeout }}
+          restartPolicy: {{ $root.Values.jobs.example.restartPolicy }}
+          restartDelay: {{ $root.Values.jobs.example.restartDelay }}
+          restartTimeout: {{ $root.Values.jobs.example.restartTimeout }}
         bootstrap:
           serviceAccount: flink-bootstrap
-          pullPolicy: {{ $root.Values.example.pullPolicy }}
-          image: {{ $root.Values.example.image }}
-          jarPath: /com.nextbreakpoint.flink.example.jar
-          className: com.nextbreakpoint.flink.example.TemperatureMeasurementMain
+          pullPolicy: {{ $root.Values.jobs.pullPolicy }}
+          image: {{ $root.Values.jobs.image }}
+          jarPath: /com.nextbreakpoint.flink.dummies.jar
+          className: com.nextbreakpoint.flink.dummies.TemperatureMeasurementMain
           arguments:
             - --CONFIG_FILE
             - file:///var/config/measurement.properties
