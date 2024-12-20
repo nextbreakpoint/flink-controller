@@ -1,7 +1,7 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="cluster create (2)" type="JetRunConfigurationType">
     <option name="MAIN_CLASS_NAME" value="com.nextbreakpoint.flink.controller.cli.Main" />
-    <module name="com.nextbreakpoint.flink.controller" />
+    <module name="flink-controller" />
     <option name="PROGRAM_PARAMETERS" value="cluster create --cluster-name=test2 --cluster-spec=./example/cluster-spec-2.json --keystore-path=secrets/keystore-operator-cli.jks --truststore-path=secrets/truststore-operator-cli.jks --keystore-secret=keystore-password --truststore-secret=truststore-password" />
     <shortenClasspath name="NONE" />
     <method v="2">

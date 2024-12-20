@@ -1,8 +1,8 @@
 # Example of Flink deployment on Minikube   
 
-Follow these tutorial to set up a Minikube environment and learn how to use the Flink Kubernetes Toolbox.
+Follow the instructions below to install Flink Controller on Minikube and deploy a Flink application.
 
-## Preparation   
+## Prepare environment
 
 Install Minikube 1.34. Install kubectl, Helm 3, and AWS CLI.
 
@@ -10,7 +10,7 @@ Start Minikube with at least 8Gb of memory and Kubernetes 1.31:
 
     minikube start --cpus=4 --memory=8gb --kubernetes-version v1.31.0 --disk-size 80GB --driver=<your-driver>
 
-## Install Flink Kubernetes Toolbox    
+## Install the operator    
 
 Create flink-operator namespace:
 
@@ -20,7 +20,7 @@ Create flink-jobs namespace:
 
     kubectl create namespace flink-jobs
 
-Install toolbox resources:
+Install operator resources:
 
     helm install flink-controller-crd helm/flink-controller-crd
     helm install flink-controller-roles helm/flink-controller-roles --namespace flink-operator --set targetNamespace=flink-jobs
@@ -71,7 +71,7 @@ or create the bucket with Minio client:
 
     kubectl -n minio run minio-client --image=minio/mc:latest --restart=Never --command=true -- sh -c "mc config host add minio http://minio-headless:9000 minioaccesskey miniosecretkey && mc mb --region=eu-west-1 minio/nextbreakpoint-example"
 
-## Install example deployment
+## Install Flink deployment
 
 Install deployment resource to create cluster and jobs:
 
@@ -265,17 +265,17 @@ Start a job:
 
 ## Remove all resources
 
-Delete the deployment to remove all resources (this might take a while):
+Delete the Flink deployment:
 
     helm uninstall example -n flink-jobs
 
-Wait until the operator has removed everything, then remove the toolbox.
+Wait until the operator has removed everything, then remove the operator.
 
-Start the operator:
+Stop the operator:
 
     kubectl scale deployment -n flink-operator flink-operator --replicas=0
 
-Uninstall toolbox resources:
+Uninstall the operator resources:
 
     helm uninstall flink-controller-operator --namespace flink-operator
     helm uninstall flink-controller-roles --namespace flink-operator
