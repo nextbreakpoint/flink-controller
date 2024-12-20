@@ -1,8 +1,6 @@
-# Flink Control - User Manual
+# Flink Controller - User Manual
 
-This document describes how to use Flink Control. 
-
-The commands are provided for Minikube, but they can be adapted to work with any Kubernetes installation. 
+This document describes how to use Flink Controller. The manual provides instruction for Minikube, but they can be adapted to any flavor of Kubernetes.   
 
 ## Setup test environment
 
@@ -22,7 +20,7 @@ Create a namespace for executing Flink:
 
     kubectl create namespace flink-jobs
 
-Generate the keystores and truststores required for a secure connection:
+Generate the keystores and truststores required for enabling SSL:
 
     ./secrets.sh flink-operator key-password keystore-password truststore-password
 
@@ -984,11 +982,11 @@ The schema of the resource contains the documentation for each field:
     kubectl get crd -o json flinkclusters.nextbreakpoint.com | jq '.spec.versions[0].schema.openAPIV3Schema.properties' > schemas/flinkcluster-schema.json
     kubectl get crd -o json flinkjobs.nextbreakpoint.com | jq '.spec.versions[0].schema.openAPIV3Schema.properties' > schemas/flinkjob-schema.json
 
-## Developers instructions
+## Build and execute
 
-This section provides the instructions for building and running the flinkctl command.
+This section provides the instructions for building and executing flinkctl.
 
-### Build requirements
+### Requirements
 
 Install Java 21 and Maven 3.8.
 
@@ -1096,7 +1094,7 @@ If not specified, the default service account will be used for JobManagers and T
 In case the default account are not used, then new account must be created with the correct permissions.
 The required permissions should match the ones which are defined in the default accounts.
 
-### Configure automatic savepoints
+### Configure automatic and periodic savepoints
 
 The operator automatically creates savepoints before stopping a job, and automatically starts a job from the latest savepoint when the job restarts.
 The job typically restarts when a change is applied to a specification, or the cluster is rescaled, or the job parallelism is changed, or the job is stopped manually.
