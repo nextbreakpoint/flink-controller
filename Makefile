@@ -26,6 +26,10 @@ package:
 install:
 	mvn install -DskipTests=true
 
+.PHONY: package-shaded
+package-shaded:
+	mvn package -DskipTests=true -Pshaded
+
 .PHONY: package-distribution
 package-distribution:
 	mvn package -DskipTests=true -Pdistribution
