@@ -59,7 +59,7 @@
 		<blockhound.version>1.0.10.RELEASE</blockhound.version>
 		<junit.version>5.11.4</junit.version>
 		<mockito.version>5.14.2</mockito.version>
-		<assertj.version>3.26.3</assertj.version>
+		<assertj.version>3.27.7</assertj.version>
 		<awaitility.version>4.2.2</awaitility.version>
 		<wiremock.version>3.10.0</wiremock.version>
 		<maven-toolchains-plugin.version>3.2.0</maven-toolchains-plugin.version>
